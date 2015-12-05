@@ -19,12 +19,12 @@ case class ClockInOutService(implicit cache: ScalaCache) extends Service {
 
   private def processClockInOutRequest(compId: String, account: Account, clockingIn: Boolean) = transaction {
     (for {
-      ass <- Assistant.findByUsername(account.username)
-      _   <- ClockInOutRecord(ass.employeeId, compId, new Date(), clockingIn).insert
-      _   <- ass.copy(currentlyClockedIn = clockingIn).save
-    } yield ass) match {
+      asst <- Assistant.findByUsername(account.username)
+      _   <- ClockInOutRecord(asst.employeeId, compId, new Date(), clockingIn).insert
+      _   <- asst.copy(currentlyClockedIn = clockingIn).save
+    } yield asst) match {
       case Xor.Right(_)  => HttpResponse(StatusCodes.OK)
-      case Xor.Left(err) => println(err); err.toHttpResponse
+      case Xor.Left(err) => err.toHttpResponse
     }
   }
 

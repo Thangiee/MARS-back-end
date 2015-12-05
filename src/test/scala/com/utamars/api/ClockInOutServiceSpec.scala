@@ -13,7 +13,7 @@ class ClockInOutServiceSpec extends ServiceSpec {
   val service = new ClockInOutService()
 
   before {
-    initDataBase
+    initDataBase()
   }
 
   after {

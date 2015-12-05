@@ -16,7 +16,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
   }
 
   override def beforeAll(): Unit = {
-    initDataBase
+    initDataBase()
   }
 
   "Services with authentication and Authorization" should {

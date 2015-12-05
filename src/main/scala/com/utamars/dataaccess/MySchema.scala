@@ -10,31 +10,35 @@ object MySchema extends Schema {
   ))
 
   val assistants = table[Assistant]
-  on(assistants)(a => declare(
-    a.employeeId is primaryKey
+  on(assistants)(asst => declare(
+    asst.employeeId is primaryKey,
+    asst.email is unique,
+    asst.albumName is unique,
+    asst.albumKey is unique
   ))
 
   val instructors = table[Instructor]
-  on(instructors)(i => declare(
-    i.id is primaryKey
+  on(instructors)(inst => declare(
+    inst.id is primaryKey,
+    inst.email is unique
   ))
 
   val clockInOutRecord = table[ClockInOutRecord]
-  on(clockInOutRecord)(c => declare(
-    c.id is primaryKey
+  on(clockInOutRecord)(record => declare(
+    record.id is primaryKey
   ))
 
   val assistantToClockInOutRecord =
     oneToManyRelation(assistants, clockInOutRecord)
-      .via((a, c) => a.employeeId === c.employeeId)
+      .via((asst, record) => asst.employeeId === record.employeeId)
 
   val accountToAssistant =
     oneToManyRelation(accounts, assistants)
-    .via((acc, ass) => acc.username === ass.username)
+    .via((acc, asst) => acc.username === asst.username)
 
   val accountToInstructor =
     oneToManyRelation(accounts, instructors)
-      .via((acc, i) => acc.username === i.username)
+      .via((acc, inst) => acc.username === inst.username)
 
   assistantToClockInOutRecord.foreignKeyDeclaration.constrainReference(onDelete cascade)
   accountToAssistant.foreignKeyDeclaration.constrainReference(onDelete cascade)

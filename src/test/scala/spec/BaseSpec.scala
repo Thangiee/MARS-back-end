@@ -28,7 +28,7 @@ trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProto
   val assistantBobAcc    = Account("bob123", "password", Role.Assistant)
 
   val instructorAlice = Instructor("alice", "A", instructorAliceAcc.username, "alice@gmail.com")
-  val assistantBob    = Assistant("1000", assistantBobAcc.username, "bob", "B", "bob@gmail.com")
+  val assistantBob    = Assistant("1000", assistantBobAcc.username, "albumName", "albumKey", "bob", "B", "bob@gmail.com")
 
   def clearCache = Await.ready(removeAll(), 5.seconds)
 
@@ -41,7 +41,7 @@ trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProto
   def requestWithCredentials(request: HttpRequest, route: Route)(user: String, pass: String): RouteTestResult =
     request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
 
-  def initDataBase: Unit = transaction {
+  def initDataBase(): Unit = transaction {
     MySchema.drop
     MySchema.create
     transaction {

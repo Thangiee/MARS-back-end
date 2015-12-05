@@ -3,6 +3,8 @@ package com.utamars.dataaccess
 case class Assistant(
   employeeId: String,
   username: String,
+  albumName: String,
+  albumKey: String,
   firstName: String = "",
   lastName: String = "",
   email: String = "",
