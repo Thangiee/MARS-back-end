@@ -9,6 +9,8 @@ import scala.concurrent.duration.{TimeUnit, DurationConversions, Duration, Finit
 
 package object api extends AnyRef with LazyLogging {
 
+  type Username = String
+
   // needed to be able to convert Map[String, Any] to json using spray
   implicit object AnyJsonFormat extends JsonFormat[Any] {
     def write(x: Any) = x match {

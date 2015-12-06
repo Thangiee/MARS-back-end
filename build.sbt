@@ -8,7 +8,7 @@ scalacOptions += "-Xexperimental"
 
 libraryDependencies ++= {
   val akkaV       = "2.4.0"
-  val akkaStreamV = "2.0-M1"
+  val akkaStreamV = "2.0-M2"
   Seq(
     "org.postgresql"    % "postgresql"                            % "9.4-1205-jdbc42",
     "com.h2database"    % "h2"                                    % "1.3.166",
@@ -18,6 +18,7 @@ libraryDependencies ++= {
     "com.github.cb372"  %% "scalacache-guava"                     % "0.7.3",
     "com.lihaoyi"       %% "ammonite-ops"                         % "0.4.9",
     "ch.qos.logback"    %  "logback-classic"                      % "1.1.3",
+    "com.softwaremill.akka-http-session" %% "core"                % "0.2.2",
     "com.typesafe.akka" %% "akka-actor"                           % akkaV,
     "com.typesafe.akka" %% "akka-stream-experimental"             % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-core-experimental"          % akkaStreamV,

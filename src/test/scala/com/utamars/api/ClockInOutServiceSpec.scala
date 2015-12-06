@@ -8,8 +8,12 @@ import cats.data.Xor
 import com.utamars.dataaccess._
 import spec.ServiceSpec
 
-class ClockInOutServiceSpec extends ServiceSpec {
+import scala.concurrent.Await
+import scalacache._
+import scalacache.guava.GuavaCache
 
+class ClockInOutServiceSpec extends ServiceSpec {
+  implicit val scalaCache = ScalaCache(GuavaCache())
   val service = new ClockInOutService()
 
   before {
@@ -17,7 +21,7 @@ class ClockInOutServiceSpec extends ServiceSpec {
   }
 
   after {
-    clearCache
+    Await.ready(removeAll(), 5.seconds)
   }
 
   "Clock in/out service" should {

@@ -7,22 +7,26 @@ import akka.http.scaladsl.model.FormData
 import spec.ServiceSpec
 import spray.json._
 
+import scala.concurrent.Await
+import scalacache._
+import scalacache.guava.GuavaCache
+
 
 class RegisterUUIDServiceSpec extends ServiceSpec {
-
+  implicit val scalaCache = ScalaCache(GuavaCache())
   val service = new RegisterUUIDService()
   val ttl     = config.getInt("service.registerUUID.ttl-in-sec").seconds.toMillis
 
-  override def afterAll(): Unit = {
-    clearCache
+  after {
+    Await.ready(removeAll(), 5.seconds)
   }
 
   "Register UUID service" when {
 
     "receiving a POST with form data containing a VALID UUID" must {
       val uuid = UUID.randomUUID().toString
-      val post = Post("/register-uuid", FormData("uuid" -> uuid)) ~> service.route
-      val regTime = System.currentTimeMillis()
+      def post = Post("/register-uuid", FormData("uuid" -> uuid)) ~> service.route
+      def regTime = System.currentTimeMillis()
 
       "response with status code ok (200)" in post ~> check {
         status shouldEqual StatusCodes.OK
@@ -33,10 +37,9 @@ class RegisterUUIDServiceSpec extends ServiceSpec {
         json.getOrElse("expireTime", fail) shouldEqual (regTime + ttl) +- 100
       }
       "hold on to the UUID for the duration specified by service.registerUUID.ttl-in-sec in application.conf" in post ~> check {
-        import scalacache._
-        sync.get(uuid) shouldBe defined
+        whenReady(get(uuid))(_ shouldBe defined)
         Thread.sleep(ttl)
-        sync.get(uuid) shouldBe None
+        whenReady(get(uuid))(_ shouldBe None)
       }
     }
 

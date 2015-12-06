@@ -6,13 +6,14 @@ import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.Xor
+import com.softwaremill.session.{SessionManager, _}
 import com.utamars.dataaccess._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scalacache.{ScalaCache, get => _}
 
 
-case class ClockInOutService(implicit cache: ScalaCache) extends Service {
+case class ClockInOutService(implicit cache: ScalaCache, sm: SessionManager[Username], ts: RefreshTokenStorage[Username]) extends Service {
 
   override val authzRoles: Seq[Role] = Seq(Role.Assistant)
   override val realm     : String    = "mars-app"
@@ -41,17 +42,17 @@ case class ClockInOutService(implicit cache: ScalaCache) extends Service {
         }
       }
     } ~
-      logRequestResult("Clock Out") {
-        (path("clock-out") & formField('uuid, 'computerid) & authnAndAuthz) { (uuid, compId, account) =>
-          complete {
-            scalacache.get(uuid).map {
-              case Some(_) =>
-                processClockInOutRequest(compId, account, clockingIn = false)
-              case None    =>
-                HttpResponse(StatusCodes.Gone)
-            }
+    logRequestResult("Clock Out") {
+      (path("clock-out") & formField('uuid, 'computerid) & authnAndAuthz) { (uuid, compId, account) =>
+        complete {
+          scalacache.get(uuid).map {
+            case Some(_) =>
+              processClockInOutRequest(compId, account, clockingIn = false)
+            case None    =>
+              HttpResponse(StatusCodes.Gone)
           }
         }
       }
+    }
   }
 }
