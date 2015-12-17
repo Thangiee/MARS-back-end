@@ -1,15 +1,22 @@
 package com.utamars
 
-import akka.http.scaladsl.model.{StatusCodes, HttpResponse}
+import java.net.URL
+
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import com.typesafe.scalalogging.LazyLogging
-import com.utamars.dataaccess.{InternalErr, SqlErr, NotFound, DataAccessErr}
+import com.utamars.dataaccess.{DataAccessErr, InternalErr, NotFound, SqlErr}
+import de.jollyday.{HolidayManager, ManagerParameters}
+import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar
+import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory
+import org.joda.time.{DateTimeConstants, LocalDate}
 import spray.json._
 
-import scala.concurrent.duration.{TimeUnit, DurationConversions, Duration, FiniteDuration}
+import scala.concurrent.duration.{Duration, DurationConversions, FiniteDuration, TimeUnit}
 
 package object api extends AnyRef with LazyLogging {
 
   type Username = String
+  type ErrMsg = String
 
   // needed to be able to convert Map[String, Any] to json using spray
   implicit object AnyJsonFormat extends JsonFormat[Any] {
@@ -55,4 +62,24 @@ package object api extends AnyRef with LazyLogging {
       }
   }
   // ==================================================================
+
+  implicit class RichLocalDate(localDate: LocalDate) {
+    import com.github.nscala_time.time.Imports._
+    import scala.collection.JavaConversions._
+
+    def nextBusinessDays(days: Int): LocalDate = {
+      val m = HolidayManager.getInstance(ManagerParameters.create(new URL("file:src/main/resources/uta-holidays.xml")))
+      val year = localDate.year().get()
+      val holidays = m.getHolidays(year).map(_.getDate) ++ m.getHolidays(year+1).map(_.getDate)
+      val holidayCalendar = new DefaultHolidayCalendar[LocalDate](holidays)
+      val cal = LocalDateKitCalculatorsFactory.forwardCalculator("uta")
+      cal.setStartDate(localDate)
+      cal.setHolidayCalendar(holidayCalendar)
+
+      if (localDate.getDayOfWeek == DateTimeConstants.SATURDAY || localDate.getDayOfWeek == DateTimeConstants.SUNDAY)
+        cal.moveByBusinessDays(days-1).getCurrentBusinessDate
+      else
+        cal.moveByBusinessDays(days).getCurrentBusinessDate
+    }
+  }
 }

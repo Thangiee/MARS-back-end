@@ -10,6 +10,14 @@ libraryDependencies ++= {
   val akkaV       = "2.4.0"
   val akkaStreamV = "2.0-M2"
   Seq(
+    "de.jollyday"       % "jollyday"                              % "0.4.9",
+    "net.objectlab.kit" % "datecalc-common"                       % "1.4.0",
+    "net.objectlab.kit" % "datecalc-joda"                         % "1.4.0",
+    "com.itextpdf"      % "itextpdf"                              % "5.5.8",
+    "me.lessis"         %% "courier"                              % "0.1.3",
+    "com.github.nscala-time" %% "nscala-time"                     % "2.6.0",
+    "com.github.pathikrit" %% "better-files"                      % "2.13.0",
+    "org.scalaj"        %% "scalaj-http"                          % "2.1.0",
     "org.postgresql"    % "postgresql"                            % "9.4-1205-jdbc42",
     "com.h2database"    % "h2"                                    % "1.3.166",
     "org.squeryl"       %% "squeryl"                              % "0.9.6-RC4",

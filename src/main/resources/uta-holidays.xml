@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:Configuration hierarchy="uta" xmlns:tns="http://www.example.org/Holiday">
+
+    <!-- https://www.uta.edu/business-affairs/payroll/payroll-processing-dates.php -->
+    <tns:Holidays>
+        <!-- Independence Day -->
+        <tns:Fixed month="JULY" day="4" />
+
+        <!-- Christmas -->
+        <tns:Fixed month="DECEMBER" day="25" />
+
+        <!-- New Year -->
+        <tns:Fixed month="DECEMBER" day="31" />
+        <tns:Fixed month="JANUARY" day="1" />
+
+        <!-- UTA Spring Break -->
+        <tns:RelativeToWeekdayInMonth weekday="FRIDAY" when="AFTER">
+            <tns:FixedWeekday which="SECOND" weekday="MONDAY" month="MARCH"/>
+        </tns:RelativeToWeekdayInMonth>
+
+        <!-- MLK -->
+        <tns:FixedWeekday which="THIRD" weekday="MONDAY" month="JANUARY" />
+
+        <!-- Memorial Day -->
+        <tns:FixedWeekday which="LAST" weekday="MONDAY" month="MAY" />
+
+        <!-- Labor Day -->
+        <tns:FixedWeekday which="FIRST" weekday="MONDAY" month="SEPTEMBER" />
+
+        <!-- Thanksgiving -->
+        <tns:FixedWeekday which="FOURTH" weekday="THURSDAY" month="NOVEMBER"/>
+        <tns:FixedWeekday which="FOURTH" weekday="FRIDAY" month="NOVEMBER"/>
+
+    </tns:Holidays>
+
+</tns:Configuration>
