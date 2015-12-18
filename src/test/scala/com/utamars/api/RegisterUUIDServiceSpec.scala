@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.FormData
 import spec.ServiceSpec
 import spray.json._
+import com.github.nscala_time.time.Imports._
 
 import scala.concurrent.Await
 import scalacache._

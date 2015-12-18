@@ -8,6 +8,7 @@ import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
+import com.github.nscala_time.time.Imports._
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -19,7 +20,7 @@ object Boot extends App with LazyLogging {
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(24.hours.toSeconds),
     sessionEncryptData = true,
-    refreshTokenMaxAgeSeconds = 14.days.toSeconds
+    refreshTokenMaxAgeSeconds = 14.days.seconds
   )
 
   implicit val system       = ActorSystem("MARS", config)
@@ -45,6 +46,8 @@ object Boot extends App with LazyLogging {
     SessionService() ::
     RegisterUUIDService() ::
     ClockInOutService()   ::
+    FacialRecognitionService() ::
+    TimeSheetGenService() ::
     Nil
 
   val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
