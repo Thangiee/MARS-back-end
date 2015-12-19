@@ -16,12 +16,12 @@ import scala.concurrent.Future
 
 trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
-  /* Limit this service to only the included roles */
+  /** Limit this service to only the included roles */
   def authzRoles: Seq[Role] = Nil
 
   def realm: String = ""
 
-  /* Authenticate the account, i.e. check the username and password or an existing session */
+  /** Authenticate the account, i.e. check the username and password or an existing session */
   def authn(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] = {
     val authenticator = (credentials: Credentials) => credentials match {
       case p@Credentials.Provided(username) => Future {
@@ -44,11 +44,11 @@ trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
     }
   }
 
-  /* Authorize the account by checking if the user's role is in [[Service#authzRoles]] */
+  /** Authorize the account by checking if the user's role is in [[Service#authzRoles]] */
   def authz(acc: Account): Directive1[Account] =
     if (authzRoles contains acc.role) provide(acc) else reject(AuthorizationFailedRejection)
 
-  /* check authentication and then check Authorization */
+  /** check authentication and then check Authorization */
   def authnAndAuthz(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] = authn.flatMap(authz)
 
   def route: Route
