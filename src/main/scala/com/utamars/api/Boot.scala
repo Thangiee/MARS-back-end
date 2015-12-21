@@ -8,7 +8,7 @@ import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import com.utamars.dataaccess.tables.DB
+import com.utamars.dataaccess.DB
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration

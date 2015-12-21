@@ -3,7 +3,6 @@ package com.utamars
 import java.sql.BatchUpdateException
 
 import cats.data.{Xor, XorT}
-import com.utamars.dataaccess.tables._
 import com.utamars.util.TimeConversion
 import slick.SlickException
 import slick.dbio.{DBIOAction, NoStream}
@@ -14,7 +13,7 @@ import scala.util.Try
 
 package object dataaccess extends AnyRef with TimeConversion {
 
-  private implicit val ec = DB.executionCtx
+  private[dataaccess] implicit val ec = DB.executionCtx
 
   type Role = String
   object Role {

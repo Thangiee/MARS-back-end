@@ -8,7 +8,6 @@ import com.softwaremill.session.{InMemoryRefreshTokenStorage, SessionConfig, Ses
 import com.typesafe.config.ConfigFactory
 import com.utamars.api.Username
 import com.utamars.dataaccess._
-import com.utamars.dataaccess.tables.DB
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}

@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.softwaremill.session.{SessionConfig, SessionManager, SessionUtil}
-import com.utamars.dataaccess.tables.DB
+import com.utamars.dataaccess.DB
 import spec.ServiceSpec
 
 class SessionSpec extends ServiceSpec {

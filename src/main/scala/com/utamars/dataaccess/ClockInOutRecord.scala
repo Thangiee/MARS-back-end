@@ -2,8 +2,7 @@ package com.utamars.dataaccess
 
 import cats.data.XorT
 import com.github.nscala_time.time.Imports._
-import com.utamars.dataaccess.tables.DB
-import com.utamars.dataaccess.tables.DB.driver.api._
+import com.utamars.dataaccess.DB.driver.api._
 
 import scala.concurrent.Future
 
@@ -24,6 +23,9 @@ object ClockInOutRecord {
 
   def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
     withErrHandlingOpt(DB.ClockInOutRecordTable.filter(_.netId === netId).sortBy(_.inTime.desc).result.headOption)
+
+  def findBetween(start: LocalDate, end: LocalDate, netId: String) =
+    withErrHandling(DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result)
 
   def clockOutAll(netId: String, computerId: String): XorT[Future, DataAccessErr, Unit] = withErrHandling {
     DBIO.seq(

@@ -3,8 +3,7 @@ package com.utamars.dataaccess
 import java.sql.Timestamp
 
 import cats.data.XorT
-import com.utamars.dataaccess.tables.DB
-import com.utamars.dataaccess.tables.DB.driver.api._
+import com.utamars.dataaccess.DB.driver.api._
 
 import scala.concurrent.Future
 

@@ -7,7 +7,6 @@ import akka.http.scaladsl.server.Route
 import cats.data.Xor
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess._
-import com.utamars.dataaccess.tables.DB
 import spec.ServiceSpec
 
 import scala.concurrent.Await
