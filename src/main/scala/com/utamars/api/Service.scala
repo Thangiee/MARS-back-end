@@ -19,7 +19,7 @@ import scala.concurrent.{Await, Future}
 trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
   /** Limit this service to only the included roles */
-  def authzRoles: Seq[Role] = Nil // todo:
+  def defaultAuthzRoles: Seq[Role] = Nil
 
   def realm: String = ""
 
@@ -46,11 +46,12 @@ trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
   }
 
   /** Authorize the account by checking if the user's role is in [[Service#authzRoles]] */
-  def authz(acc: Account): Directive1[Account] =
+  def authz(acc: Account, authzRoles: Seq[Role]=defaultAuthzRoles): Directive1[Account] =
     if (authzRoles contains acc.role) provide(acc) else reject(AuthorizationFailedRejection)
 
   /** check authentication and then check Authorization */
-  def authnAndAuthz(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] = authn.flatMap(authz)
+  def authnAndAuthz(authzRoles: Role*)(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] =
+    authn.flatMap(acc => authz(acc, if (authzRoles.isEmpty) defaultAuthzRoles else authzRoles))
 
   def route: Route
 }

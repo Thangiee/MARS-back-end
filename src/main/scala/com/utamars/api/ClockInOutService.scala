@@ -16,12 +16,12 @@ import scalacache.{ScalaCache, get => _}
 case class ClockInOutService(implicit cache: ScalaCache, sm: SessionManager[Username],
   ts: RefreshTokenStorage[Username], ec: ExecutionContext) extends Service {
 
-  override val authzRoles: Seq[Role] = Seq(Role.Assistant)
-  override val realm     : String    = "mars-app"
+  override val defaultAuthzRoles: Seq[Role] = Seq(Role.Assistant)
+  override val realm            : String    = "mars-app"
 
   override val route: Route = post {
     logRequestResult("Clocking In") {
-      (post & path("clock-in") & formFields('uuid, 'computerid) & authnAndAuthz) { (uuid, compId, account) =>
+      (post & path("clock-in") & formFields('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
         complete {
           scalacache.get(uuid).map {
             case Some(_) => // successful found the registered UUID
@@ -33,7 +33,7 @@ case class ClockInOutService(implicit cache: ScalaCache, sm: SessionManager[User
       }
     } ~
     logRequestResult("Clock Out") {
-      (path("clock-out") & formField('uuid, 'computerid) & authnAndAuthz) { (uuid, compId, account) =>
+      (path("clock-out") & formField('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
         complete {
           scalacache.get(uuid).map {
             case Some(_) =>

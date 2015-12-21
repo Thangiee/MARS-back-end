@@ -9,11 +9,11 @@ import com.utamars.dataaccess.Role
 import scala.concurrent.ExecutionContext.Implicits.global
 
 case class SessionService(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]) extends Service {
-  override val authzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
+  override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
   override val route = pathPrefix("session") {
     logRequestResult("session-login") {
-      (post & path("login") & authnAndAuthz) { acc =>
+      (post & path("login") & authnAndAuthz()) { acc =>
         setSession(refreshable[String], usingCookies, acc.username) {
           complete(StatusCodes.OK)
         }

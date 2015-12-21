@@ -9,10 +9,15 @@ import spec.ServiceSpec
 class AuthnAndAuthzSpec extends ServiceSpec {
 
   val testService = new Service {
-    override val authzRoles: Seq[Role] = Seq(Role.Admin, Role.Instructor)
-    override val route: Route = (path("test") & authnAndAuthz) { account =>
-      complete(account.username)
-    }
+    override val defaultAuthzRoles: Seq[Role] = Seq(Role.Admin, Role.Instructor)
+
+    override val route: Route =
+      (path("admin-and-inst-only") & authnAndAuthz()) { account => // use default authzRoles
+        complete(account.username)
+      } ~
+      (path("asst-only") & authnAndAuthz(Role.Assistant)) { account => // override default authzRoles
+        complete(account.username)
+      }
   }
 
   override def beforeAll(): Unit = {
@@ -21,7 +26,8 @@ class AuthnAndAuthzSpec extends ServiceSpec {
   }
 
   "Services with authentication and Authorization" should {
-    val request = requestWithCredentials(Get("/test"), Route.seal(testService.route)) _
+    val request  = requestWithCredentials(Get("/admin-and-inst-only"), Route.seal(testService.route)) _
+    val request2 = requestWithCredentials(Get("/asst-only"), Route.seal(testService.route)) _
 
     "response with 200 on authenticated and authorized account" in {
       Seq(adminAcc, instructorAliceAcc).foreach{ acc =>
@@ -29,6 +35,11 @@ class AuthnAndAuthzSpec extends ServiceSpec {
           status shouldEqual StatusCodes.OK
           responseAs[String] shouldEqual acc.username
         }
+      }
+
+      request2(assistantBobAcc.username, assistantBobAcc.passwd) ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[String] shouldEqual assistantBobAcc.username
       }
     }
 
@@ -47,6 +58,10 @@ class AuthnAndAuthzSpec extends ServiceSpec {
 
     "response with 403 on authenticated account but not authorized" in {
       request(assistantBobAcc.username, assistantBobAcc.passwd) ~> check {
+        status shouldEqual StatusCodes.Forbidden
+      }
+
+      request2(adminAcc.username, adminAcc.passwd) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
     }
