@@ -8,11 +8,13 @@ import com.softwaremill.session.{InMemoryRefreshTokenStorage, SessionConfig, Ses
 import com.typesafe.config.ConfigFactory
 import com.utamars.api.Username
 import com.utamars.dataaccess._
+import com.utamars.dataaccess.tables.DB
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
 import spray.json.DefaultJsonProtocol
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with Matchers with ScalaFutures with GeneratorDrivenPropertyChecks
@@ -28,12 +30,12 @@ trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProto
     override def log(msg: String): Unit = println(msg)
   }
 
-  val adminAcc           = Account("admin", "password", Role.Admin)
-  val instructorAliceAcc = Account("alice123", "password", Role.Instructor)
-  val assistantBobAcc    = Account("bob123", "password", Role.Assistant)
+  val adminAcc           = Account("00000", "admin", "password", Role.Admin)
+  val instructorAliceAcc = Account("ali840", "alice123", "password", Role.Instructor)
+  val assistantBobAcc    = Account("b123", "bob123", "password", Role.Assistant)
 
-  val instructorAlice = Instructor("alice", "A", instructorAliceAcc.username, "alice@gmail.com")
-  val assistantBob    = Assistant("1000", assistantBobAcc.username, "albumName", "albumKey", "bob", "B", "bob@gmail.com")
+  val instructorAlice = Instructor(instructorAliceAcc.netId, "alice@gmail.com", "A", "Alice")
+  val assistantBob    = Assistant(assistantBobAcc.netId, 10.50, "bob@gmail.com", Job.Teaching, "CSE", "B", "bob", "1000", "", "")
 
   def requestWithCredentials(request: HttpRequest, user: String, pass: String)(route: Route): RouteTestResult =
     request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
@@ -44,15 +46,18 @@ trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProto
   def requestWithCredentials(request: HttpRequest, route: Route)(user: String, pass: String): RouteTestResult =
     request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
 
-  def initDataBase(): Unit = transaction {
-    MySchema.drop
-    MySchema.create
-    transaction {
-      adminAcc.insert
-      instructorAliceAcc.insert
-      assistantBobAcc.insert
-      instructorAlice.insert
-      assistantBob.insert
-    }
+  def initDataBaseData(): Unit = {
+    Account.add(adminAcc, instructorAliceAcc, assistantBobAcc)
+    instructorAlice.create()
+    assistantBob.create()
   }
+
+  def deleteAllDataBaseData(): Unit ={
+    Await.ready(ClockInOutRecord.deleteAll().value, 1.minute)
+    Await.ready(Instructor.deleteAll().value, 1.minute)
+    Await.ready(Assistant.deleteAll().value, 1.minute)
+    Await.ready(Account.deleteAll().value, 1.minute)
+  }
+
+  def deleteDataBase(): Unit = DB.dropSchema()
 }

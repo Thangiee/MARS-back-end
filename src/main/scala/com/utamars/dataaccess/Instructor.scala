@@ -1,16 +1,20 @@
 package com.utamars.dataaccess
 
-import java.util.UUID
+import cats.data.XorT
+import com.utamars.dataaccess.tables.DB
+import com.utamars.dataaccess.tables.DB.driver.api._
 
-case class Instructor(
-  firstName: String,
-  lastName: String,
-  username: String,
-  email: String = "",
-  id: UUID = UUID.randomUUID())
+import scala.concurrent.Future
 
-object Instructor extends Repo {
-  override type PK = UUID
-  override type T = Instructor
-  override def table = MySchema.instructors
+case class Instructor(netId: String, email: String, lastName: String, firstName: String)
+
+object Instructor {
+
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
+    withErrHandling(DBIO.seq(DB.InstructorTable.filter(i => i.netId === i.netId).delete))
+  }
+
+  implicit class PostfixOps(instructor: Instructor) {
+    def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.InstructorTable += instructor))
+  }
 }

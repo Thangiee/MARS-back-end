@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import com.utamars.dataaccess._
-import com.github.nscala_time.time.Imports._
+import com.utamars.dataaccess.tables.DB
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -42,20 +42,15 @@ object Boot extends App with LazyLogging {
   val interface = config.getString("http.interface")
   val port      = config.getInt("http.port")
 
+  if (config.getBoolean("db.create")) DB.createSchema()
+
   val services =
     SessionService() ::
     RegisterUUIDService() ::
     ClockInOutService()   ::
-    FacialRecognitionService() ::
-    TimeSheetGenService() ::
     Nil
 
   val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
   Http().bindAndHandle(routes, interface, port)
-
-  if (config.getBoolean("db.create")) transaction {
-    MySchema.create
-    MySchema.printDdl
-  }
 }
 

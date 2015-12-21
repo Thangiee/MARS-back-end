@@ -1,23 +1,28 @@
 package com.utamars.dataaccess
 
-import java.util.Date
+import java.sql.Timestamp
 
-import cats.data.Xor
-import org.squeryl._
+import cats.data.XorT
+import com.utamars.dataaccess.tables.DB
+import com.utamars.dataaccess.tables.DB.driver.api._
 
-case class Account(username: String, passwd: String, role: String, lastLogin: Date = new Date())
+import scala.concurrent.Future
 
-object Account extends Repo {
-  override type PK = String
-  override type T = Account
-  override val table: Table[Account] = MySchema.accounts
+case class Account(netId: String, username: String, passwd: String, role: String, lastLogin: Timestamp = new Timestamp(System.currentTimeMillis()))
 
-  def accountsByRoles(roles: Role*): Xor[DataAccessErr, Seq[Account]] = withErrHandling {
-    table.where(acc => acc.role in roles).distinct.toSeq
+object Account {
+
+  def findBy(username: String): XorT[Future, DataAccessErr, Account] =
+    withErrHandlingOpt(DB.AccountTable.filter(_.username === username).result.headOption)
+
+  def add(accs: Account*): XorT[Future, DataAccessErr, Unit] =
+    withErrHandling(DBIO.seq(DB.AccountTable ++= accs))
+
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
+    withErrHandling(DBIO.seq(DB.AccountTable.filter(a => a.netId === a.netId).delete))
   }
 
-  implicit class Ops(acc: Account) {
-    def changePasswd(newPasswd: String): Xor[DataAccessErr, Account] =
-      for (updatedAcc <- update(acc.copy(passwd = newPasswd))) yield updatedAcc
+  implicit class PostfixOps(acc: Account) {
+    def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.AccountTable += acc))
   }
 }

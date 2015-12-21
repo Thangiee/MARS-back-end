@@ -1,31 +1,20 @@
 package com.utamars
 
-import java.sql.DriverManager
-import java.util.UUID
+import java.sql.BatchUpdateException
 
-import cats.data.Xor
-import com.typesafe.config.ConfigFactory
-import org.squeryl._
-import org.squeryl.adapters.{PostgreSqlAdapter, H2Adapter}
+import cats.data.{Xor, XorT}
+import com.utamars.dataaccess.tables._
+import com.utamars.util.TimeConversion
+import slick.SlickException
+import slick.dbio.{DBIOAction, NoStream}
 
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.Future
+import scala.language.implicitConversions
+import scala.util.Try
 
-package object dataaccess extends AnyRef with PrimitiveTypeMode {
+package object dataaccess extends AnyRef with TimeConversion {
 
-  val config = ConfigFactory.load()
-  val url = config.getString("db.url")
-  val user = config.getString("db.user")
-  val pass = config.getString("db.passwd")
-  val driver = config.getString("db.driver")
-  val adapter = driver match {
-    case "org.postgresql.Driver" => new PostgreSqlAdapter
-    case "org.h2.Driver"         => new H2Adapter
-    case _                       =>
-      throw new RuntimeException(s"$driver driver is not supported. Try using org.postgresql.Driver or org.h2.Driver.")
-  }
-
-  Class.forName(driver)
-  SessionFactory.concreteFactory = Some(() => Session.create(DriverManager.getConnection(url, user, pass), adapter))
+  private implicit val ec = DB.executionCtx
 
   type Role = String
   object Role {
@@ -36,49 +25,27 @@ package object dataaccess extends AnyRef with PrimitiveTypeMode {
 
   type Job = String
   object Job {
-    val Grading  = "grading"
+    val Grading = "grading"
     val Teaching = "teaching"
   }
 
   sealed trait DataAccessErr
   case object NotFound extends DataAccessErr
-  case class SqlErr(msg: String, detailedMsg: String) extends DataAccessErr
+  case class SqlErr(msg: String, cause: Throwable) extends DataAccessErr
   case class InternalErr(err: Throwable) extends DataAccessErr
 
-  def withErrHandling[A](a: => A): Xor[DataAccessErr, A] = Try(a) match {
-    case Success(b)                       => Xor.Right(b)
-    case Failure(ex: SquerylSQLException) => Xor.Left(SqlErr(Try(ex.getCause().getMessage).getOrElse(""), Try(ex.getMessage).getOrElse("")))
-    case Failure(ex)                      => Xor.Left(InternalErr(ex))
+  def withErrHandling[A](a: => Future[A]) = XorT[Future, DataAccessErr, A] {
+    a.map(b => Xor.Right(b)).recover(defaultErrHandler)
   }
 
-  def withErrHandlingOpt[A](a: => Option[A]): Xor[DataAccessErr, A] = Try(a) match {
-    case Success(Some(b))                 => Xor.Right(b)
-    case Success(None)                    => Xor.Left(NotFound)
-    case Failure(ex: SquerylSQLException) => println(ex.getCause().getErrorCode); Xor.Left(SqlErr(ex.getCause().getMessage, ex.getMessage))
-    case Failure(ex)                      => Xor.Left(InternalErr(ex))
+  def withErrHandlingOpt[A](a: => Future[Option[A]]) = XorT[Future, DataAccessErr, A] {
+    a.map(b => if (b.isDefined) Xor.Right(b.get) else Xor.Left(NotFound)).recover(defaultErrHandler)
+  }
+  private val defaultErrHandler = PartialFunction[Throwable, Xor.Left[DataAccessErr]] {
+    case ex: SlickException       => Xor.Left(SqlErr(Try(ex.getMessage).getOrElse("Err msg is null!"), ex.getCause))
+    case ex: BatchUpdateException => Xor.Left(SqlErr(ex.getNextException.getMessage, ex))
+    case ex                       => Xor.Left(InternalErr(ex))
   }
 
-  implicit val accountKED = new KeyedEntityDef[Account, String]  {
-    override def getId(a: Account): String = a.username
-    override def idPropertyName: String = "username"
-    override def isPersisted(a: Account): Boolean = true
-  }
-
-  implicit val assistantKED = new KeyedEntityDef[Assistant, String] {
-    override def getId(a: Assistant): String = a.employeeId
-    override def idPropertyName: String = "employeeId"
-    override def isPersisted(a: Assistant): Boolean = true
-  }
-
-  implicit val instructorKED = new KeyedEntityDef[Instructor, UUID] {
-    override def getId(a: Instructor): UUID = a.id
-    override def idPropertyName: String = "id"
-    override def isPersisted(a: Instructor): Boolean = true
-  }
-
-  implicit val clockInOutRecordKED = new KeyedEntityDef[ClockInOutRecord, UUID] {
-    override def getId(a: ClockInOutRecord): UUID = a.id
-    override def idPropertyName: String = "id"
-    override def isPersisted(a: ClockInOutRecord): Boolean = true
-  }
+  private[dataaccess] implicit def executeFromDb[A](action: DBIOAction[A, NoStream, Nothing]): Future[A] = DB.run(action)
 }

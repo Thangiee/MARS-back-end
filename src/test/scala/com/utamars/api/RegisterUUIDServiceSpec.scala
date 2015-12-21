@@ -2,11 +2,10 @@ package com.utamars.api
 
 import java.util.UUID
 
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.FormData
+import akka.http.scaladsl.model.{FormData, StatusCodes}
+import com.github.nscala_time.time.Imports._
 import spec.ServiceSpec
 import spray.json._
-import com.github.nscala_time.time.Imports._
 
 import scala.concurrent.Await
 import scalacache._
@@ -19,7 +18,7 @@ class RegisterUUIDServiceSpec extends ServiceSpec {
   val ttl     = config.getInt("service.registerUUID.ttl-in-sec").seconds.toMillis
 
   after {
-    Await.ready(removeAll(), 5.seconds)
+    Await.ready(scalacache.removeAll(), 5.seconds)
   }
 
   "Register UUID service" when {

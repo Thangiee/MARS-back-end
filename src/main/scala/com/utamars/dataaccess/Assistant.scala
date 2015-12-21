@@ -1,26 +1,24 @@
 package com.utamars.dataaccess
 
-case class Assistant(
-  employeeId: String,
-  username: String,
-  albumName: String,
-  albumKey: String,
-  firstName: String = "",
-  lastName: String = "",
-  email: String = "",
-  title: String = "N/A",
-  titleCode: String = "N/A",
-  department: String = "CSE",
-  rate: Double = 0.0,
-  job: Job = Job.Teaching,
-  currentlyClockedIn: Boolean = false
-)
+import cats.data.XorT
+import com.utamars.dataaccess.tables.DB
+import com.utamars.dataaccess.tables.DB.driver.api._
 
-object Assistant extends Repo {
-  override type PK = String
-  override type T = Assistant
+import scala.concurrent.Future
 
-  override def table = MySchema.assistants
+case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
+  lastName: String, firstName: String, employeeId: String, title: String, titleCode: String)
 
-  def findByUsername(username: String) = withErrHandlingOpt(table.where(_.username === username).singleOption)
+object Assistant {
+
+  def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
+    withErrHandlingOpt(DB.AssistantTable.filter(_.netId === netId).result.headOption)
+
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
+    withErrHandling(DBIO.seq(DB.AssistantTable.filter(a => a.netId === a.netId).delete))
+  }
+
+  implicit class PostfixOps(asst: Assistant) {
+    def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.AssistantTable += asst))
+  }
 }

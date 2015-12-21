@@ -3,18 +3,18 @@ package com.utamars
 import java.net.URL
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import com.github.nscala_time.time.DurationBuilder
 import com.typesafe.scalalogging.LazyLogging
-import com.utamars.dataaccess.{DataAccessErr, InternalErr, NotFound, SqlErr}
+import com.utamars.dataaccess._
+import com.utamars.util.TimeConversion
 import de.jollyday.{HolidayManager, ManagerParameters}
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory
 import org.joda.time.{DateTimeConstants, LocalDate}
 import spray.json._
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.language.implicitConversions
 
-package object api extends AnyRef with LazyLogging {
+package object api extends AnyRef with TimeConversion with LazyLogging {
 
   type Username = String
   type ErrMsg = String
@@ -36,7 +36,7 @@ package object api extends AnyRef with LazyLogging {
     def toHttpResponse: HttpResponse = err match {
       case NotFound            => HttpResponse(StatusCodes.NotFound)
       case SqlErr(msg, detail) =>
-        logger.debug(detail)
+        logger.debug(msg, detail)
         HttpResponse(StatusCodes.Conflict, entity = msg)
       case InternalErr(error)    =>
         logger.error(error.getMessage)
@@ -45,13 +45,7 @@ package object api extends AnyRef with LazyLogging {
     }
   }
 
-  // convert nscala-time to scala.concurrent.duration when necessary
-  implicit def concurrentFiniteDurationFrom(d: DurationBuilder): FiniteDuration =
-    Duration( d.millis, scala.concurrent.duration.MILLISECONDS)
-
   implicit class RichLocalDate(localDate: LocalDate) {
-    import com.github.nscala_time.time.Imports._
-
     import scala.collection.JavaConversions._
 
     def nextBusinessDays(days: Int): LocalDate = {

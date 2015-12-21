@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.utamars.dataaccess.Role
+import com.utamars.dataaccess.tables.DB
 import spec.ServiceSpec
 
 class AuthnAndAuthzSpec extends ServiceSpec {
@@ -16,7 +17,8 @@ class AuthnAndAuthzSpec extends ServiceSpec {
   }
 
   override def beforeAll(): Unit = {
-    initDataBase()
+    DB.createSchema()
+    initDataBaseData()
   }
 
   "Services with authentication and Authorization" should {

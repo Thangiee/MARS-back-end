@@ -5,7 +5,7 @@ version := "1.0"
 scalaVersion := "2.11.7"
 
 scalacOptions += "-Xexperimental"
-
+// todo: clean up
 libraryDependencies ++= {
   val akkaV       = "2.4.0"
   val akkaStreamV = "2.0-M2"
@@ -20,7 +20,6 @@ libraryDependencies ++= {
     "org.scalaj"        %% "scalaj-http"                          % "2.1.0",
     "org.postgresql"    % "postgresql"                            % "9.4-1205-jdbc42",
     "com.h2database"    % "h2"                                    % "1.3.166",
-    "org.squeryl"       %% "squeryl"                              % "0.9.6-RC4",
     "org.spire-math"    %% "cats"                                 % "0.3.0",
     "com.github.mpilquist" %% "simulacrum"                        % "0.5.0",
     "com.github.cb372"  %% "scalacache-guava"                     % "0.7.3",
@@ -39,6 +38,9 @@ libraryDependencies ++= {
 }
 
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
+libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % "3.1.0"
+libraryDependencies +=  "com.typesafe.slick" %% "slick" % "3.1.0"
+libraryDependencies +=  "com.typesafe.slick" %% "slick-hikaricp" % "3.1.0"
 libraryDependencies += "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.1"
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)

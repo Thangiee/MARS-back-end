@@ -4,7 +4,8 @@ import akka.http.scaladsl.model.headers.{Cookie, HttpCookie, `Set-Cookie`}
 import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.softwaremill.session.{SessionManager, SessionUtil, SessionConfig}
+import com.softwaremill.session.{SessionConfig, SessionManager, SessionUtil}
+import com.utamars.dataaccess.tables.DB
 import spec.ServiceSpec
 
 class SessionSpec extends ServiceSpec {
@@ -35,8 +36,9 @@ class SessionSpec extends ServiceSpec {
   def setRefreshTokenHeader() = Cookie(refreshTokenCookieName, getSession.get)
   def isRefreshTokenExpired = cookiesMap.get(refreshTokenCookieName).flatMap(_.expires).contains(DateTime.MinValue)
 
-  before {
-    initDataBase()
+  override def beforeAll(): Unit = {
+    DB.createSchema()
+    initDataBaseData()
   }
 
   "Session login" should {
