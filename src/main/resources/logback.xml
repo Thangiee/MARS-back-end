@@ -31,4 +31,10 @@
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>
     </root>
+
+    <logger name="com.zaxxer.hikari" level="INFO" />
+    <logger name="slick.basic" level="INFO" />
+    <logger name="slick.compiler" level="INFO" />
+    <logger name="slick.relational" level="INFO" />
+    <logger name="slick.jdbc" level="DEBUG" />
 </configuration>
