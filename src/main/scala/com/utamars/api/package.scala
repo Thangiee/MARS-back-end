@@ -1,6 +1,7 @@
 package com.utamars
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
@@ -12,6 +13,10 @@ package object api extends AnyRef with TimeConversion with LazyLogging {
 
   type Username = String
   type ErrMsg = String
+
+  // abbreviation
+  type SessMgr = SessionManager[Username]
+  type RTS = RefreshTokenStorage[Username]
 
   // needed to be able to convert Map[String, Any] to json using spray
   implicit object AnyJsonFormat extends JsonFormat[Any] {

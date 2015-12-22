@@ -8,23 +8,21 @@ import cats.data.Xor
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.softwaremill.session.SessionDirectives._
-import com.softwaremill.session._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 import spray.json.DefaultJsonProtocol
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ExecutionContext, Await, Future}
 
 trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
   /** Limit this service to only the included roles */
   def defaultAuthzRoles: Seq[Role] = Nil
 
-  def realm: String = ""
+  def realm: String = "secure"
 
   /** Authenticate the account, i.e. check the username and password or an existing session */
-  def authn(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] = {
+  def authn(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] = {
     val authenticator = (credentials: Credentials) => credentials match {
       case p@Credentials.Provided(username) =>
         Account.findBy(username).fold(
@@ -50,7 +48,7 @@ trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
     if (authzRoles contains acc.role) provide(acc) else reject(AuthorizationFailedRejection)
 
   /** check authentication and then check Authorization */
-  def authnAndAuthz(authzRoles: Role*)(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]): Directive1[Account] =
+  def authnAndAuthz(authzRoles: Role*)(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
     authn.flatMap(acc => authz(acc, if (authzRoles.isEmpty) defaultAuthzRoles else authzRoles))
 
   def route: Route

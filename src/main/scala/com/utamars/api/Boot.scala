@@ -48,6 +48,7 @@ object Boot extends App with LazyLogging {
     SessionService() ::
     RegisterUUIDService() ::
     ClockInOutService()   ::
+    TimeSheetGenService() ::
     Nil
 
   val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
