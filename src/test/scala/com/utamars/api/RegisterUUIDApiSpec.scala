@@ -12,9 +12,9 @@ import scalacache._
 import scalacache.guava.GuavaCache
 
 
-class RegisterUUIDServiceSpec extends ServiceSpec {
+class RegisterUUIDApiSpec extends ServiceSpec {
   implicit val scalaCache = ScalaCache(GuavaCache())
-  val service = new RegisterUUIDService()
+  val service = new RegisterUUIDApi()
   val ttl     = config.getInt("service.registerUUID.ttl-in-sec").seconds.toMillis
 
   after {

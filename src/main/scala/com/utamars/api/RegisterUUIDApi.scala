@@ -9,7 +9,7 @@ import spray.json._
 
 import scalacache._
 
-case class RegisterUUIDService(implicit cache: ScalaCache) extends Service {
+case class RegisterUUIDApi(implicit cache: ScalaCache) extends Api {
 
   private val config = ConfigFactory.load()
   private val ttl = config.getInt("service.registerUUID.ttl-in-sec").seconds

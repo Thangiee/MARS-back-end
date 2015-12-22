@@ -2,7 +2,7 @@ package com.utamars.api
 
 import akka.http.scaladsl.server.Route
 
-class AssistantSignUpService extends Service {
+class AssistantSignUpApi extends Api {
 
   override def route: Route = ???
 }

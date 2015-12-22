@@ -8,7 +8,7 @@ import com.utamars.dataaccess.Role
 
 class AuthnAndAuthzSpec extends ServiceSpec {
 
-  val testService = new Service {
+  val testService = new Api {
     override val defaultAuthzRoles: Seq[Role] = Seq(Role.Admin, Role.Instructor)
 
     override val route: Route =

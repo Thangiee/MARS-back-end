@@ -13,7 +13,7 @@ import org.joda.time.IllegalFieldValueException
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Try
 
-case class TimeSheetGenService(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Service {
+case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
   private val monthYear =  parameter('month.as[Int], 'year.as[Int])
 

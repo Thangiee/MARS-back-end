@@ -7,15 +7,15 @@ import akka.http.scaladsl.server.Route
 import com.softwaremill.session.{SessionConfig, SessionManager, SessionUtil}
 import com.utamars.ServiceSpec
 
-class SessionSpec extends ServiceSpec {
+class SessionApiSpec extends ServiceSpec {
   override val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(1),
     refreshTokenMaxAgeSeconds = 1
   )
   override implicit val sessionManager = new SessionManager[Username](sessionConfig)
 
-  val sessionService = SessionService()
-  val protectedService = new Service {
+  val sessionService = SessionApi()
+  val protectedService = new Api {
     override val route = (path("resources") & authn) { _ => complete(StatusCodes.OK) }
   }
 

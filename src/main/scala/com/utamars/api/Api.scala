@@ -14,7 +14,7 @@ import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.{ExecutionContext, Await, Future}
 
-trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
+trait Api extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
   /** Limit this service to only the included roles */
   def defaultAuthzRoles: Seq[Role] = Nil
@@ -43,7 +43,7 @@ trait Service extends AnyRef with DefaultJsonProtocol with LazyLogging {
     }
   }
 
-  /** Authorize the account by checking if the user's role is in [[Service#authzRoles]] */
+  /** Authorize the account by checking if the user's role is in [[Api#authzRoles]] */
   def authz(acc: Account, authzRoles: Seq[Role]=defaultAuthzRoles): Directive1[Account] =
     if (authzRoles contains acc.role) provide(acc) else reject(AuthorizationFailedRejection)
 

@@ -6,9 +6,9 @@ import better.files._
 import com.utamars.ServiceSpec
 import org.jvnet.mock_javamail.Mailbox
 
-class TimeSheetGenServiceSpec extends ServiceSpec {
+class TimeSheetGenApiSpec extends ServiceSpec {
 
-  val service    = TimeSheetGenService()
+  val service    = TimeSheetGenApi()
 
   val bobRequest = requestWithCredentials(asstBobAcc.username, asstBobAcc.passwd, Route.seal(service.route)) _
   val bobMailbox = Mailbox.get(asstBob.email)

@@ -13,9 +13,9 @@ import scala.concurrent.Await
 import scalacache._
 import scalacache.guava.GuavaCache
 
-class ClockInOutServiceSpec extends ServiceSpec {
+class ClockInOutApiSpec extends ServiceSpec {
   implicit val scalaCache = ScalaCache(GuavaCache())
-  val service = new ClockInOutService()
+  val service = new ClockInOutApi()
 
   override def beforeAll(): Unit = {
     initDataBase()

@@ -13,8 +13,8 @@ import scala.concurrent.{Await, ExecutionContext}
 import scalacache.{ScalaCache, get => _}
 
 
-case class ClockInOutService(implicit cache: ScalaCache, sm: SessionManager[Username],
-  ts: RefreshTokenStorage[Username], ec: ExecutionContext) extends Service {
+case class ClockInOutApi(implicit cache: ScalaCache, sm: SessionManager[Username],
+  ts: RefreshTokenStorage[Username], ec: ExecutionContext) extends Api {
 
   override val defaultAuthzRoles: Seq[Role] = Seq(Role.Assistant)
   override val realm            : String    = "mars-app"

@@ -1,4 +1,4 @@
-package com.utamars.api
+package com.utamars
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
@@ -8,6 +8,7 @@ import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
+import com.utamars.api._
 import com.utamars.dataaccess.DB
 
 import scala.concurrent.Future
@@ -45,10 +46,10 @@ object Boot extends App with LazyLogging {
   if (config.getBoolean("db.create")) DB.createSchema()
 
   val services =
-    SessionService() ::
-    RegisterUUIDService() ::
-    ClockInOutService()   ::
-    TimeSheetGenService() ::
+    SessionApi() ::
+    RegisterUUIDApi() ::
+    ClockInOutApi()   ::
+    TimeSheetGenApi() ::
     Nil
 
   val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
