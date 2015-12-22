@@ -32,7 +32,8 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-testkit-experimental"       % akkaStreamV,
     "org.scalatest"     %% "scalatest"                            % "2.2.5"     % "test",
-     "org.scalacheck"   %% "scalacheck"                           % "1.12.4"    % "test"
+    "org.scalacheck"   %% "scalacheck"                            % "1.12.4"    % "test",
+    "org.jvnet.mock-javamail" % "mock-javamail"                   % "1.9"       % "test"
   ).map(_.withJavadoc())
 }
 
