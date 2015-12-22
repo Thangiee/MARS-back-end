@@ -5,8 +5,7 @@ import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.softwaremill.session.{SessionConfig, SessionManager, SessionUtil}
-import com.utamars.dataaccess.DB
-import spec.ServiceSpec
+import com.utamars.ServiceSpec
 
 class SessionSpec extends ServiceSpec {
   override val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
@@ -37,7 +36,7 @@ class SessionSpec extends ServiceSpec {
   def isRefreshTokenExpired = cookiesMap.get(refreshTokenCookieName).flatMap(_.expires).contains(DateTime.MinValue)
 
   override def beforeAll(): Unit = {
-    DB.createSchema()
+    initDataBase()
     initDataBaseData()
   }
 

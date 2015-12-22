@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.{FormData, StatusCodes}
 import com.github.nscala_time.time.Imports._
-import spec.ServiceSpec
+import com.utamars.ServiceSpec
 import spray.json._
 
 import scala.concurrent.Await

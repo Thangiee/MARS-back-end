@@ -3,8 +3,8 @@ package com.utamars.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.utamars.dataaccess.{DB, Role}
-import spec.ServiceSpec
+import com.utamars.ServiceSpec
+import com.utamars.dataaccess.Role
 
 class AuthnAndAuthzSpec extends ServiceSpec {
 
@@ -21,7 +21,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
   }
 
   override def beforeAll(): Unit = {
-    DB.createSchema()
+    initDataBase()
     initDataBaseData()
   }
 
@@ -30,16 +30,16 @@ class AuthnAndAuthzSpec extends ServiceSpec {
     val request2 = requestWithCredentials(Get("/asst-only"), Route.seal(testService.route)) _
 
     "response with 200 on authenticated and authorized account" in {
-      Seq(adminAcc, instructorAliceAcc).foreach{ acc =>
+      Seq(adminAcc, instAliceAcc).foreach{ acc =>
         request(acc.username, acc.passwd) ~> check {
           status shouldEqual StatusCodes.OK
           responseAs[String] shouldEqual acc.username
         }
       }
 
-      request2(assistantBobAcc.username, assistantBobAcc.passwd) ~> check {
+      request2(asstBobAcc.username, asstBobAcc.passwd) ~> check {
         status shouldEqual StatusCodes.OK
-        responseAs[String] shouldEqual assistantBobAcc.username
+        responseAs[String] shouldEqual asstBobAcc.username
       }
     }
 
@@ -57,7 +57,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
     }
 
     "response with 403 on authenticated account but not authorized" in {
-      request(assistantBobAcc.username, assistantBobAcc.passwd) ~> check {
+      request(asstBobAcc.username, asstBobAcc.passwd) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
 

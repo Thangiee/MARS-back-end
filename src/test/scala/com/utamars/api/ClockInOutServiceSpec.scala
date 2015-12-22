@@ -6,8 +6,8 @@ import akka.http.scaladsl.model.{FormData, StatusCodes}
 import akka.http.scaladsl.server.Route
 import cats.data.Xor
 import com.github.nscala_time.time.Imports._
+import com.utamars.ServiceSpec
 import com.utamars.dataaccess._
-import spec.ServiceSpec
 
 import scala.concurrent.Await
 import scalacache._
@@ -18,7 +18,7 @@ class ClockInOutServiceSpec extends ServiceSpec {
   val service = new ClockInOutService()
 
   override def beforeAll(): Unit = {
-    DB.createSchema()
+    initDataBase()
   }
 
   before {
@@ -31,7 +31,7 @@ class ClockInOutServiceSpec extends ServiceSpec {
   }
 
   "Clock in/out service" should {
-    val request = requestWithCredentials(assistantBobAcc.username, assistantBobAcc.passwd, Route.seal(service.route)) _
+    val request = requestWithCredentials(asstBobAcc.username, asstBobAcc.passwd, Route.seal(service.route)) _
     val uuid = UUID.randomUUID().toString
 
     "response with 200 on a successful clock in" in {
@@ -51,9 +51,9 @@ class ClockInOutServiceSpec extends ServiceSpec {
     "save a clock in record into the database after clocking in" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
       request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
-        Await.result(ClockInOutRecord.findMostRecent(assistantBob.netId).value, 1.minute) match {
+        Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
           case Xor.Right(record) =>
-            record.netId shouldEqual assistantBob.netId
+            record.netId shouldEqual asstBob.netId
             record.outTime shouldEqual None
             record.inComputerId shouldEqual Some("ERB 103")
           case Xor.Left(err) => fail(err.toString)
@@ -65,9 +65,9 @@ class ClockInOutServiceSpec extends ServiceSpec {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
       request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         request(Post("/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
-          Await.result(ClockInOutRecord.findMostRecent(assistantBob.netId).value, 1.minute) match {
+          Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
             case Xor.Right(record) =>
-              record.netId shouldEqual assistantBob.netId
+              record.netId shouldEqual asstBob.netId
               record.outTime shouldBe defined
               record.inComputerId shouldEqual Some("ERB 103")
             case Xor.Left(err) => fail(err.toString)
