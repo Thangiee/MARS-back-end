@@ -11,7 +11,7 @@ case class Assistant(netId: String, rate: Double, email: String, job: String, de
 object Assistant {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
-    withErrHandlingOpt(DB.AssistantTable.filter(_.netId === netId).result.headOption)
+    withErrHandlingOpt(DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption)
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
     withErrHandling(DBIO.seq(DB.AssistantTable.filter(a => a.netId === a.netId).delete))

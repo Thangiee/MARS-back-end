@@ -9,6 +9,9 @@ case class Instructor(netId: String, email: String, lastName: String, firstName:
 
 object Instructor {
 
+  def findBy(netId: String): XorT[Future, DataAccessErr, Instructor] =
+    withErrHandlingOpt(DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption)
+
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
     withErrHandling(DBIO.seq(DB.InstructorTable.filter(i => i.netId === i.netId).delete))
   }

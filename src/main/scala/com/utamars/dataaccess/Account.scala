@@ -12,7 +12,7 @@ case class Account(netId: String, username: String, passwd: String, role: String
 object Account {
 
   def findBy(username: String): XorT[Future, DataAccessErr, Account] =
-    withErrHandlingOpt(DB.AccountTable.filter(_.username === username).result.headOption)
+    withErrHandlingOpt(DB.AccountTable.filter(_.username.toLowerCase === username.toLowerCase).result.headOption)
 
   def add(accs: Account*): XorT[Future, DataAccessErr, Unit] =
     withErrHandling(DBIO.seq(DB.AccountTable ++= accs))

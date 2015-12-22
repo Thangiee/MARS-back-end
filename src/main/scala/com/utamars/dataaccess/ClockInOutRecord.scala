@@ -19,10 +19,10 @@ case class ClockInOutRecord(
 object ClockInOutRecord {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
-    withErrHandling(DB.ClockInOutRecordTable.filter(_.netId === netId).result)
+    withErrHandling(DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).result)
 
   def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
-    withErrHandlingOpt(DB.ClockInOutRecordTable.filter(_.netId === netId).sortBy(_.inTime.desc).result.headOption)
+    withErrHandlingOpt(DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption)
 
   def findBetween(start: LocalDate, end: LocalDate, netId: String) =
     withErrHandling(DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result)
@@ -30,7 +30,7 @@ object ClockInOutRecord {
   def clockOutAll(netId: String, computerId: String): XorT[Future, DataAccessErr, Unit] = withErrHandling {
     DBIO.seq(
       DB.ClockInOutRecordTable
-        .filter(r => r.netId === netId && r.outTime.isEmpty)
+        .filter(r => r.netId.toLowerCase === netId.toLowerCase && r.outTime.isEmpty)
         .map(r => (r.outTime, r.outComputerId))
         .update((Some(DateTime.now()), Some(computerId)))
     ).transactionally
