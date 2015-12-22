@@ -7,8 +7,7 @@ scalaVersion := "2.11.7"
 scalacOptions += "-Xexperimental"
 // todo: clean up
 libraryDependencies ++= {
-  val akkaV       = "2.4.0"
-  val akkaStreamV = "2.0-M2"
+  val akkaStreamV = "2.0"
   Seq(
     "de.jollyday"       % "jollyday"                              % "0.4.9",
     "net.objectlab.kit" % "datecalc-common"                       % "1.4.0",
@@ -26,7 +25,7 @@ libraryDependencies ++= {
     "com.lihaoyi"       %% "ammonite-ops"                         % "0.4.9",
     "ch.qos.logback"    %  "logback-classic"                      % "1.1.3",
     "com.softwaremill.akka-http-session" %% "core"                % "0.2.2",
-    "com.typesafe.akka" %% "akka-actor"                           % akkaV,
+    "com.typesafe.akka" %% "akka-actor"                           % "2.4.1",
     "com.typesafe.akka" %% "akka-stream-experimental"             % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-core-experimental"          % akkaStreamV,
     "com.typesafe.akka" %% "akka-http-experimental"               % akkaStreamV,
@@ -38,12 +37,11 @@ libraryDependencies ++= {
 }
 
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0"
-libraryDependencies += "com.typesafe.slick" %% "slick-codegen" % "3.1.0"
-libraryDependencies +=  "com.typesafe.slick" %% "slick" % "3.1.0"
-libraryDependencies +=  "com.typesafe.slick" %% "slick-hikaricp" % "3.1.0"
+libraryDependencies +=  "com.typesafe.slick" %% "slick" % "3.1.1"
+libraryDependencies +=  "com.typesafe.slick" %% "slick-hikaricp" % "3.1.1"
 libraryDependencies += "com.typesafe.akka" % "akka-slf4j_2.11" % "2.4.1"
 
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5" cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
 fork in run := true
 
