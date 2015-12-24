@@ -8,7 +8,7 @@ import com.utamars.dataaccess.Role
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class SessionApi(implicit sm: SessionManager[Username], ts: RefreshTokenStorage[Username]) extends Api {
+case class SessionApi(implicit sm: SessMgr, rts: RTS) extends Api {
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
   override val route = pathPrefix("session") {

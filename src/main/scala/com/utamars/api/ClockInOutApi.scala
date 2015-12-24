@@ -6,15 +6,13 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
-import com.softwaremill.session.{SessionManager, _}
 import com.utamars.dataaccess.{NotFound, _}
 
 import scala.concurrent.{Await, ExecutionContext}
 import scalacache.{ScalaCache, get => _}
 
 
-case class ClockInOutApi(implicit cache: ScalaCache, sm: SessionManager[Username],
-  ts: RefreshTokenStorage[Username], ec: ExecutionContext) extends Api {
+case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: ExecutionContext) extends Api {
 
   override val defaultAuthzRoles: Seq[Role] = Seq(Role.Assistant)
   override val realm            : String    = "mars-app"
