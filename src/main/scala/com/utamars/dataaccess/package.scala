@@ -1,15 +1,12 @@
 package com.utamars
 
-import java.sql.BatchUpdateException
-
 import cats.data.{Xor, XorT}
 import com.utamars.util.TimeConversion
-import slick.SlickException
+import org.postgresql.util.PSQLException
 import slick.dbio.{DBIOAction, NoStream}
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
-import scala.util.Try
 
 package object dataaccess extends AnyRef with TimeConversion {
 
@@ -30,7 +27,8 @@ package object dataaccess extends AnyRef with TimeConversion {
 
   sealed trait DataAccessErr
   case object NotFound extends DataAccessErr
-  case class SqlErr(msg: String, cause: Throwable) extends DataAccessErr
+  case class SqlDuplicateKey(msg: String) extends DataAccessErr
+  case class SqlErr(code: String, msg: String) extends DataAccessErr
   case class InternalErr(err: Throwable) extends DataAccessErr
 
   def withErrHandling[A](a: => Future[A]) = XorT[Future, DataAccessErr, A] {
@@ -41,9 +39,12 @@ package object dataaccess extends AnyRef with TimeConversion {
     a.map(b => if (b.isDefined) Xor.Right(b.get) else Xor.Left(NotFound)).recover(defaultErrHandler)
   }
   private val defaultErrHandler = PartialFunction[Throwable, Xor.Left[DataAccessErr]] {
-    case ex: SlickException       => Xor.Left(SqlErr(Try(ex.getMessage).getOrElse("Err msg is null!"), ex.getCause))
-    case ex: BatchUpdateException => Xor.Left(SqlErr(ex.getNextException.getMessage, ex))
-    case ex                       => Xor.Left(InternalErr(ex))
+    case ex: PSQLException =>
+      ex.getSQLState match {
+        case "23505" => Xor.Left(SqlDuplicateKey(ex.getServerErrorMessage.getDetail))
+        case code    => Xor.Left(SqlErr(code, ex.getServerErrorMessage.getDetail))
+      }
+    case ex          => Xor.Left(InternalErr(ex))
   }
 
   private[dataaccess] implicit def executeFromDb[A](action: DBIOAction[A, NoStream, Nothing]): Future[A] = DB.run(action)
