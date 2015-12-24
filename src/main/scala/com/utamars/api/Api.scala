@@ -10,11 +10,10 @@ import com.github.nscala_time.time.Imports._
 import com.softwaremill.session.SessionDirectives._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
-import spray.json.DefaultJsonProtocol
 
 import scala.concurrent.{ExecutionContext, Await, Future}
 
-trait Api extends AnyRef with DefaultJsonProtocol with LazyLogging {
+trait Api extends AnyRef with LazyLogging {
 
   /** Limit this service to only the included roles */
   def defaultAuthzRoles: Seq[Role] = Nil
