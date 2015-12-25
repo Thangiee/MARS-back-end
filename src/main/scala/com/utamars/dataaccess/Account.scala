@@ -34,6 +34,8 @@ object Account {
   def add(accs: Account*): XorT[Future, DataAccessErr, Unit] =
     withErrHandling(DBIO.seq(DB.AccountTable ++= accs))
 
+  def deleteBy(username: String): XorT[Future, DataAccessErr, Unit] = findBy(username).flatMap(_.delete())
+
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
     withErrHandling(DBIO.seq(DB.AccountTable.filter(a => a.netId === a.netId).delete))
   }
@@ -49,5 +51,8 @@ object Account {
 
     def changePassword(newPass: String): XorT[Future, DataAccessErr, Unit] =
       acc.copy(passwd = newPass).update()
+
+    def delete(): XorT[Future, DataAccessErr, Unit] =
+      withErrHandling(DBIO.seq(DB.AccountTable.filter(_.username === acc.username).delete))
   }
 }

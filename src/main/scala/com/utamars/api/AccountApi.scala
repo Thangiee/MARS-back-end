@@ -31,6 +31,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (username, _) =>
       Account.findBy(username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint)
     } ~
+    (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
+      Account.deleteBy(username).responseWith(OK)
+    } ~
     ((post|put) & path("account"/"change-password") & authnAndAuthz()) { acc =>
       formField('newpassword) { newPass =>
         acc.changePassword(newPass.bcrypt).responseWith(OK)
