@@ -1,7 +1,9 @@
 package com.utamars.dataaccess
 
 import cats.data.XorT
+import cats.implicits._
 import com.utamars.dataaccess.DB.driver.api._
+import com.utamars.forms.UpdateInstructorForm
 
 import scala.concurrent.Future
 
@@ -16,7 +18,20 @@ object Instructor {
     withErrHandling(DBIO.seq(DB.InstructorTable.filter(i => i.netId === i.netId).delete))
   }
 
+  def update(netId: String, form: UpdateInstructorForm): XorT[Future, DataAccessErr, Unit] = {
+    findBy(netId).flatMap { inst =>
+      inst.copy(
+        email = form.email.getOrElse(inst.email),
+        lastName = form.lastName.getOrElse(inst.lastName),
+        firstName = form.firstName.getOrElse(inst.firstName)
+      ).update()
+    }
+  }
+
   implicit class PostfixOps(instructor: Instructor) {
     def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.InstructorTable += instructor))
+
+    def update(): XorT[Future, DataAccessErr, Unit] =
+      withErrHandling(DBIO.seq(DB.InstructorTable.filter(_.netId === instructor.netId).update(instructor)))
   }
 }

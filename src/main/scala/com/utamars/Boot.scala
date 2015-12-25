@@ -46,6 +46,7 @@ object Boot extends App with LazyLogging {
   if (config.getBoolean("db.create")) DB.createSchema()
 
   val services =
+    AccountApi() ::
     SessionApi() ::
     RegisterUUIDApi() ::
     ClockInOutApi()   ::
