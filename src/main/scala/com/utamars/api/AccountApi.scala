@@ -14,13 +14,13 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
   override val route =
-    ((post|put) & path("account"/"assistant")) {
+    (post & path("account"/"assistant")) {
       formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job,
         'dept, 'first, 'last, 'empid, 'title, 'titlecode).as(CreateAssistantForm) { form =>
         Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
       }
     } ~
-    ((post|put) & path("account"/"instructor")) {
+    (post & path("account"/"instructor")) {
       formFields('netid, 'user, 'pass, 'email, 'first, 'last).as(CreateInstructorAccForm) { form =>
         Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
       }

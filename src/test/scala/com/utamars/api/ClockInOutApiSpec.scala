@@ -36,21 +36,21 @@ class ClockInOutApiSpec extends ServiceSpec {
 
     "response with 200 on a successful clock in" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
 
     "response with 200 on a successful clock out" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
-      request(Post("/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
 
     "save a clock in record into the database after clocking in" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
           case Xor.Right(record) =>
             record.netId shouldEqual asstBob.netId
@@ -63,8 +63,8 @@ class ClockInOutApiSpec extends ServiceSpec {
 
     "save a clock out record into the database after clocking out" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
-        request(Post("/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+        request(Post("/records/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
           Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
             case Xor.Right(record) =>
               record.netId shouldEqual asstBob.netId
@@ -79,14 +79,14 @@ class ClockInOutApiSpec extends ServiceSpec {
     "response with 409 if an assistant try to clock in but is already clocked in" in {
       scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
 
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
-        request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+        request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
           status shouldEqual StatusCodes.Conflict
         }
 
         // now clock out then in
-        request(Post("/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
-          request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+        request(Post("/records/clock-out", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+          request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
             status shouldEqual StatusCodes.OK
           }
         }
@@ -95,18 +95,18 @@ class ClockInOutApiSpec extends ServiceSpec {
 
     "response with 410 if either the UUID was not registered or it has been expired" in {
       // NOTE: did not simulate registering the uuid
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.Gone
       }
 
       scalacache.sync.cachingWithTTL(uuid)(500.millis)("")  // simulate registering the uuid
       Thread.sleep(100)
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.OK
       }
 
       Thread.sleep(501) // wait for uuid to expirer
-      request(Post("/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
+      request(Post("/records/clock-in", FormData("uuid" -> uuid, "computerid" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.Gone
       }
     }

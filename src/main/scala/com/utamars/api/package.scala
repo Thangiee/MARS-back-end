@@ -47,11 +47,10 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
     }
   }
 
-  implicit val accJsonFormat = jsonFormat5(Account.apply)
-
-  implicit val asstJsonFormat = jsonFormat10(Assistant.apply)
-
-  implicit val instJsonFormat = jsonFormat4(Instructor.apply)
+  implicit val accJsonFormat    = jsonFormat5(Account.apply)
+  implicit val asstJsonFormat   = jsonFormat10(Assistant.apply)
+  implicit val instJsonFormat   = jsonFormat4(Instructor.apply)
+  implicit val recordJsonFormat = jsonFormat6(ClockInOutRecord.apply)
 
   implicit class XorFuture2Route[A](future: XorT[Future, DataAccessErr, A]) {
     def responseWith(onSucc: A => ToResponseMarshallable, onErr: DataAccessErr => ToResponseMarshallable = (err) => err.toHttpResponse): Route =
