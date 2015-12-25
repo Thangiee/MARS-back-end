@@ -13,6 +13,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
 import spray.json.DefaultJsonProtocol
+import com.github.t3hnar.bcrypt._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -30,7 +31,11 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
   def initDataBase(): Unit = DB.createSchema()
 
   def initDataBaseData(): Unit = {
-    Account.add(adminAcc, instAliceAcc, asstBobAcc)
+    Account.add(
+      adminAcc.copy(passwd = adminAcc.passwd.bcrypt),
+      instAliceAcc.copy(passwd = instAliceAcc.passwd.bcrypt),
+      asstBobAcc.copy(passwd = asstBobAcc.passwd.bcrypt)
+    )
     instAlice.create()
     asstBob.create()
 

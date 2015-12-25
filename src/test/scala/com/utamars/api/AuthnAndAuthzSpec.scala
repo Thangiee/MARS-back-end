@@ -43,7 +43,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
       }
     }
 
-    "response with 401 on invalid username and/or password" in {
+    "response with 403 on invalid username and/or password" in {
       val userAndPass = Seq(
         ("bad_username", "bad_passwd"),
         (adminAcc.username, "bad_passwd"),
@@ -51,7 +51,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
 
       userAndPass.foreach { case (user, passwd) =>
         request(user, passwd) ~> check {
-          status shouldEqual StatusCodes.Unauthorized
+          status shouldEqual StatusCodes.Forbidden
         }
       }
     }

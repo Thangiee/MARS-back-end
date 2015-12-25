@@ -5,10 +5,10 @@ import akka.http.scaladsl.server.Directives._
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAssistantForm, UpdateInstructorForm}
 import spray.json._
+import com.github.t3hnar.bcrypt._
 
 import scala.concurrent.ExecutionContext
 
-//todo: encrypt password
 case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
@@ -18,12 +18,12 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       (post & path("create"/"assistant")) {
         formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job,
           'dept, 'first, 'last, 'empid, 'title, 'titlecode).as(CreateAssistantForm) { form =>
-          Account.createFromForm(form).responseWith(OK)
+          Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
         }
       } ~
       (post & path("create"/"instructor")) {
         formFields('netid, 'user, 'pass, 'email, 'first, 'last).as(CreateInstructorAccForm) { form =>
-          Account.createFromForm(form).responseWith(OK)
+          Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
         }
       } ~
       (get & path("info") & authnAndAuthz()) { (acc) =>
@@ -34,12 +34,12 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       } ~
       (post & path("change-password") & authnAndAuthz()) { acc =>
         formField('newpassword) { newPass =>
-          acc.changePassword(newPass).responseWith(OK)
+          acc.changePassword(newPass.bcrypt).responseWith(OK)
         }
       } ~
       (post & path("change-password"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
         formField('newpassword) { newPass =>
-          Account.changePassword(username, newPass).responseWith(OK)
+          Account.changePassword(username, newPass.bcrypt).responseWith(OK)
         }
       }
     } ~

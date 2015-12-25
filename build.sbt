@@ -9,6 +9,7 @@ scalacOptions += "-Xexperimental"
 libraryDependencies ++= {
   val akkaStreamV = "2.0"
   Seq(
+    "com.github.t3hnar" % "scala-bcrypt_2.11"                     % "2.5",
     "de.jollyday"       % "jollyday"                              % "0.4.9",
     "net.objectlab.kit" % "datecalc-common"                       % "1.4.0",
     "net.objectlab.kit" % "datecalc-joda"                         % "1.4.0",
