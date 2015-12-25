@@ -74,7 +74,7 @@ class SessionApiSpec extends ServiceSpec {
       loginRequest ~> check {
         status shouldEqual StatusCodes.OK
 
-        Get("/session/logout") ~> addHeader(setSessionHeader()) ~> addHeader(setRefreshTokenHeader()) ~>
+        Post("/session/logout") ~> addHeader(setSessionHeader()) ~> addHeader(setRefreshTokenHeader()) ~>
           sessionService.route ~> check {
           Get("/resources") ~>
             Route.seal(protectedService.route) ~> check {
