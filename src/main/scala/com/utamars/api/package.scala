@@ -2,14 +2,20 @@ package com.utamars
 
 import java.sql.Timestamp
 
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import cats.data.{Xor, XorT}
 import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
 import spray.json._
 
+import scala.concurrent.Future
 import scala.language.implicitConversions
+import scala.util.{Failure, Success}
 
 package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with LazyLogging {
 
@@ -47,13 +53,28 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
 
   implicit val instJsonFormat = jsonFormat4(Instructor.apply)
 
+  implicit class XorFuture2Route[A](future: XorT[Future, DataAccessErr, A]) {
+    def responseWith(onSucc: A => ToResponseMarshallable, onErr: DataAccessErr => ToResponseMarshallable = (err) => err.toHttpResponse): Route =
+      onComplete(future.value) {
+        case Success(Xor.Right(a))  => complete(onSucc(a))
+        case Success(Xor.Left(err)) => complete(onErr(err))
+        case Failure(ex) => logger.error(ex.getMessage, ex); complete(HttpResponse(StatusCodes.InternalServerError))
+      }
+
+    def responseWith(code: StatusCode): Route = onComplete(future.value) {
+      case Success(Xor.Right(a))  => complete(HttpResponse(code))
+      case Success(Xor.Left(err)) => complete(err.toHttpResponse)
+      case Failure(ex) => logger.error(ex.getMessage, ex); complete(HttpResponse(StatusCodes.InternalServerError))
+    }
+  }
+
   implicit class DataAccessErr2HttpResponse(err: DataAccessErr) {
     def toHttpResponse: HttpResponse = err match {
       case NotFound             => HttpResponse(StatusCodes.NotFound)
       case SqlDuplicateKey(msg) => HttpResponse(StatusCodes.Conflict, entity = msg)
       case SqlErr(code, msg) =>
         logger.error(s"SQL error code: $code | $msg")
-        HttpResponse(StatusCodes.InsufficientStorage)
+        HttpResponse(StatusCodes.InternalServerError)
       case InternalErr(error)  =>
         logger.error(error.getMessage)
         error.printStackTrace()

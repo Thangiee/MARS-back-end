@@ -82,6 +82,9 @@ class TimeSheetGenApiSpec extends ServiceSpec {
       bobRequest(Get("/time-sheet/first-half-month?year=2015&month=13")) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
+      aliceRequest(Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=0")) ~> check {
+        status shouldEqual StatusCodes.BadRequest
+      }
     }
   }
 }

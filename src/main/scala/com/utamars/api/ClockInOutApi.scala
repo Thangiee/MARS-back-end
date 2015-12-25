@@ -20,52 +20,40 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
   override val route: Route = post {
     logRequestResult("Clocking In") {
       (post & path("clock-in") & formFields('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
-        complete {
-          scalacache.get(uuid).map {
-            case Some(_) => // successful found the registered UUID
-              processClockInRequest(compId, account)
-            case None    => // did not find the UUID, either it was not registered or it has been expired
-              HttpResponse(Gone)
-          }
+        if (scalacache.sync.get(uuid).isDefined) {
+          processClockInRequest(compId, account) // successful found the registered UUID
+        } else {
+          complete(HttpResponse(Gone)) // did not find the UUID, either it was not registered or it has been expired
         }
       }
     } ~
     logRequestResult("Clock Out") {
       (path("clock-out") & formField('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
-        complete {
-          scalacache.get(uuid).map {
-            case Some(_) =>
-              processClockOutRequest(compId, account)
-            case None    =>
-              HttpResponse(Gone)
-          }
+        if (scalacache.sync.get(uuid).isDefined) {
+          ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
+        } else {
+          complete(HttpResponse(Gone))
         }
       }
     }
   }
 
-  private def processClockInRequest(compId: String, account: Account) = {
-    def createClockInRecord() =
+  private def processClockInRequest(compId: String, account: Account): Route = {
+    def createClockInRecord(): HttpResponse =
       Await.result(ClockInOutRecord(None, account.netId, inComputerId = Some(compId)).create()
-        .fold(err => err.toHttpResponse, _ => HttpResponse(OK)), 1.minute)
+        .fold(err => err.toHttpResponse, succ => HttpResponse(OK)), 1.minute)
 
-    val result = ClockInOutRecord.findMostRecent(account.netId).map { record =>
-      // check for clock out of previous record before creating a new record
-      if   (record.outTime.isDefined) createClockInRecord()
-      else HttpResponse(Conflict, entity = "Please clock out first then try again.")
-    } leftMap {
-      // no previous record
-      case NotFound => createClockInRecord()
-      case otherErr => otherErr.toHttpResponse
-    }
-
-    Await.result(result.merge, 1.minute)
-  }
-
-  private def processClockOutRequest(compId: String, account: Account) = {
-    val result = ClockInOutRecord.clockOutAll(account.netId, compId)
-      .fold(err => err.toHttpResponse, _ => HttpResponse(OK))
-
-    Await.result(result, 1.minute)
+    ClockInOutRecord.findMostRecent(account.netId).responseWith(
+      record => {
+        // check for clock out of previous record before creating a new record
+        if (record.outTime.isDefined) createClockInRecord()
+        else HttpResponse(Conflict, entity = "Please clock out first then try again.")
+      },
+      onErr => onErr match {
+        // no previous record
+        case NotFound => createClockInRecord()
+        case otherErr => otherErr.toHttpResponse
+      }
+    )
   }
 }
