@@ -1,3 +1,4 @@
+[test](#update-instructor)
 
 API Endpoints
 =============
@@ -8,6 +9,16 @@ API Endpoints
 |:--------:|----------------------|-------------------------------|
 | GET      | /account             | Admin, Instructor, Assistant  |
 | GET      | /account/{*username*}| Admin, Instructor             |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | [Account](#account)                   |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found            |
+|        500       | [Internal Error](#500-internal-error) |
 
 ---
 
@@ -195,3 +206,118 @@ Parameters
 Data Models
 ===========
 
+#### Account 
+
+| Key           | Type   | Description                                             |
+|:-------------:|--------|---------------------------------------------------------|
+| netID         | String | The UT Arlington netID                                  |
+| role          | String | The account role (admin, instructor, or assistant)      |
+| username      | String | The account username                                    |
+| createTime    | Long   | When the account was created, epoch time in milliseconds|
+| passwd        | string | This field will always be an empty string               |
+
+
+```json
+// example json response
+{
+    "netId": "tql7155",
+    "role": "assistant",
+    "username": "thangiee",
+    "createTime": 1451077341962,
+    "passwd": ""
+}
+```
+
+#### Assistant
+
+| Key        | Type   | Description               |
+|------------|--------|---------------------------|
+| rate       | Double | Dollar per hour           |
+| netId      | String | The UT Arlington netID    |
+| email      | String | The assistant email       |
+| job        | String | The assistant job         |
+| department | String | The assistant department  |
+| firstName  | String | The assistant first name  |
+| lastName   | String | The assistant last name   |
+| employeeId | String | The assistant employee ID |
+| title      | String | The assistant title       |
+| titleCode  | String | The assistant titlecode   |
+
+```json
+// example json response
+{
+  "rate": 10.50,
+  "netId": "tql7155",
+  "email": "abc@gmail.com",
+  "job": "grading",
+  "department": "CSE",
+  "lastName": "Smith",
+  "firstName": "Bob",
+  "employeeId": "123456789",
+  "title": "some title",
+  "titleCode": "some title code"
+}
+```
+
+#### Instructor
+
+| Key        | Type   | Description               |
+|------------|--------|---------------------------|
+| netId      | String | The UT Arlington netID    |
+| email      | String | The assistant email       |
+| firstName  | String | The assistant first name  |
+| lastName   | String | The assistant last name   |
+
+```json
+// example json response
+{
+  "netId": "abc123",
+  "email": "aaa@gmail.com",
+  "lastName": "Ewing",
+  "firstName": "David"
+}
+```
+
+#### ClockInOutRecord
+
+| Key           | Type   | Description                                                                                  |
+|---------------|--------|----------------------------------------------------------------------------------------------|
+| inTime        | Long   | Clock in time, epoch time in milliseconds.                                                   |
+| inComputerId  | String | The computer id used to register the UUID and generate the QR code, or null if not avaliable |
+| netId         | String | The UT Arlington netID                                                                       |
+| id            | Int    | Id for the record                                                                            |
+| outTime       | Long   | Clock in time, epoch time in milliseconds, or null if this record has not been clock out.    |
+| outComputerId | String | The computer id used to register the UUID and generate the QR code, or null if not avaliable |
+
+```json
+// example json response
+{
+  "inTime": 1441385100000,
+  "inComputerId": "ERB 103",
+  "netId": "tql7155",
+  "id": 3,
+  "outTime": 1441390500000,
+  "outComputerId": null
+}
+```
+
+Common HTTP Error Codes
+-----------------------
+
+#### 400 Bad Request
+
+The request contains bad syntax such as invalid parameter or form-data.
+
+#### 403 Forbidden
+
+You don't have access to this resource because:
+  * the account is not properly authenticated so check the username and password.
+  * the account role is not authorized. 
+
+#### 404 Not Found
+
+The requested resource that does not exist.
+
+#### 500 Internal Error
+
+Something when wrong on the server side.
