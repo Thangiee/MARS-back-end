@@ -28,7 +28,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("account") & authnAndAuthz()) { (acc) =>
       Account.findBy(acc.username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint) // hide password
     } ~
-    (get & path("account"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (username, _) =>
+    (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
       Account.findBy(username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint)
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
