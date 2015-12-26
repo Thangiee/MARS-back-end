@@ -1,13 +1,69 @@
+MARS-back-end
+=============
+The Mavs Assistant Reporting System (MARS) back-end server provides services that other 
+systems can consume through its RESTful API.
+
+Authentication
+--------------
+Most of the API endpoints require you to be authenticated. You can do that in one of two ways:
+
+  * Using HTTP Basic Authentication: 
+        
+    Include the username and password in the URL on every API calls that require authentication.
+    `http://username:password@example.com/resource`
+  
+  * Get a Session (preferably):
+    
+    Use the above method to [log into a session](#session-login), afterwards you will not need to 
+    include your credentials for future API calls.
+
 
 API Endpoints
-=============
+-------------
+
+*This API is still under development and is subject to changes.*
+
+To use the APIs, you will need to form the full URL by combining the base URL with the targeted API's route.
+The current base URL is `http://52.33.35.165:8080/api`.
+
+Examples:
+  * Get the current account info: `http://52.33.35.165:8080/api/account`
+  * Get clock in/out records of a specific assistant: `http://52.33.35.165:8080/api/records/tql7155`
+
+--
+
+All Endpoints
+  
+* [Account Info](#account-info)
+* [Assistant Info](#assistant-info)
+* [Assistant Account Creation](#assistant-account-creation)
+* [Update Assistant](#update-assistant)
+* [Instructor Info](#instructor-info)
+* [Instructor Account Creation](#instructor-account-creation)
+* [Update Instructor](#update-instructor)
+* [Change Account Password](#change-account-password)
+* [Account Deletion](#account-deletion)
+* [Clock In](#clock-in)
+* [Clock Out](#clock-out)
+* [Clock In/Out Record Info](#clock-inout-record-info)
+* [Update Clock In/Out Record](#update-clock-inout-record)
+* [Facial Recognition (WIP)](#facial-recognition-wip)
+* [Register UUID](##register-uuid)
+* [Session Login](#session-login)
+* [Session Logout](#session-logout)
+* [1st Half-month Time-sheet](#1st-half-month-time-sheet)
+* [2nd Half-month Time-Sheet](#2nd-half-month-time-sheet)
+
+--
 
 #### Account Info
+
+Get info of the current account or specify {*username*} to get info about a specific account.
 
 | Method   | Route                | Authorized                    |
 |:--------:|----------------------|-------------------------------|
 | GET      | /account             | Admin, Instructor, Assistant  |
-| GET      | /account/{*username*}| Admin, Instructor             |
+| GET      | /account/{*username*}| Admin                         |
 
 Returning
 
@@ -22,6 +78,8 @@ Returning
 ---
 
 ### Assistant Info
+
+Get info of the current assistant or specify {*netid*} to get info about a specific assistant.
 
 | Method   | Route                  | Authorized                    |
 |:--------:|------------------------|-------------------------------|
@@ -41,6 +99,8 @@ Returning
 ---
 
 #### Assistant Account Creation
+
+Create an assistant and setup an account for that assistant.
 
 | Method   | Route              | 
 |:--------:|--------------------| 
@@ -77,6 +137,8 @@ Returning
 
 #### Update Assistant
 
+Update an assistant info.
+
 | Method      | Route              | Authorized                    |
 |:-----------:|--------------------|-------------------------------|
 | POST or PUT | /assistant         | Assistant                     |
@@ -103,6 +165,8 @@ Returning
 
 ### Instructor Info
 
+Get info of the current instructor or specify {*netid*} to get info about a specific instructor.
+
 | Method   | Route                   | Authorized                    |
 |:--------:|-------------------------|-------------------------------|
 | GET      | /instructor             | Instructor                    |
@@ -121,6 +185,8 @@ Returning
 ---
 
 #### Instructor Account Creation
+
+Create an instructor and setup an account for that instructor.
 
 | Method   | Route               | 
 |:--------:|---------------------| 
@@ -151,6 +217,8 @@ Returning
 
 #### Update Instructor
 
+Update an instructor info.
+
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
 | POST or PUT | /instructor         | Instructor                    |
@@ -175,6 +243,8 @@ Returning
 ---
 
 #### Change Account Password
+
+Change the password of the current account or specify {*username*} to do it for a specific account.
 
 | Method      | Route                                 | Authorized                    |
 |:-----------:|---------------------------------------|-------------------------------|
@@ -201,6 +271,8 @@ Returning
 
 #### Account Deletion
 
+Delete a specific account. This action will cascade and **DELETE ALL** other data relating to the account.
+
 | Method      | Route                 | Authorized                    |
 |:-----------:|-----------------------|-------------------------------|
 | DELETE      | /account/{*username*} | Admin                         |
@@ -218,6 +290,8 @@ Returning
 ---
 
 #### Clock In
+
+Assistant clock in. You must be clock out before trying to clock in, otherwise, an error code will return.
 
 | Method      | Route              | Authorized                    |
 |:-----------:|--------------------|-------------------------------|
@@ -245,6 +319,8 @@ Returning
 
 #### Clock Out
 
+Assistant clock out. You must be clock in before trying to clock out, otherwise, an error code will return.
+
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
 | POST        | /records/clock-out  | Assistant                     |
@@ -271,6 +347,8 @@ Returning
 
 #### Clock In/Out Record Info
 
+Get all clock in/out records for the current assistant or specify {*netid*} to get it for a specific assistant.
+
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
 | GET         | /records             | Assistant                     |
@@ -280,7 +358,7 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | Return [ClockInOutRecord](#clockInOutRecord) |
+|        200       | Return [ClockInOutRecord](#clockinoutrecord) |
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
@@ -289,6 +367,8 @@ Returning
 ---
 
 #### Update Clock In/Out Record
+
+Update a specific record. 
 
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
@@ -321,6 +401,8 @@ Returning
 
 #### Register UUID
 
+Register a short lived uuid. (use in the clock in/out process)
+
 | Method      | Route              | 
 |:-----------:|--------------------|
 | POST        | /register-uuid     |
@@ -335,7 +417,7 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | Return [UUID metadata](#uUID-metadata)|
+|        200       | Return [UUID metadata](#uuid-metadata)|
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -343,6 +425,9 @@ Returning
 ---
 
 #### Session Login
+
+Start a session. The server will generate a cookie and give it to the client for identifying the session. 
+Most web browser will automatically set the cookie for you.
 
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
@@ -361,6 +446,8 @@ Returning
 
 #### Session Logout
 
+End a session.
+
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
 | POST or PUT | /session/logout      | Admin, Instructor, Assistant  |
@@ -377,6 +464,14 @@ Returning
 ---
 
 #### 1st Half-month Time-sheet
+
+Generate and email a time-sheet for the first half month(1-15) of a specific {*year*} and {*month*} for  
+the current assistant or specify {*netid*} for a specific assistant. E-mail many take up to a few minutes
+to arrive.
+
+Example: 
+
+Time-sheet for pay period 9/1/2015 - 9/15/2015  `/time-sheet/first-half-month?year=2015&month=9`	
 
 | Method      | Route                                                                 | Authorized |
 |:-----------:|-----------------------------------------------------------------------|------------|
@@ -404,6 +499,14 @@ Returning
 
 #### 2nd Half-month Time-Sheet
 
+Generate and email a time-sheet for the second half month(16 to last day of the month) of a 
+specific {*year*} and {*month*} for the current assistant or specify {*netid*} for a specific assistant. 
+E-mail many take up to a few minutes to arrive.
+
+Example: 
+
+Time-sheet for pay period 9/16/2015 - 9/30/2015  `/time-sheet/second-half-month?year=2015&month=9`	
+
 | Method      | Route                                    | Authorized |
 |:-----------:|------------------------------------------|------------|
 | GET         | /time-sheet/second-half-month            | Assistant  |
@@ -429,7 +532,8 @@ Returning
 ---
 
 Data Models
-===========
+-----------
+Data encoded in JSON that some APIs will return on an HTTP 200.
 
 #### Account 
 
