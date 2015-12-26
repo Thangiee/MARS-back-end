@@ -48,7 +48,7 @@ All Endpoints
 * [Clock In/Out Record Info](#clock-inout-record-info)
 * [Update Clock In/Out Record](#update-clock-inout-record)
 * [Facial Recognition (WIP)](#facial-recognition-wip)
-* [Register UUID](##register-uuid)
+* [Register UUID](#register-uuid)
 * [Session Login](#session-login)
 * [Session Logout](#session-logout)
 * [1st Half-month Time-sheet](#1st-half-month-time-sheet)
