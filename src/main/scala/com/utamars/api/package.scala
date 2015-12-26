@@ -17,7 +17,7 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
-package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with LazyLogging {
+package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with NullOptions with LazyLogging {
 
   type Username = String
   type ErrMsg = String
