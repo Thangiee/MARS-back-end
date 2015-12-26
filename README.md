@@ -1,4 +1,3 @@
-[test](#update-instructor)
 
 API Endpoints
 =============
@@ -17,7 +16,7 @@ Returning
 |        200       | [Account](#account)                   |
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
-|        404       | [Not Found](#404-not-found            |
+|        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
@@ -45,6 +44,16 @@ Parameters
 | title     | String | yes      | The assistant title       |
 | titlecode | String | yes      | The assistant titlecode   |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Assistant account created             |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        409       | Conflict. Net Id or username already exists |
+|        500       | [Internal Error](#500-internal-error) |
+
 ---
 
 #### Update Assistant
@@ -62,6 +71,17 @@ Parameters
 | title     | String | optional | The assistant title       |
 | titlecode | String | optional | The assistant titlecode   |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Assistant updated                     |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Instructor Account Creation
 
 | Method   | Route               | 
@@ -78,6 +98,18 @@ Parameter
 | email     | String | yes      | The instructor email      |
 | first     | String | yes      | The instructor first name |
 | last      | String | yes      | The instructor last name  |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Instructor account created                       |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        409       | Conflict. Net Id or username already exists |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 #### Update Instructor
 
@@ -214,7 +246,7 @@ Data Models
 | role          | String | The account role (admin, instructor, or assistant)      |
 | username      | String | The account username                                    |
 | createTime    | Long   | When the account was created, epoch time in milliseconds|
-| passwd        | string | This field will always be an empty string               |
+| passwd        | String | This field will always be an empty string               |
 
 
 ```json
