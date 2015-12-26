@@ -49,4 +49,4 @@ fork in run := true
 
 // deployment settings; run "sbt dist"
 enablePlugins(JavaServerAppPackaging)
-mainClass in Compile := Some("com.utamars.api.Boot")
+mainClass in Compile := Some("com.utamars.Boot")

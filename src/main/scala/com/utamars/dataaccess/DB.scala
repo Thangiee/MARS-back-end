@@ -12,7 +12,8 @@ import scala.util.Try
 
 object DB extends AnyRef with Tables {
   private val config = ConfigFactory.load()
-  implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(config.getInt("db.parallelism")))
+  private val parallelism: Int = config.getInt("db.parallelism")
+  implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(parallelism))
 
   val driver = config.getString("db.driver") match {
     case "org.postgresql.Driver" => slick.driver.PostgresDriver
