@@ -13,7 +13,26 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | [Account](#account)                   |
+|        200       | Return [account](#account)            |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+### Assistant Info
+
+| Method   | Route                  | Authorized                    |
+|:--------:|------------------------|-------------------------------|
+| GET      | /assistant             | Assistant                     |
+| GET      | /assistant/{*netid*}   | Admin, Instructor             |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [Assistant](#assistant)        |
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
@@ -82,6 +101,25 @@ Returning
 
 ---
 
+### Instructor Info
+
+| Method   | Route                   | Authorized                    |
+|:--------:|-------------------------|-------------------------------|
+| GET      | /instructor             | Instructor                    |
+| GET      | /instructor/{*netid*}   | Admin                         |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [Instructor](#instructor)      |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Instructor Account Creation
 
 | Method   | Route               | 
@@ -103,7 +141,7 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | Instructor account created                       |
+|        200       | Instructor account created            |
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Net Id or username already exists |
@@ -125,6 +163,17 @@ Parameters
 | firstname | String | optional | The assistant first name  |
 | lastname  | String | optional | The assistant last name   |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Instructor updated                    |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Change Account Password
 
 | Method      | Route                                 | Authorized                    |
@@ -138,11 +187,35 @@ Parameters
 |-------------|--------|----------|---------------------------|
 | newpassword | String | yes      | The account new password  |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Account password changed              |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Account Deletion
 
 | Method      | Route                 | Authorized                    |
 |:-----------:|-----------------------|-------------------------------|
 | DELETE      | /account/{*username*} | Admin                         |
+
+Returning 
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Account deleted                       |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 #### Clock In
 
@@ -157,6 +230,19 @@ Parameters
 | uuid        | String | yes      | The registered UUID                    |
 | computerid  | String | optional | The computer id used register the UUID |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Clock in success                      |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        409       | Conflict. Assistant is already clocked in |
+|        410       | Gone. Either the UUID was not registered or it has been expired |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Clock Out
 
 | Method      | Route               | Authorized                    |
@@ -170,12 +256,37 @@ Parameters
 | uuid        | String | yes      | The registered UUID                       |
 | computerid  | String | optional | The computer id used to register the UUID |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Clock out success                     |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        409       | Conflict. Assistant is already clocked out |
+|        410       | Gone. Either the UUID was not registered or it has been expired |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Clock In/Out Record Info
 
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
 | GET         | /records             | Assistant                     |
 | GET         | /records/{*netid*}   | Instructor                    |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [ClockInOutRecord](#clockInOutRecord) |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 #### Update Clock In/Out Record
 
@@ -192,9 +303,21 @@ Parameters
 | incompid  | string | optional | The computer id used to register the UUID  | 
 | outcompid | string | optional | The computer id used to register the UUID  | 
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Record updated                        |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Facial Recognition (WIP)
 
-
+---
 
 #### Register UUID
 
@@ -208,11 +331,33 @@ Parameters
 |-------------|--------|----------|-------------------------------------------|
 | uuid        | String | yes      | A valid UUID                              |
 
+Returning 
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [UUID metadata](#uUID-metadata)|
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### Session Login
 
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
 | POST or PUT | /session/login      | Admin, Instructor, Assistant  |
+
+Returning 
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Successfully login to a session       |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 #### Session Logout
 
@@ -220,12 +365,42 @@ Parameters
 |:-----------:|----------------------|-------------------------------|
 | POST or PUT | /session/logout      | Admin, Instructor, Assistant  |
 
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Successfully log out of a session     |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
 #### 1st Half-month Time-sheet
 
-| Method      | Route                                   | Authorized |
-|:-----------:|-----------------------------------------|------------|
-| GET         | /time-sheet/first-half-month            | Assistant  |
-| GET         | /time-sheet/{*netid*}/first-half-month  | Instructor |
+| Method      | Route                                                                 | Authorized |
+|:-----------:|-----------------------------------------------------------------------|------------|
+| GET         | /time-sheet/first-half-month?year={*year*}&month={*month*}            | Assistant  |
+| GET         | /time-sheet/{*netid*}/first-half-month?year={*year*}&month={*month*}  | Instructor |
+
+Parameters
+
+| Key         | Type   | Required | Description                               |
+|-------------|--------|----------|-------------------------------------------|
+| year        | Int    | yes      | The year                                  |
+| month       | Int    | yes      | The month [1..12]                         |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Successfully generated and emailed the time-sheet |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 #### 2nd Half-month Time-Sheet
 
@@ -234,6 +409,24 @@ Parameters
 | GET         | /time-sheet/second-half-month            | Assistant  |
 | GET         | /time-sheet/{*netid*}/second-half-month  | Instructor |
 
+Parameters
+
+| Key         | Type   | Required | Description                               |
+|-------------|--------|----------|-------------------------------------------|
+| year        | Int    | yes      | The year                                  |
+| month       | Int    | yes      | The month [1..12]                         |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Successfully generated and emailed the time-sheet |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
 
 Data Models
 ===========
@@ -333,12 +526,27 @@ Data Models
 }
 ```
 
+#### UUID metadata
+
+| Key           | Type   | Description                                                                                  |
+|---------------|--------|----------------------------------------------------------------------------------------------|
+| ttl           | Long   | Time To Live. Milliseconds until the UUID expire                                             |
+| expireTime    | Long   | The epoch time in milliseconds in which the UUID expire                                      |
+
+```json
+// example json response
+{
+  "ttl": 30000,
+  "expireTime": 1451153243447
+}
+```
+
 Common HTTP Error Codes
 -----------------------
 
 #### 400 Bad Request
 
-The request contains bad syntax such as invalid parameter or form-data.
+The request contains bad syntax or invalid parameters/form-data.
 
 #### 403 Forbidden
 
