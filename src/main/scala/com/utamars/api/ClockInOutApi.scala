@@ -21,7 +21,7 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
 
   override val route: Route =
     logRequestResult("Clocking In") {
-      (post & path("records"/"clock-in") & formFields('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
+      (post & path("records"/"clock-in") & formFields('uuid, 'computerid.?) & authnAndAuthz()) { (uuid, compId, account) =>
         scalacache.sync.get(uuid) match {
           case Some(_) => processClockInRequest(compId, account) // successful found the registered UUID
           case None    => complete(HttpResponse(Gone)) // did not find the UUID, either it was not registered or it has been expired
@@ -29,7 +29,7 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
       }
     } ~
     logRequestResult("Clock Out") {
-      (post & path("records"/"clock-out") & formField('uuid, 'computerid) & authnAndAuthz()) { (uuid, compId, account) =>
+      (post & path("records"/"clock-out") & formField('uuid, 'computerid.?) & authnAndAuthz()) { (uuid, compId, account) =>
         scalacache.sync.get(uuid) match {
           case Some(_) => ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
           case None    => complete(HttpResponse(Gone))
@@ -48,9 +48,9 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
       }
     }
 
-  private def processClockInRequest(compId: String, account: Account): Route = {
+  private def processClockInRequest(compId: Option[String], account: Account): Route = {
     def createClockInRecord(): HttpResponse =
-      Await.result(ClockInOutRecord(None, account.netId, inComputerId = Some(compId)).create()
+      Await.result(ClockInOutRecord(None, account.netId, inComputerId = compId).create()
         .fold(err => err.toHttpResponse, succ => HttpResponse(OK)), 1.minute)
 
     ClockInOutRecord.findMostRecent(account.netId).responseWith(

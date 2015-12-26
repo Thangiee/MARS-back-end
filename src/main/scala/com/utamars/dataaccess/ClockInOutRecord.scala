@@ -34,12 +34,12 @@ object ClockInOutRecord {
   def findBetween(start: LocalDate, end: LocalDate, netId: String) =
     withErrHandling(DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result)
 
-  def clockOutAll(netId: String, computerId: String): XorT[Future, DataAccessErr, Unit] = withErrHandling {
+  def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] = withErrHandling {
     DBIO.seq(
       DB.ClockInOutRecordTable
         .filter(r => r.netId.toLowerCase === netId.toLowerCase && r.outTime.isEmpty)
         .map(r => (r.outTime, r.outComputerId))
-        .update((Some(DateTime.now()), Some(computerId)))
+        .update((Some(DateTime.now()), computerId))
     ).transactionally
   }
 
