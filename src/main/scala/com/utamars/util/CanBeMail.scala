@@ -1,6 +1,7 @@
 package com.utamars.util
 
 import java.io
+import javax.activation.{MailcapCommandMap, CommandMap}
 import javax.mail.internet.InternetAddress
 
 import better.files.File
@@ -33,6 +34,14 @@ object CanBeMail {
 import CanBeMail.ops._
 
 object EMailer extends AnyRef with LazyLogging {
+  // http://stackoverflow.com/a/25650033
+  private val mc = CommandMap.getDefaultCommandMap.asInstanceOf[MailcapCommandMap]
+  mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html")
+  mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml")
+  mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain")
+  mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed")
+  mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822")
+
   private val config = ConfigFactory.load()
   private val envelope = Envelope.from(new InternetAddress(config.getString("email.addr")))
   private val mailer = Mailer(config.getString("email.host"), config.getInt("email.port"))

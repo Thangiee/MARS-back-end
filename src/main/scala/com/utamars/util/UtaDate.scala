@@ -21,7 +21,7 @@ trait UtaDate {
   def payDate(endDate: LocalDate): LocalDate = nextBusinessDays(endDate, days=5)
 
   private def nextBusinessDays(localDate: LocalDate, days: Int): LocalDate = {
-    val m = HolidayManager.getInstance(ManagerParameters.create(new URL("file:src/main/resources/uta-holidays.xml")))
+    val m = HolidayManager.getInstance(ManagerParameters.create(getClass.getClassLoader.getResource("uta-holidays.xml")))
     val year = localDate.year().get()
     val holidays = m.getHolidays(year).map(_.getDate) ++ m.getHolidays(year+1).map(_.getDate)
     val holidayCalendar = new DefaultHolidayCalendar[LocalDate](holidays)

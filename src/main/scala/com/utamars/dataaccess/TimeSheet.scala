@@ -34,7 +34,7 @@ object TimeSheet {
 
     ClockInOutRecord.findBetween(start, end, asst.netId).map { records =>
 
-      val reader = new PdfReader("timesheet-template.pdf")
+      val reader = new PdfReader(getClass.getClassLoader.getResourceAsStream("timesheet-template.pdf"))
       if (!outDir.toFile.exists) outDir.toFile.createDirectories()
       val outFilepath = s"$outDir/timesheet_${asst.lastName}_${asst.firstName}_${printDt("MM-dd-YYYY", end)}.pdf"
       val stamper = new PdfStamper(reader, new FileOutputStream(outFilepath))
