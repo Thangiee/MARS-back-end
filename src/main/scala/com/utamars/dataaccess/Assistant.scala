@@ -13,11 +13,9 @@ case class Assistant(netId: String, rate: Double, email: String, job: String, de
 object Assistant {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
-    withErrHandlingOpt(DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption)
+    DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
-  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
-    withErrHandling(DBIO.seq(DB.AssistantTable.filter(a => a.netId === a.netId).delete))
-  }
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
 
   def update(netId: String, form: UpdateAssistantForm): XorT[Future, DataAccessErr, Unit] = {
     findBy(netId).flatMap { asst =>
@@ -31,9 +29,8 @@ object Assistant {
   }
 
   implicit class PostfixOps(asst: Assistant) {
-    def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.AssistantTable += asst))
+    def create(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable += asst
 
-    def update(): XorT[Future, DataAccessErr, Unit] =
-      withErrHandling(DBIO.seq(DB.AssistantTable.filter(_.netId === asst.netId).update(asst)))
+    def update(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(_.netId === asst.netId).update(asst)
   }
 }

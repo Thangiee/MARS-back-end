@@ -7,6 +7,8 @@ import cats.implicits._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateRecordForm
+import slick.dbio.Effect.Read
+import slick.profile.FixedSqlStreamingAction
 
 import scala.concurrent.Future
 
@@ -23,25 +25,24 @@ case class ClockInOutRecord(
 object ClockInOutRecord {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
-    withErrHandling(DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).result)
+    DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).result
 
   def findBy(id: Int): XorT[Future, DataAccessErr, ClockInOutRecord] =
-    withErrHandlingOpt(DB.ClockInOutRecordTable.filter(_.id === id).result.headOption)
+    DB.ClockInOutRecordTable.filter(_.id === id).result.headOption
 
   def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
-    withErrHandlingOpt(DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption)
+    DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption
 
   def findBetween(start: LocalDate, end: LocalDate, netId: String) =
-    withErrHandling(DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result)
+    DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result
 
-  def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] = withErrHandling {
+  def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] =
     DBIO.seq(
       DB.ClockInOutRecordTable
         .filter(r => r.netId.toLowerCase === netId.toLowerCase && r.outTime.isEmpty)
         .map(r => (r.outTime, r.outComputerId))
         .update((Some(DateTime.now()), computerId))
     ).transactionally
-  }
 
   def update(id: Int, form: UpdateRecordForm): XorT[Future, DataAccessErr, Unit] = {
     findBy(id).flatMap { record =>
@@ -54,15 +55,11 @@ object ClockInOutRecord {
     }
   }
 
-  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
-    withErrHandling(DBIO.seq(DB.ClockInOutRecordTable.filter(r => r.netId === r.netId).delete))
-  }
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(r => r.netId === r.netId).delete
 
   implicit class PostfixOps(record: ClockInOutRecord) {
-    def create(): XorT[Future, DataAccessErr, Int] = withErrHandling(DB.ClockInOutRecordTable += record)
+    def create(): XorT[Future, DataAccessErr, Int] = DB.ClockInOutRecordTable += record
 
-    def update(): XorT[Future, DataAccessErr, Unit] = {
-      withErrHandling(DBIO.seq(DB.ClockInOutRecordTable.filter(_.id === record.id).update(record)))
-    }
+    def update(): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(_.id === record.id).update(record)
   }
 }

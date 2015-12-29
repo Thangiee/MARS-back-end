@@ -12,11 +12,9 @@ case class Instructor(netId: String, email: String, lastName: String, firstName:
 object Instructor {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Instructor] =
-    withErrHandlingOpt(DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption)
+    DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
-  def deleteAll(): XorT[Future, DataAccessErr, Unit] = {
-    withErrHandling(DBIO.seq(DB.InstructorTable.filter(i => i.netId === i.netId).delete))
-  }
+  def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.InstructorTable.filter(i => i.netId === i.netId).delete
 
   def update(netId: String, form: UpdateInstructorForm): XorT[Future, DataAccessErr, Unit] = {
     findBy(netId).flatMap { inst =>
@@ -29,9 +27,9 @@ object Instructor {
   }
 
   implicit class PostfixOps(instructor: Instructor) {
-    def create(): XorT[Future, DataAccessErr, Unit] = withErrHandling(DBIO.seq(DB.InstructorTable += instructor))
+    def create(): XorT[Future, DataAccessErr, Unit] = DB.InstructorTable += instructor
 
     def update(): XorT[Future, DataAccessErr, Unit] =
-      withErrHandling(DBIO.seq(DB.InstructorTable.filter(_.netId === instructor.netId).update(instructor)))
+      DB.InstructorTable.filter(_.netId === instructor.netId).update(instructor)
   }
 }

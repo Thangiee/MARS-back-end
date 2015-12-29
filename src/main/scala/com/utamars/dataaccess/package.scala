@@ -3,7 +3,7 @@ package com.utamars
 import cats.data.{Xor, XorT}
 import com.utamars.util.TimeConversion
 import org.postgresql.util.PSQLException
-import slick.dbio.{DBIOAction, NoStream}
+import slick.dbio.{Effect, DBIOAction, NoStream}
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
@@ -31,13 +31,6 @@ package object dataaccess extends AnyRef with TimeConversion {
   case class SqlErr(code: String, msg: String) extends DataAccessErr
   case class InternalErr(err: Throwable) extends DataAccessErr
 
-  def withErrHandling[A](a: => Future[A]) = XorT[Future, DataAccessErr, A] {
-    a.map(b => Xor.Right(b)).recover(defaultErrHandler)
-  }
-
-  def withErrHandlingOpt[A](a: => Future[Option[A]]) = XorT[Future, DataAccessErr, A] {
-    a.map(b => if (b.isDefined) Xor.Right(b.get) else Xor.Left(NotFound)).recover(defaultErrHandler)
-  }
   private val defaultErrHandler = PartialFunction[Throwable, Xor.Left[DataAccessErr]] {
     case ex: PSQLException =>
       ex.getSQLState match {
@@ -47,5 +40,15 @@ package object dataaccess extends AnyRef with TimeConversion {
     case ex          => Xor.Left(InternalErr(ex))
   }
 
-  private[dataaccess] implicit def executeFromDb[A](action: DBIOAction[A, NoStream, Nothing]): Future[A] = DB.run(action)
+  private[dataaccess] implicit def withErrHandling[A, B <: NoStream, C <: Effect](action: DBIOAction[A,B,C]): XorT[Future, DataAccessErr, A] =
+    XorT(DB.run(action).map(a => Xor.Right(a)).recover(defaultErrHandler))
+
+  private[dataaccess] implicit def withErrHandling_[B <: NoStream, C <: Effect](action: DBIOAction[_,B,C]): XorT[Future, DataAccessErr, Unit] =
+    XorT(DB.run(action).map(_ => Xor.Right()).recover(defaultErrHandler))
+
+  private[dataaccess] implicit def withErrHandlingUnit[B <: NoStream, C <: Effect](action: DBIOAction[Unit,B,C]): XorT[Future, DataAccessErr, Unit] =
+    XorT(DB.run(action).map(_ => Xor.Right()).recover(defaultErrHandler))
+
+  private[dataaccess] implicit def withErrHandlingOpt[A, B <: NoStream, C <: Effect](action: DBIOAction[Option[A],B,C]): XorT[Future, DataAccessErr, A] =
+    XorT(DB.run(action).map(a => if (a.isDefined) Xor.Right(a.get) else Xor.Left(NotFound)).recover(defaultErrHandler))
 }
