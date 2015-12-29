@@ -1,19 +1,13 @@
 package com.utamars.dataaccess
 
-import akka.dispatch.ExecutionContexts
 import com.github.nscala_time.time.Imports._
-import com.typesafe.config.ConfigFactory
 import org.h2.jdbc.JdbcSQLException
 import slick.dbio.{DBIOAction, NoStream}
 
-import scala.concurrent.forkjoin.ForkJoinPool
 import scala.concurrent.{Await, Future}
 import scala.util.Try
 
 object DB extends AnyRef with Tables {
-  private val config = ConfigFactory.load()
-  private val parallelism: Int = config.getInt("db.parallelism")
-  implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(parallelism))
 
   val driver = config.getString("db.driver") match {
     case "org.postgresql.Driver" => slick.driver.PostgresDriver

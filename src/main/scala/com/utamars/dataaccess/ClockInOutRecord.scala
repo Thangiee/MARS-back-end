@@ -7,8 +7,6 @@ import cats.implicits._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateRecordForm
-import slick.dbio.Effect.Read
-import slick.profile.FixedSqlStreamingAction
 
 import scala.concurrent.Future
 

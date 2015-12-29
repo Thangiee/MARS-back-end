@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.{Xor, XorT}
 import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
+import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
@@ -18,6 +19,8 @@ import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with NullOptions with LazyLogging {
+
+  private[api] val config = ConfigFactory.load()
 
   type Username = String
   type ErrMsg = String

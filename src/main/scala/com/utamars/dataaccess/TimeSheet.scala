@@ -7,7 +7,6 @@ import cats.data.XorT
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.itextpdf.text.pdf.{PdfReader, PdfStamper}
-import com.typesafe.config.ConfigFactory
 import com.utamars.util.UtaDate
 import org.joda.time.{Days, LocalDate, ReadablePartial}
 
@@ -19,7 +18,6 @@ import scala.concurrent.Future
 object TimeSheet {
 
   private val printDt = (pattern: String, date: ReadablePartial) =>  DateTimeFormat.forPattern(pattern).print(date)
-  private val config = ConfigFactory.load()
   private val outDir = config.getString("service.timesheet.dir")
 
   def fromDateRange(range: (LocalDate, LocalDate), asst: Assistant): XorT[Future, DataAccessErr, File] = fromDateRange(range._1, range._2, asst)

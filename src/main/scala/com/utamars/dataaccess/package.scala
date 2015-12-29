@@ -1,16 +1,21 @@
 package com.utamars
 
+import akka.dispatch.ExecutionContexts
 import cats.data.{Xor, XorT}
+import com.typesafe.config.ConfigFactory
 import com.utamars.util.TimeConversion
 import org.postgresql.util.PSQLException
 import slick.dbio.{Effect, DBIOAction, NoStream}
 
 import scala.concurrent.Future
+import scala.concurrent.forkjoin.ForkJoinPool
 import scala.language.implicitConversions
 
 package object dataaccess extends AnyRef with TimeConversion {
 
-  private[dataaccess] implicit val ec = DB.executionCtx
+  private[dataaccess] val config = ConfigFactory.load()
+  private val parallelism: Int = config.getInt("db.parallelism")
+  private[dataaccess] implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(parallelism))
 
   type Role = String
   object Role {
