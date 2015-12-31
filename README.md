@@ -47,7 +47,10 @@ All Endpoints
 * [Clock Out](#clock-out)
 * [Clock In/Out Record Info](#clock-inout-record-info)
 * [Update Clock In/Out Record](#update-clock-inout-record)
-* [Facial Recognition (WIP)](#facial-recognition-wip)
+* [Facial Recognition](#facial-recognition)
+* [Add Face For Recognition](#add-face-for-recognition)
+* [Remove Face From Recognition](#remove-face-from-recognition)
+* [Get Face Images Info](#get-face-images-info)
 * [Register UUID](#register-uuid)
 * [Session Login](#session-login)
 * [Session Logout](#session-logout)
@@ -120,6 +123,7 @@ Parameters
 | first     | String | yes      | The assistant first name  |
 | last      | String | yes      | The assistant last name   |
 | empid     | String | yes      | The assistant employee ID |
+| threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. Default is 0.4 if a value is not provided. |
 | title     | String | yes      | The assistant title       |
 | titlecode | String | yes      | The assistant titlecode   |
 
@@ -151,6 +155,7 @@ Parameters
 | dept      | String | optional | The assistant department  |
 | title     | String | optional | The assistant title       |
 | titlecode | String | optional | The assistant titlecode   |
+| threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. 
 
 Returning
 
@@ -395,7 +400,97 @@ Returning
 
 ---
 
-#### Facial Recognition (WIP)
+#### Facial Recognition 
+
+Given a face image, calculate the confidence that face belongs to the same assistant.
+
+| Method      | Route                | Authorized                    |
+|:-----------:|----------------------|-------------------------------|
+| POST or PUT | /face/recognition    | Assistant                     |
+
+Parameters
+
+| Key       | type       | Required | Discription                                | 
+|-----------|------------|----------|--------------------------------------------| 
+| img       | byte array | yes      | The binary data of the face image to check |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [Recognition Result](#recognition-result) |
+|        400       | [Bad request](#400-bad-request)       |
+|        400       | Can't find a face on the uploaded image |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Add Face For Recognition
+
+Add a face to the assistant to be used for calculating recognition results.
+
+| Method      | Route                | Authorized                    |
+|:-----------:|----------------------|-------------------------------|
+| POST        | /face                | Assistant                     |
+
+Parameters
+
+| Key       | type       | Required | Discription                                | 
+|-----------|------------|----------|--------------------------------------------| 
+| img       | byte array | yes      | The binary data of the face image          |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [Image URL](#url)              |
+|        400       | [Bad request](#400-bad-request)       |
+|        400       | Can't find a face on the uploaded image |
+|        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Remove Face From Recognition
+
+Remove a face image from being used for calculating recognition results. 
+
+| Method      | Route                | Authorized                    |
+|:-----------:|----------------------|-------------------------------|
+| DELETE      | /face/{*imageId*}    | Admin, Instructor             |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Image removed                         | 
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Get Face images Info
+
+Get all face images info of the current assistant or specify {*netid*} to get them
+for a specific assistant.
+
+| Method      | Route                | Authorized                    |
+|:-----------:|----------------------|-------------------------------|
+| GET         | /face                | Assistant                     |
+| GET         | /face/{*netid*}      | Admin, Instructor             |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [Image Info](#image-info)      |
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
 
 ---
 
@@ -569,6 +664,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 | firstName  | String | The assistant first name  |
 | lastName   | String | The assistant last name   |
 | employeeId | String | The assistant employee ID |
+| threshold  | Double | Can use to determine pass or fail for a facial recognition result. |
 | title      | String | The assistant title       |
 | titleCode  | String | The assistant titlecode   |
 
@@ -583,6 +679,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
   "lastName": "Smith",
   "firstName": "Bob",
   "employeeId": "123456789",
+  "threshold":0.4
   "title": "some title",
   "titleCode": "some title code"
 }
@@ -642,6 +739,58 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 {
   "ttl": 30000,
   "expireTime": 1451153243447
+}
+```
+
+#### Recognition Result
+
+| Key           | Type     | Description                                                                                  |
+|---------------|----------|----------------------------------------------------------------------------------------------|
+| confidence    | Double   | A value between 0 and 1 of the likelihood the given face belongs to the same person
+| threshold     | Double   | A value between 0 and 1 that can be compared with confidence to determine pass or fail. 
+
+```json
+// example json response
+{
+  "confidence": 0.673156,
+  "threshold": 0.4
+}
+```
+
+#### URL 
+
+| Key           | Type     | Description                                                                                  |
+|---------------|----------|----------------------------------------------------------------------------------------------|
+| url           | String   | Url to the image 
+
+```json
+// example json response
+{
+  "url":"http://localhost:8080/api/assets/face/Xb1yQze.jpg"
+}
+```
+
+#### Image Info 
+
+| Key           | Type     | Description                                                                                  |
+|---------------|----------|----------------------------------------------------------------------------------------------|
+| data          | Array    | Array containing the images info 
+| id            | String   | Image id
+| url           | String   | Url to the image 
+
+```json
+// example json response
+{
+  "data": [
+    {
+      "id": "zwxNke.jpg",
+      "url": "http://localhost:8080/api/assets/face/zwxNke.jpg"
+    },
+    {
+      "id": "Xb1yQze.jpg",
+      "url": "http://localhost:8080/api/assets/face/Xb1yQze.jpg"
+    }
+  ]
 }
 ```
 
