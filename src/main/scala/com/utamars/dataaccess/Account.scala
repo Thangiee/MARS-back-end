@@ -23,7 +23,7 @@ object Account {
     DBIO.seq(
       DB.AccountTable += Account(form.netId, form.user, form.pass, Role.Assistant),
       DB.AssistantTable += Assistant(form.netId, form.rate, form.email, form.job, form.dept, form.lastName,
-        form.firstName, form.empId, form.title, form.titleCode)
+        form.firstName, form.empId, form.title, form.titleCode, form.threshold.getOrElse(.4))
     ).transactionally
 
   def findBy(username: String): XorT[Future, DataAccessErr, Account] =

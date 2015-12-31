@@ -26,7 +26,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
   val asstBobAcc   = Account("b123", "bob123", "password", Role.Assistant)
 
   val instAlice = Instructor(instAliceAcc.netId, "alice@gmail.com", "A", "Alice")
-  val asstBob   = Assistant(asstBobAcc.netId, 10.50, "bob@gmail.com", Job.Teaching, "CSE", "B", "bob", "1000", "", "")
+  val asstBob   = Assistant(asstBobAcc.netId, 10.50, "bob@gmail.com", Job.Teaching, "CSE", "B", "bob", "1000", "", "", .4)
 
   def initDataBase(): Unit = DB.createSchema()
 

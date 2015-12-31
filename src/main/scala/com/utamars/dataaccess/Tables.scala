@@ -12,8 +12,10 @@ private [dataaccess] trait Tables {
   private[dataaccess] lazy val AccountTable          = new TableQuery(tag => new AccountTable(tag))
   private[dataaccess] lazy val ClockInOutRecordTable = new TableQuery(tag => new ClockInOutRecordTable(tag))
   private[dataaccess] lazy val InstructorTable       = new TableQuery(tag => new InstructorTable(tag))
+  private[dataaccess] lazy val FaceImageTable        = new TableQuery(tag => new FaceImageTable(tag))
 
-  protected lazy val schema = AssistantTable.schema ++ AccountTable.schema ++ ClockInOutRecordTable.schema ++ InstructorTable.schema
+  protected lazy val schema = AssistantTable.schema ++ AccountTable.schema ++ ClockInOutRecordTable.schema ++
+    InstructorTable.schema ++ FaceImageTable.schema
 
   class AccountTable(_tableTag: Tag) extends Table[Account](_tableTag, "account") {
     def * = (netId, username, passwd, role, createTime) <>(Account.apply _ tupled, Account.unapply)
@@ -28,7 +30,7 @@ private [dataaccess] trait Tables {
   }
 
   class AssistantTable(_tableTag: Tag) extends Table[Assistant](_tableTag, "assistant") {
-    def * = (netId, rate, email, job, department, lastName, firstName, employeeId, title, titleCode) <> (Assistant.apply _ tupled, Assistant.unapply)
+    def * = (netId, rate, email, job, department, lastName, firstName, employeeId, title, titleCode, threshold) <> (Assistant.apply _ tupled, Assistant.unapply)
 
     val netId     : Rep[String] = column[String]("net_id", O.PrimaryKey, O.Length(128, varying = true))
     val rate      : Rep[Double] = column[Double]("rate")
@@ -40,6 +42,7 @@ private [dataaccess] trait Tables {
     val employeeId: Rep[String] = column[String]("employee_id", O.Length(128, varying = true))
     val title     : Rep[String] = column[String]("title", O.Length(128, varying = true))
     val titleCode : Rep[String] = column[String]("title_code", O.Length(128, varying = true))
+    val threshold : Rep[Double] = column[Double]("threshold")
 
     lazy val accountTableFk = foreignKey("assistant_net_id_fkey", netId, AccountTable)(r => r.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
 
@@ -59,7 +62,6 @@ private [dataaccess] trait Tables {
     lazy val assistantTableFk = foreignKey("clock_in_out_record_net_id_fkey", netId, AssistantTable)(r => r.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
   }
 
-
   class InstructorTable(_tableTag: Tag) extends Table[Instructor](_tableTag, "instructor") {
     def * = (netId, email, lastName, firstName) <> (Instructor.apply _ tupled, Instructor.unapply)
 
@@ -71,5 +73,16 @@ private [dataaccess] trait Tables {
     lazy val accountTableFk = foreignKey("instructor_net_id_fkey", netId, AccountTable)(r => r.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
 
     val index1 = index("instructor_idx", email, unique=true)
+  }
+
+  class FaceImageTable(_tableTag: Tag) extends Table[FaceImage](_tableTag, "face_image") {
+    def * = (id, netId, path, faceId) <> (FaceImage.apply _ tupled, FaceImage.unapply)
+
+    val id    : Rep[String] = column[String]("id", O.PrimaryKey, O.Length(128, varying = true))
+    val netId : Rep[String] = column[String]("net_id", O.Length(128, varying = true))
+    val path  : Rep[String] = column[String]("path", O.Length(128, varying = true))
+    val faceId: Rep[String] = column[String]("face_id", O.Length(128, varying = true))
+
+    lazy val assistantTableFk = foreignKey("face_image_net_id_fkey", netId, AssistantTable)(asst => asst.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
   }
 }

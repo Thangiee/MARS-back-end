@@ -8,7 +8,7 @@ import com.utamars.forms.UpdateAssistantForm
 import scala.concurrent.Future
 
 case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
-  lastName: String, firstName: String, employeeId: String, title: String, titleCode: String)
+  lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
 object Assistant {
 
@@ -23,7 +23,8 @@ object Assistant {
         rate = form.rate.getOrElse(asst.rate),
         department = form.department.getOrElse(asst.department),
         title = form.title.getOrElse(asst.title),
-        titleCode = form.titleCode.getOrElse(asst.titleCode)
+        titleCode = form.titleCode.getOrElse(asst.titleCode),
+        threshold = form.threshold.getOrElse(asst.threshold)
       ).update()
     }
   }

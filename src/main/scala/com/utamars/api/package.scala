@@ -3,15 +3,20 @@ package com.utamars
 import java.sql.Timestamp
 
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{StandardRoute, Route}
 import cats.data.{Xor, XorT}
+import com.facepp.error.FaceppParseException
+import com.facepp.http.HttpRequests
 import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
+import com.utamars.dataaccess.NotFound
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
+import org.json.JSONException
 import spray.json._
 
 import scala.concurrent.Future
@@ -21,6 +26,7 @@ import scala.util.{Failure, Success}
 package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with NullOptions with LazyLogging {
 
   private[api] val config = ConfigFactory.load()
+  private[api] val facePlusPlus = new HttpRequests(config.getString("facepp.key"), config.getString("facepp.secret"), false, false)
 
   type Username = String
   type ErrMsg = String
@@ -51,7 +57,7 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
   }
 
   implicit val accJsonFormat    = jsonFormat5(Account.apply)
-  implicit val asstJsonFormat   = jsonFormat10(Assistant.apply)
+  implicit val asstJsonFormat   = jsonFormat11(Assistant.apply)
   implicit val instJsonFormat   = jsonFormat4(Instructor.apply)
   implicit val recordJsonFormat = jsonFormat6(ClockInOutRecord.apply)
 
@@ -82,6 +88,18 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
         error.printStackTrace()
         HttpResponse(StatusCodes.InternalServerError)
     }
+  }
+
+  def faceppErrHandler(err: Throwable): HttpResponse = err match {
+    case ex: FaceppParseException =>  // todo: more details
+      val code = """(?<=responseCode=).+""".r.findFirstIn(ex.toString).getOrElse("500").toInt
+      val msg  = """(?<=message=).+(?=,)""".r.findFirstIn(ex.toString).getOrElse("")
+      HttpResponse(StatusCode.int2StatusCode(code), entity = msg)
+    case ex: JSONException =>
+      HttpResponse(BadRequest, entity = "Could not detect face in the given image.")
+    case ex =>
+      logger.error(ex.getMessage, ex)
+      HttpResponse(InternalServerError)
   }
 
 }

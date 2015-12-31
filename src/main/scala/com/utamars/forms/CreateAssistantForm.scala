@@ -12,5 +12,8 @@ case class CreateAssistantForm(
   lastName: String,
   empId: String,
   title: String,
-  titleCode: String
-)
+  titleCode: String,
+  threshold: Option[Double]
+) {
+  threshold.foreach(value => require(value >= 0 && value <= 1, "'threshold' must be between [0,1]"))
+}
