@@ -40,7 +40,7 @@ object Boot extends App with LazyLogging {
     override def remove(selector: String): Future[Unit] = scalacache.remove(selector)
   }
 
-  val interface = config.getString("http.interface")
+  val interface = config.getString("http.addr")
   val port      = config.getInt("http.port")
 
   if (config.getBoolean("db.create")) DB.createSchema()
@@ -51,6 +51,7 @@ object Boot extends App with LazyLogging {
     RegisterUUIDApi() ::
     ClockInOutApi()   ::
     TimeSheetGenApi() ::
+    FacialRecognitionApi() ::
     Nil
 
   val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }

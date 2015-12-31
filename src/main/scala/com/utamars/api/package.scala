@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{StandardRoute, Route}
+import akka.http.scaladsl.server.Route
 import cats.data.{Xor, XorT}
 import com.facepp.error.FaceppParseException
 import com.facepp.http.HttpRequests
@@ -91,10 +91,16 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
   }
 
   def faceppErrHandler(err: Throwable): HttpResponse = err match {
-    case ex: FaceppParseException =>  // todo: more details
+    case ex: FaceppParseException =>
       val code = """(?<=responseCode=).+""".r.findFirstIn(ex.toString).getOrElse("500").toInt
       val msg  = """(?<=message=).+(?=,)""".r.findFirstIn(ex.toString).getOrElse("")
-      HttpResponse(StatusCode.int2StatusCode(code), entity = msg)
+      code match {
+        case 403|500|502|441|453 =>
+          logger.error(s"$code: $msg", ex)
+          HttpResponse(InternalServerError)
+        case _ =>
+          HttpResponse(StatusCodes.custom(code, reason = msg))
+      }
     case ex: JSONException =>
       HttpResponse(BadRequest, entity = "Could not detect face in the given image.")
     case ex =>

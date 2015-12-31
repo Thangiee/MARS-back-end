@@ -2,12 +2,15 @@ package com.utamars.api
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
+import cats.data.Xor
+import com.facepp.http.PostParameters
+import com.github.t3hnar.bcrypt._
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAssistantForm, UpdateInstructorForm}
 import spray.json._
-import com.github.t3hnar.bcrypt._
 
 import scala.concurrent.ExecutionContext
+import scala.util.Try
 
 case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
@@ -15,9 +18,17 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
 
   override val route =
     (post & path("account"/"assistant")) {
-      formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job,
-        'dept, 'first, 'last, 'empid, 'title, 'titlecode).as(CreateAssistantForm) { form =>
-        Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
+      formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job, 'dept, 'first, 'last,
+        'empid, 'title, 'titlecode, 'threshold.as[Double].?).as(CreateAssistantForm) { form =>
+
+        val result = Xor.catchNonFatal(facePlusPlus.personCreate(new PostParameters().setPersonName(s"mars_${form.netId}")))
+        result.fold(
+          err      => complete(faceppErrHandler(err)),
+          response => {
+            logger.info(response.toString)
+            Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
+          }
+        )
       }
     } ~
     (post & path("account"/"instructor")) {
@@ -51,7 +62,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       Assistant.findBy(netId).responseWith(asst => asst.toJson.compactPrint)
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>
-      formFields('rate.as[Double].?, 'dept.?, 'title.?, 'titlecode.?).as(UpdateAssistantForm) { form =>
+      formFields('rate.as[Double].?, 'dept.?, 'title.?, 'titlecode.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
         Assistant.update(acc.netId, form).responseWith(OK)
       }
     } ~
