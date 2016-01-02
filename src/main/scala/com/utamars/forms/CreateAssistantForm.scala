@@ -15,5 +15,6 @@ case class CreateAssistantForm(
   titleCode: String,
   threshold: Option[Double]
 ) {
+  require(!user.contains(" "), "Username cannot contains space.")
   threshold.foreach(value => require(value >= 0 && value <= 1, "'threshold' must be between [0,1]"))
 }

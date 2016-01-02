@@ -1,8 +1,10 @@
 package com.utamars.api
 
+import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.data.Xor
+import cats.std.all._
 import com.facepp.http.PostParameters
 import com.github.t3hnar.bcrypt._
 import com.utamars.dataaccess._
@@ -10,7 +12,6 @@ import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAs
 import spray.json._
 
 import scala.concurrent.ExecutionContext
-import scala.util.Try
 
 case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
@@ -21,12 +22,13 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job, 'dept, 'first, 'last,
         'empid, 'title, 'titlecode, 'threshold.as[Double].?).as(CreateAssistantForm) { form =>
 
-        val result = Xor.catchNonFatal(facePlusPlus.personCreate(new PostParameters().setPersonName(s"mars_${form.netId}")))
-        result.fold(
-          err      => complete(faceppErrHandler(err)),
-          response => {
-            logger.info(response.toString)
-            Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
+        val nameParam = new PostParameters().setPersonName(s"mars_${form.netId}")
+        Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(
+          succ => {
+            Xor.catchNonFatal(facePlusPlus.personCreate(nameParam)) match {
+              case Xor.Right(_)  => HttpResponse(OK)
+              case Xor.Left(err) => Account.deleteBy(form.user); faceppErrHandler(err)
+            }
           }
         )
       }
@@ -43,7 +45,11 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       Account.findBy(username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint)
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
-      Account.deleteBy(username).responseWith(OK)
+      Account.findBy(username).map { asst =>
+        val nameParam = new PostParameters().setPersonName(s"mars_${asst.netId}")
+        Xor.catchNonFatal(facePlusPlus.personDelete(nameParam)).leftMap(err => logger.error(err.getMessage, err))
+        Account.deleteBy(username)
+      }.responseWith(OK)
     } ~
     ((post|put) & path("account"/"change-password") & authnAndAuthz()) { acc =>
       formField('newpassword) { newPass =>
