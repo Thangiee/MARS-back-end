@@ -52,6 +52,7 @@ All Endpoints
 * [Remove Face From Recognition](#remove-face-from-recognition)
 * [Get Face Images Info](#get-face-images-info)
 * [Register UUID](#register-uuid)
+* [Verify Registered UUID](#verify-registered-uuid)
 * [Session Login](#session-login)
 * [Session Logout](#session-logout)
 * [1st Half-month Time-sheet](#1st-half-month-time-sheet)
@@ -306,7 +307,6 @@ Parameters
 
 | Key         | Type   | Required | Description                            |
 |-------------|--------|----------|----------------------------------------|
-| uuid        | String | yes      | The registered UUID                    |
 | computerid  | String | optional | The computer id used register the UUID |
 
 Returning
@@ -317,7 +317,6 @@ Returning
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Assistant is already clocked in |
-|        410       | Gone. Either the UUID was not registered or it has been expired |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
@@ -334,7 +333,6 @@ Parameters
 
 | Key         | Type   | Required | Description                               |
 |-------------|--------|----------|-------------------------------------------|
-| uuid        | String | yes      | The registered UUID                       |
 | computerid  | String | optional | The computer id used to register the UUID |
 
 Returning
@@ -515,6 +513,26 @@ Returning
 |        200       | Return [UUID metadata](#uuid-metadata)|
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Verify Registered UUID
+
+Verify that a specific {*uuid*} is still registered (use in the clock in/out process)
+
+| Method      | Route              | 
+|:-----------:|--------------------|
+| GET         | /register-uuid/verify/{*uuid*} |
+
+Returning 
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return [UUID metadata](#uuid-metadata)|
+|        400       | [Bad request](#400-bad-request)       |
+|        403       | [Forbidden](#403-forbidden)           |
+|        410       | Gone. Either the UUID was not registered or it has been expired |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
