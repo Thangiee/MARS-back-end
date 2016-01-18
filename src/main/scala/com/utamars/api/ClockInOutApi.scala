@@ -21,19 +21,13 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
 
   override val route: Route =
     logRequestResult("Clocking In") {
-      (post & path("records"/"clock-in") & formFields('uuid, 'computerid.?) & authnAndAuthz()) { (uuid, compId, account) =>
-        scalacache.sync.get(uuid) match {
-          case Some(_) => processClockInRequest(compId, account) // successful found the registered UUID
-          case None    => complete(HttpResponse(Gone)) // did not find the UUID, either it was not registered or it has been expired
-        }
+      (post & path("records"/"clock-in") & formFields('computerid.?) & authnAndAuthz()) { (compId, account) =>
+        processClockInRequest(compId, account)
       }
     } ~
     logRequestResult("Clock Out") {
-      (post & path("records"/"clock-out") & formField('uuid, 'computerid.?) & authnAndAuthz()) { (uuid, compId, account) =>
-        scalacache.sync.get(uuid) match {
-          case Some(_) => ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
-          case None    => complete(HttpResponse(Gone))
-        }
+      (post & path("records"/"clock-out") & formField('computerid.?) & authnAndAuthz()) { (compId, account) =>
+        ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
       }
     } ~
     (get & path("records") & authnAndAuthz()) { acc =>
