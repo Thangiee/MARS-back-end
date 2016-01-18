@@ -4,7 +4,7 @@ scalaVersion := "2.11.7"
 scalacOptions += "-Xexperimental"
 
 // akka
-val akkaStreamV = "2.0"
+val akkaStreamV = "2.0.2"
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream-experimental"             % akkaStreamV,
   "com.typesafe.akka" %% "akka-http-core-experimental"          % akkaStreamV,
@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % akkaStreamV,
   "com.typesafe.akka" %% "akka-http-testkit-experimental"       % akkaStreamV,
   "com.typesafe.akka" %% "akka-actor"                           % "2.4.1",
-  "com.softwaremill.akka-http-session" %% "core"                % "0.2.2"
+  "com.softwaremill.akka-http-session" %% "core"                % "0.2.3"
 ).map(_.withJavadoc())
 
 // functional programming libs
@@ -23,8 +23,8 @@ libraryDependencies ++= Seq(
 
 // database
 libraryDependencies ++= Seq(
-  "org.postgresql"      % "postgresql"      % "9.4-1205-jdbc42",
-  "com.h2database"      % "h2"              % "1.3.166",
+  "org.postgresql"      % "postgresql"      % "9.4.1207",
+  "com.h2database"      % "h2"              % "1.4.190",
   "com.typesafe.slick" %% "slick"           % "3.1.1",
   "com.typesafe.slick" %% "slick-hikaricp"  % "3.1.1"
 ).map(_.withJavadoc())

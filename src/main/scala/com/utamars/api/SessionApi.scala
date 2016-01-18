@@ -3,6 +3,7 @@ package com.utamars.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import com.softwaremill.session.SessionDirectives._
+import com.softwaremill.session.SessionOptions._
 import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.utamars.dataaccess.Role
 

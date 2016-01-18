@@ -7,6 +7,7 @@ import akka.http.scaladsl.server._
 import cats.data.Xor
 import com.github.t3hnar.bcrypt._
 import com.softwaremill.session.SessionDirectives._
+import com.softwaremill.session.SessionOptions._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 
