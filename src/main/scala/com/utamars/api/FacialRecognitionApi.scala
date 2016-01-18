@@ -64,7 +64,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
     FaceImage.findAll(netId)
       .map(imgs => imgs.map(img => Image(img.id, s"$baseUrl/${img.id}")))
-      .responseWith(imgs => Map("data" -> imgs).toJson.compactPrint)
+      .responseWith(imgs => Map("images" -> imgs).toJson.compactPrint)
   }
 
   private def doFacialRecognition(acc: Account, file: File): Route = {
