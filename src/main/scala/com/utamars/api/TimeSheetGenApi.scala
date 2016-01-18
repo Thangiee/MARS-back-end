@@ -65,15 +65,4 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
     }
   }
 
-  private def halfMonth(m: Int, y: Int, first: Boolean): (LocalDate, LocalDate) = {
-    if (first) {  // first half of the month; day 1 to 15.
-      val start = new LocalDate(y, m, 1)
-      val end   = new LocalDate(y, m, 15)
-      (start, end)
-    } else {      // second half of the month; day 16 to last day of the month
-      val start = new LocalDate(y, m, 16)
-      val end   = new LocalDate(y, m, 28).dayOfMonth().withMaximumValue()
-      (start, end)
-    }
-  }
 }

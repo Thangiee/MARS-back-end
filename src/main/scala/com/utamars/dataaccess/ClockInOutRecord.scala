@@ -23,16 +23,16 @@ case class ClockInOutRecord(
 object ClockInOutRecord {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
-    DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).result
+    DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result
 
   def findBy(id: Int): XorT[Future, DataAccessErr, ClockInOutRecord] =
-    DB.ClockInOutRecordTable.filter(_.id === id).result.headOption
+    DB.ClockInOutRecordTable.filter(_.id === id).sortBy(_.inTime.desc).result.headOption
 
   def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption
 
-  def findBetween(start: LocalDate, end: LocalDate, netId: String) =
-    DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).result
+  def findBetween(start: LocalDate, end: LocalDate, netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
+    DB.ClockInOutRecordTable.filter(r => r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs).sortBy(_.inTime.desc).result
 
   def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] =
     DBIO.seq(

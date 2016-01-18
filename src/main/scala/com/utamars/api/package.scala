@@ -16,6 +16,7 @@ import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess.NotFound
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
+import org.joda.time.LocalDate
 import org.json.JSONException
 import spray.json._
 
@@ -34,6 +35,18 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
   // abbreviation
   type SessMgr = SessionManager[Username]
   type RTS = RefreshTokenStorage[Username]
+
+  def halfMonth(m: Int, y: Int, first: Boolean): (LocalDate, LocalDate) = {
+    if (first) {  // first half of the month; day 1 to 15.
+    val start = new LocalDate(y, m, 1)
+      val end   = new LocalDate(y, m, 15)
+      (start, end)
+    } else {      // second half of the month; day 16 to last day of the month
+    val start = new LocalDate(y, m, 16)
+      val end   = new LocalDate(y, m, 28).dayOfMonth().withMaximumValue()
+      (start, end)
+    }
+  }
 
   // needed to be able to convert Map[String, Any] to json using spray
   implicit val anyJsonFormat = new JsonWriter[Any] {

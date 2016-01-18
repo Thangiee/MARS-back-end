@@ -30,11 +30,11 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
         ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
       }
     } ~
-    (get & path("records") & authnAndAuthz()) { acc =>
-      ClockInOutRecord.findBy(acc.netId).responseWith(records => records.toJson.compactPrint)
+    (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>
+      getRecords(dateFilter, acc.netId)
     } ~
-    (get & path("records"/Segment) & authnAndAuthz(Role.Instructor)) { (netId, _) =>
-      ClockInOutRecord.findBy(netId).responseWith(records => records.toJson.compactPrint)
+    (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Instructor)) { (netId, dateFilter, _) =>
+      getRecords(dateFilter, netId)
     } ~
     ((post|put) & path("records"/IntNumber) & authnAndAuthz(Role.Instructor)) { (id, _) =>
       formFields('intime.as[Long].?, 'outtime.as[Long].?, 'incompid.?, 'outcompid.?).as(UpdateRecordForm) { form =>
@@ -59,5 +59,29 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
         case otherErr => otherErr.toHttpResponse
       }
     )
+  }
+
+  private def getRecords(dateFilter: Option[String], netId: String): Route = {
+    val today = LocalDate.now()
+    dateFilter match {
+      case Some("pay-period")  =>
+        val (start, end) = halfMonth(today.getMonthOfYear, today.getYear, first = today.getDayOfMonth < 16)
+        ClockInOutRecord.findBetween(start, end, netId).responseWith(records => Map("records" -> records).toJson.compactPrint)
+
+      case Some("month")       =>
+        val start = today.dayOfMonth().withMaximumValue()
+        val end   = today.dayOfMonth().withMaximumValue()
+        ClockInOutRecord.findBetween(start, end, netId).responseWith(records => Map("records" -> records).toJson.compactPrint)
+
+      case Some("year") =>
+        val start = today.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue()
+        val end   = today.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()
+        ClockInOutRecord.findBetween(start, end, netId).responseWith(records => Map("records" -> records).toJson.compactPrint)
+
+      case Some(_) => complete(HttpResponse(BadRequest, entity = "Invalid parameter: filter"))
+
+      case None => // no filter, get all records
+        ClockInOutRecord.findBy(netId).responseWith(records => Map("records" -> records).toJson.compactPrint)
+    }
   }
 }
