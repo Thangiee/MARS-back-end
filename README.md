@@ -352,10 +352,17 @@ Returning
 
 Get all clock in/out records for the current assistant or specify {*netid*} to get it for a specific assistant.
 
+filter {*option*}:
+  * `pay-period` - get records only from the current pay period
+  * `month` - get records only from the current month
+  * `year`  - get records only from the current year
+
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
 | GET         | /records             | Assistant                     |
+| GET         | /records?filter={*option*}             | Assistant                     |
 | GET         | /records/{*netid*}   | Instructor                    |
+| GET         | /records/{*netid*}?filter={*option*}   | Instructor                    |
 
 Returning
 
@@ -736,12 +743,16 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 ```json
 // example json response
 {
-  "inTime": 1441385100000,
-  "inComputerId": "ERB 103",
-  "netId": "tql7155",
-  "id": 3,
-  "outTime": 1441390500000,
-  "outComputerId": null
+  records: [
+    {
+      "inTime": 1441385100000,
+      "inComputerId": "ERB 103",
+      "netId": "tql7155",
+      "id": 3,
+      "outTime": 1441390500000,
+      "outComputerId": null
+    }
+  ]
 }
 ```
 
@@ -799,7 +810,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 ```json
 // example json response
 {
-  "data": [
+  "images": [
     {
       "id": "zwxNke.jpg",
       "url": "http://localhost:8080/api/assets/face/zwxNke.jpg"
