@@ -536,7 +536,7 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | Return [UUID metadata](#uuid-metadata)|
+|        200       | The UUID is valid at the time of the request. Return the given UUID. |
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        410       | Gone. Either the UUID was not registered or it has been expired |
