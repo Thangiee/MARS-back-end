@@ -734,11 +734,11 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 | Key           | Type   | Description                                                                                  |
 |---------------|--------|----------------------------------------------------------------------------------------------|
 | inTime        | Long   | Clock in time, epoch time in milliseconds.                                                   |
-| inComputerId  | String | The computer id used to register the UUID and generate the QR code, or null if not avaliable |
+| inComputerId  | String | The computer id used to register the UUID and generate the QR code, or **null** if not avaliable |
 | netId         | String | The UT Arlington netID                                                                       |
 | id            | Int    | Id for the record                                                                            |
-| outTime       | Long   | Clock in time, epoch time in milliseconds, or null if this record has not been clock out.    |
-| outComputerId | String | The computer id used to register the UUID and generate the QR code, or null if not avaliable |
+| outTime       | Long   | Clock out time, epoch time in milliseconds, or **null** if this record has not been clock out.    |
+| outComputerId | String | The computer id used to register the UUID and generate the QR code, or **null** if not avaliable |
 
 ```json
 // example json response
@@ -775,8 +775,8 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 | Key           | Type     | Description                                                                                  |
 |---------------|----------|----------------------------------------------------------------------------------------------|
-| confidence    | Double   | A value between 0 and 1 of the likelihood the given face belongs to the same person
-| threshold     | Double   | A value between 0 and 1 that can be compared with confidence to determine pass or fail. 
+| confidence    | Double   | A value between 0 and 1 of the likelihood the given face belongs to the same person.
+| threshold     | Double   | A value between 0 and 1 that can be compared with confidence to determine pass or fail recognition. Different assistants can have different values. 
 
 ```json
 // example json response
@@ -803,7 +803,6 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 | Key           | Type     | Description                                                                                  |
 |---------------|----------|----------------------------------------------------------------------------------------------|
-| data          | Array    | Array containing the images info 
 | id            | String   | Image id
 | url           | String   | Url to the image 
 
