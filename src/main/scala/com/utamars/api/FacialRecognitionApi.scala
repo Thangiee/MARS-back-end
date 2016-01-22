@@ -18,7 +18,7 @@ import scala.concurrent.ExecutionContext
 
 case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
-  private val addr = config.getString("http.addr")
+  private val addr = config.getString("http.addr.public")
   private val port = config.getString("http.port")
   private val baseUrl = s"http://$addr:$port/api/assets/face"
 

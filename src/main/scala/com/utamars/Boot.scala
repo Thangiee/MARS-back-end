@@ -40,7 +40,7 @@ object Boot extends App with LazyLogging {
     override def remove(selector: String): Future[Unit] = scalacache.remove(selector)
   }
 
-  val interface = config.getString("http.addr")
+  val interface = config.getString("http.addr.private")
   val port      = config.getInt("http.port")
 
   if (config.getBoolean("db.create")) DB.createSchema()
