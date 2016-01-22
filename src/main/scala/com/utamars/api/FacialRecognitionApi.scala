@@ -38,7 +38,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     (get & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, _) =>
       getFaceImages(netId)
     } ~
-    (get & path("assets"/"face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor, Role.Assistant)) { (id, _) =>
+    (get & path("assets"/"face"/Segment)) { id =>
       import better.files._
       FaceImage.findBy(id).responseWith { img =>
         val imgType = id match {
