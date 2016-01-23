@@ -4,6 +4,8 @@ import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
+import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.RouteResult.Complete
 import akka.http.scaladsl.server.directives.LogEntry
@@ -20,7 +22,7 @@ import scala.concurrent.duration.Duration
 import scalacache._
 import scalacache.guava._
 
-object Boot extends App with LazyLogging {
+object Boot extends App with CorsSupport with LazyLogging {
   val config = ConfigFactory.load()
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(24.hours.toSeconds),
@@ -69,8 +71,17 @@ object Boot extends App with LazyLogging {
     case _ => None // other kind of responses
   }
 
+  val corsAllowOrigins: List[String] = List("*")
+  val corsAllowedHeaders: List[String] = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
+  val corsAllowCredentials: Boolean = true
+  val optionsCorsHeaders: List[HttpHeader] = List[HttpHeader](
+    `Access-Control-Allow-Headers`(corsAllowedHeaders.mkString(", ")),
+    `Access-Control-Max-Age`(20.days.seconds), // cache pre-flight response for 20 days
+    `Access-Control-Allow-Credentials`(corsAllowCredentials)
+  )
+
   val routes = logRequestResult(customLogging _) {
-    pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
+    pathPrefix("api") { cors(services.map(_.route).reduce(_ ~ _)) }
   }
 
   val interface = config.getString("http.addr.private")
