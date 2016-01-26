@@ -72,7 +72,7 @@ object Boot extends App with CorsSupport with LazyLogging {
   }
 
   val corsAllowOrigins: List[String] = List("*")
-  val corsAllowedHeaders: List[String] = List("Origin", "X-Requested-With", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
+  val corsAllowedHeaders: List[String] = List("Origin", "X-Requested-With", "Authorization", "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
   val corsAllowCredentials: Boolean = true
   val optionsCorsHeaders: List[HttpHeader] = List[HttpHeader](
     `Access-Control-Allow-Headers`(corsAllowedHeaders.mkString(", ")),
