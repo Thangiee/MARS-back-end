@@ -44,7 +44,8 @@ libraryDependencies ++= Seq(
   "com.github.nscala-time" %% "nscala-time"           % "2.6.0",    // date time
   "com.github.pathikrit"   %% "better-files"          % "2.13.0",   // files
   "org.scalaj"             %% "scalaj-http"           % "2.1.0",    // http request
-  "com.github.cb372"       %% "scalacache-guava"      % "0.7.3"     // caching
+  "com.github.cb372"       %% "scalacache-guava"      % "0.7.3",    // caching
+  "com.sksamuel.scrimage"  %% "scrimage-core"         % "2.1.0"     // image processing
 ).map(_.withJavadoc())
 
 // logging

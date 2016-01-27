@@ -70,7 +70,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
   private def doFacialRecognition(acc: Account, file: File): Route = {
     Assistant.findBy(acc.netId).responseWith { asst =>
       val result = for {
-        json   <- Xor.catchNonFatal(facePlusPlus.detectionDetect(new PostParameters().setImg(file)))
+        json   <- Xor.catchNonFatal(facePlusPlus.detectionDetect(new PostParameters().setImg(toPNG(file))))
         _       = println(json)
         faceId <- Xor.catchNonFatal(json.getJSONArray("face").getJSONObject(0).getString("face_id"))
         param   = new PostParameters().setPersonName(s"mars_${acc.netId}").setFaceId(faceId)
@@ -93,7 +93,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
   private def addFace(acc: Account, file: File, metadata: FileInfo): Route = {
     val result = for {
-      json   <- Xor.catchNonFatal(facePlusPlus.detectionDetect(new PostParameters().setImg(file)))
+      json   <- Xor.catchNonFatal(facePlusPlus.detectionDetect(new PostParameters().setImg(toPNG(file))))
       faceId <- Xor.catchNonFatal(json.getJSONArray("face").getJSONObject(0).getString("face_id"))
       param   = new PostParameters().setPersonName(s"mars_${acc.netId}").setFaceId(faceId)
       _      <- Xor.catchNonFatal(facePlusPlus.personAddFace(param))
@@ -119,4 +119,6 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
       )
     }
   }
+
+  private def toPNG(img: File): Array[Byte] = com.sksamuel.scrimage.Image.fromFile(img).bytes
 }
