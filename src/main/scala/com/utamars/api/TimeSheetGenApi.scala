@@ -15,7 +15,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
 
   private val monthYear =  parameter('month.as[Int], 'year.as[Int])
 
-  override val route = logRequestResult("generate time-sheet") {
+  override val route = {
     (get & pathPrefix("time-sheet") & authnAndAuthz(Role.Assistant)) { acc =>
       (path("first-half-month") & monthYear) { (month, year) =>
         asstMakeAndSendTimeSheet(acc.netId, month, year, isFirst = true)

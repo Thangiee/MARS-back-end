@@ -1,8 +1,12 @@
 package com.utamars
 
 import akka.actor.ActorSystem
+import akka.event.Logging
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.RouteResult.Complete
+import akka.http.scaladsl.server.directives.LogEntry
 import akka.stream.ActorMaterializer
 import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
@@ -27,6 +31,8 @@ object Boot extends App with LazyLogging {
   implicit val system       = ActorSystem("MARS", config)
   implicit val dispatcher   = system.dispatcher
   implicit val materializer = ActorMaterializer()
+
+  // services' dependencies that will be injected implicitly
   implicit val scalaCache   = ScalaCache(GuavaCache())
   implicit val sessionManager = new SessionManager[Username](sessionConfig)
   implicit val sessionStorage = new RefreshTokenStorage[Username] { // todo: better to store in DB?
@@ -40,9 +46,6 @@ object Boot extends App with LazyLogging {
     override def remove(selector: String): Future[Unit] = scalacache.remove(selector)
   }
 
-  val interface = config.getString("http.addr.private")
-  val port      = config.getInt("http.port")
-
   if (config.getBoolean("db.create")) DB.createSchema()
 
   val services =
@@ -54,7 +57,24 @@ object Boot extends App with LazyLogging {
     FacialRecognitionApi() ::
     Nil
 
-  val routes   = pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
+  def customLogging(req: HttpRequest): Any => Option[LogEntry] = {
+    case Complete(res: HttpResponse) =>
+      Some(LogEntry(
+        s"""|Request:
+            |  ${req.method} ${req.uri}
+            |  Headers: ${req.headers.mkString(", ")}
+            |  ${req.entity.toString.split("\n").take(3).mkString("\n  ")}
+            |  Response: $res
+        """.stripMargin, Logging.InfoLevel))
+    case _ => None // other kind of responses
+  }
+
+  val routes = logRequestResult(customLogging _) {
+    pathPrefix("api") { services.map(_.route).reduce(_ ~ _) }
+  }
+
+  val interface = config.getString("http.addr.private")
+  val port      = config.getInt("http.port")
   Http().bindAndHandle(routes, interface, port)
 }
 

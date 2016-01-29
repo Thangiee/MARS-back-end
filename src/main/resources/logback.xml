@@ -36,5 +36,5 @@
     <logger name="slick.basic" level="INFO" />
     <logger name="slick.compiler" level="INFO" />
     <logger name="slick.relational" level="INFO" />
-    <logger name="slick.jdbc" level="DEBUG" />
+    <logger name="slick.jdbc" level="INFO" />
 </configuration>

@@ -23,7 +23,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
   private val port = config.getString("http.port")
   private val baseUrl = s"http://$addr:$port/api/assets/face"
 
-  override val route: Route = logResult("Facial recognition api") {
+  override val route: Route = {
     ((post|put) & path("face"/"recognition") & authnAndAuthz(Role.Assistant)) { acc =>
       uploadedFile("img") { case (metadata, file) => doFacialRecognition(acc, file) }
     } ~

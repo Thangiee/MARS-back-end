@@ -20,15 +20,11 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
   override val realm            : String    = "mars-app"
 
   override val route: Route =
-    logRequestResult("Clocking In") {
-      (post & path("records"/"clock-in") & formFields('computerid.?) & authnAndAuthz()) { (compId, account) =>
-        processClockInRequest(compId, account)
-      }
+    (post & path("records"/"clock-in") & formFields('computerid.?) & authnAndAuthz()) { (compId, account) =>
+      processClockInRequest(compId, account)
     } ~
-    logRequestResult("Clock Out") {
-      (post & path("records"/"clock-out") & formField('computerid.?) & authnAndAuthz()) { (compId, account) =>
-        ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
-      }
+    (post & path("records"/"clock-out") & formField('computerid.?) & authnAndAuthz()) { (compId, account) =>
+      ClockInOutRecord.clockOutAll(account.netId, compId).responseWith(OK)
     } ~
     (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>
       getRecords(dateFilter, acc.netId)
