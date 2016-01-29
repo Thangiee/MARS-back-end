@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.FileInfo
 import cats.data.Xor
 import cats.std.all._
+import com.facepp.error.FaceppParseException
 import com.facepp.http.PostParameters
 import com.utamars.dataaccess.{Account, Assistant, FaceImage, Role}
 import spray.json._
@@ -80,7 +81,20 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
       } yield (confidence, isSamePerson)
 
       result.fold(
-        err => faceppErrHandler(err),
+        {
+          case err@(ex: FaceppParseException) =>
+            if (Seq(403, 431, 432, 500, 502).contains(ex.code)) {
+              // For issues with the face++ api that are out of our control, just let the
+              // recognition request succeed (less annoying for the users).
+              // For details of the error codes, see:
+              // http://www.faceplusplus.com/detection_detect/ and http://www.faceplusplus.com/recognitionverify-2/
+              // todo: email the admin that facial recognition is down?
+              logger.error(s">>> Face++ Recognition ISSUE <<<: ${ex.code}, ${ex.msg}", ex)
+              HttpResponse(OK)
+            } else {
+              faceppErrHandler(err)
+            }
+        },
         res => {
           val (confidence, isSamePerson) = res
           val normalizeConf = if (isSamePerson) confidence / 100.0 else 1 - (confidence / 100.0)

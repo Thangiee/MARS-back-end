@@ -103,13 +103,25 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
     }
   }
 
+  implicit class FaceppParseExceptionImplicit(ex: FaceppParseException) {
+    def code: Int   = """(?<=responseCode=).+""".r.findFirstIn(ex.toString).getOrElse("500").toInt
+    def msg: String = """(?<=message=).+(?=,)""".r.findFirstIn(ex.toString).getOrElse("Parsed empty message")
+  }
+
   def faceppErrHandler(err: Throwable): HttpResponse = err match {
     case ex: FaceppParseException =>
-      val code = """(?<=responseCode=).+""".r.findFirstIn(ex.toString).getOrElse("500").toInt
-      val msg  = """(?<=message=).+(?=,)""".r.findFirstIn(ex.toString).getOrElse("")
+      val code = ex.code
+      val msg  = ex.msg
       code match {
-        case 403|500|502|441|453 =>
-          logger.error(s"$code: $msg", ex)
+        case 403|500|502 =>
+          logger.error(s"Face++: $code, $msg", ex)
+          HttpResponse(InternalServerError)
+        case 431 =>
+          HttpResponse(RequestEntityTooLarge, entity = "The image is too large.")
+        case 441 =>
+          HttpResponse(BadRequest, entity = "Face++: Unable to do recognition since there is no face associated with this assistant. Please add a face first.")
+        case 453 =>
+          logger.error("Face++: Try to create a person (http://www.faceplusplus.com/personcreate/) but the name already exists.")
           HttpResponse(InternalServerError)
         case _ =>
           HttpResponse(StatusCodes.custom(code, reason = msg))

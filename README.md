@@ -343,7 +343,6 @@ Returning
 |        400       | [Bad request](#400-bad-request)       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Assistant is already clocked out |
-|        410       | Gone. Either the UUID was not registered or it has been expired |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
@@ -426,6 +425,7 @@ Returning
 |        200       | Return [Recognition Result](#recognition-result) |
 |        400       | [Bad request](#400-bad-request)       |
 |        400       | Can't find a face on the uploaded image |
+|        413       | The included image is too large       |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -453,6 +453,7 @@ Returning
 |        400       | [Bad request](#400-bad-request)       |
 |        400       | Can't find a face on the uploaded image |
 |        403       | [Forbidden](#403-forbidden)           |
+|        413       | The included image is too large       |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
