@@ -90,7 +90,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
               // http://www.faceplusplus.com/detection_detect/ and http://www.faceplusplus.com/recognitionverify-2/
               // todo: email the admin that facial recognition is down?
               logger.error(s">>> Face++ Recognition ISSUE <<<: ${ex.code}, ${ex.msg}", ex)
-              HttpResponse(OK)
+              HttpResponse(OK, entity = Map("confidence" -> 100.0, "threshold" -> asst.threshold).toJson.compactPrint)
             } else {
               faceppErrHandler(err)
             }
