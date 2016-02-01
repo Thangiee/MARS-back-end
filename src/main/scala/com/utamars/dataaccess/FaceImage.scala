@@ -10,7 +10,12 @@ import better.files._
 import scala.concurrent.Future
 import scala.util.Random
 
-case class FaceImage(id: String, netId: String, path: String, faceId: String)
+case class FaceImage(id: String, netId: String, faceId: String) {
+  def path: String = {
+    val dir = config.getString("service.face-recognition.dir")
+    s"$dir/$netId/$id"
+  }
+}
 
 object FaceImage {
 
@@ -24,9 +29,8 @@ object FaceImage {
   def create(netId: String, file: File, metadata: FileInfo, faceId: String): XorT[Future, DataAccessErr, FaceImage] = {
     val f = file.toScala
     val ext = metadata.contentType.mediaType.fileExtensions.headOption.map(ex => "."+ex.replace("jpe", "jpg")).getOrElse("")
-    val id = Random.alphanumeric.take(5 + Random.nextInt(3)).mkString + ext
-    val dir = config.getString("service.face-recognition.dir")
-    val img = FaceImage(id, netId, path=s"$dir/$netId/$id", faceId)
+    val imgId = Random.alphanumeric.take(5 + Random.nextInt(3)).mkString + ext
+    val img = FaceImage(imgId, netId, faceId)
 
     f.moveTo(img.path.toFile.createIfNotExists(), overwrite = true)
     (DB.FaceImageTable += img).map(_ => img)

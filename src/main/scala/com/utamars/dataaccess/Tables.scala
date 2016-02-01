@@ -76,11 +76,10 @@ private [dataaccess] trait Tables {
   }
 
   class FaceImageTable(_tableTag: Tag) extends Table[FaceImage](_tableTag, "face_image") {
-    def * = (id, netId, path, faceId) <> (FaceImage.apply _ tupled, FaceImage.unapply)
+    def * = (id, netId, faceId) <> (FaceImage.apply _ tupled, FaceImage.unapply)
 
     val id    : Rep[String] = column[String]("id", O.PrimaryKey, O.Length(128, varying = true))
     val netId : Rep[String] = column[String]("net_id", O.Length(128, varying = true))
-    val path  : Rep[String] = column[String]("path", O.Length(128, varying = true))
     val faceId: Rep[String] = column[String]("face_id", O.Length(128, varying = true))
 
     lazy val assistantTableFk = foreignKey("face_image_net_id_fkey", netId, AssistantTable)(asst => asst.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
