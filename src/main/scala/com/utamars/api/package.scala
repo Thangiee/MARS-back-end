@@ -3,21 +3,16 @@ package com.utamars
 import java.sql.Timestamp
 
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.data.{Xor, XorT}
-import com.facepp.error.FaceppParseException
-import com.facepp.http.HttpRequests
 import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
-import com.utamars.dataaccess.NotFound
 import com.utamars.dataaccess._
 import com.utamars.util.TimeConversion
 import org.joda.time.LocalDate
-import org.json.JSONException
 import spray.json._
 
 import scala.concurrent.Future
@@ -27,7 +22,6 @@ import scala.util.{Failure, Success}
 package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with NullOptions with LazyLogging {
 
   private[api] val config = ConfigFactory.load()
-  private[api] val facePlusPlus = new HttpRequests(config.getString("facepp.key"), config.getString("facepp.secret"), false, false)
 
   type Username = String
   type ErrMsg = String
@@ -102,35 +96,4 @@ package object api extends AnyRef with TimeConversion with DefaultJsonProtocol w
         HttpResponse(StatusCodes.InternalServerError)
     }
   }
-
-  implicit class FaceppParseExceptionImplicit(ex: FaceppParseException) {
-    def code: Int   = """(?<=responseCode=).+""".r.findFirstIn(ex.toString).getOrElse("500").toInt
-    def msg: String = """(?<=message=).+(?=,)""".r.findFirstIn(ex.toString).getOrElse("Parsed empty message")
-  }
-
-  def faceppErrHandler(err: Throwable): HttpResponse = err match {
-    case ex: FaceppParseException =>
-      val code = ex.code
-      val msg  = ex.msg
-      code match {
-        case 403|500|502 =>
-          logger.error(s"Face++: $code, $msg", ex)
-          HttpResponse(InternalServerError)
-        case 431 =>
-          HttpResponse(RequestEntityTooLarge, entity = "The image is too large.")
-        case 441 =>
-          HttpResponse(BadRequest, entity = "Face++: Unable to do recognition since there is no face associated with this assistant. Please add a face first.")
-        case 453 =>
-          logger.error("Face++: Try to create a person (http://www.faceplusplus.com/personcreate/) but the name already exists.")
-          HttpResponse(InternalServerError)
-        case _ =>
-          HttpResponse(StatusCodes.custom(code, reason = msg))
-      }
-    case ex: JSONException =>
-      HttpResponse(BadRequest, entity = "Could not detect face in the given image.")
-    case ex =>
-      logger.error(ex.getMessage, ex)
-      HttpResponse(InternalServerError)
-  }
-
 }

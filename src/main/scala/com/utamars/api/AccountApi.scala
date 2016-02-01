@@ -3,12 +3,11 @@ package com.utamars.api
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
-import cats.data.Xor
 import cats.std.all._
-import com.facepp.http.PostParameters
 import com.github.t3hnar.bcrypt._
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAssistantForm, UpdateInstructorForm}
+import com.utamars.util.FacePP
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -22,15 +21,12 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       formFields('netid, 'user, 'pass, 'email, 'rate.as[Double], 'job, 'dept, 'first, 'last,
         'empid, 'title, 'titlecode, 'threshold.as[Double].?).as(CreateAssistantForm) { form =>
 
-        val nameParam = new PostParameters().setPersonName(s"mars_${form.netId}")
-        Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(
-          succ => {
-            Xor.catchNonFatal(facePlusPlus.personCreate(nameParam)) match {
-              case Xor.Right(_)  => HttpResponse(OK)
-              case Xor.Left(err) => Account.deleteBy(form.user); faceppErrHandler(err)
-            }
-          }
-        )
+        val result = for {
+          _ <- Account.createFromForm(form.copy(pass = form.pass.bcrypt)).leftMap(_.toHttpResponse)
+          _ <- FacePP.personCreate(s"mars_${form.netId}")
+        } yield ()
+
+        complete(result.fold(errResponse => { Account.deleteBy(form.user); errResponse }, succ => HttpResponse(OK)))
       }
     } ~
     (post & path("account"/"instructor")) {
@@ -45,11 +41,13 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       Account.findBy(username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint)
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
-      Account.findBy(username).map { asst =>
-        val nameParam = new PostParameters().setPersonName(s"mars_${asst.netId}")
-        Xor.catchNonFatal(facePlusPlus.personDelete(nameParam)).leftMap(err => logger.error(err.getMessage, err))
-        Account.deleteBy(username)
-      }.responseWith(OK)
+      val result = for {
+        acc <- Account.findBy(username).leftMap(_.toHttpResponse)
+        _   <- FacePP.personDelete(s"mars_${acc.netId}")
+        _   <- Account.deleteBy(username).leftMap(_.toHttpResponse)
+      } yield ()
+
+      complete(result.fold(errResponse => errResponse , succ => HttpResponse(OK)))
     } ~
     ((post|put) & path("account"/"change-password") & authnAndAuthz()) { acc =>
       formField('newpassword) { newPass =>

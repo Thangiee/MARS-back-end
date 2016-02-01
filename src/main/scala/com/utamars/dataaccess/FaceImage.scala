@@ -8,7 +8,7 @@ import com.utamars.dataaccess.DB.driver.api._
 import better.files._
 
 import scala.concurrent.Future
-import scala.util.Random
+import scala.util.{Try, Random}
 
 case class FaceImage(id: String, netId: String, faceId: String) {
   def path: String = {
@@ -21,19 +21,30 @@ object FaceImage {
 
   def findBy(id: String): XorT[Future, DataAccessErr, FaceImage] = DB.FaceImageTable.filter(_.id === id).result.headOption
 
-  def findAll(netId: String): XorT[Future, DataAccessErr, Seq[FaceImage]] =
-    DB.FaceImageTable.filter(_.netId.toLowerCase === netId.toLowerCase).result
+  def findAllGood(netId: String): XorT[Future, DataAccessErr, Seq[FaceImage]] =
+    DB.FaceImageTable.filter(r => r.netId.toLowerCase === netId.toLowerCase && r.faceId =!= "").result
 
-  def deleteBy(id: String): XorT[Future, DataAccessErr, Unit] = DB.FaceImageTable.filter(_.id === id).delete
+  def findAllBad(netId: String): XorT[Future, DataAccessErr, Seq[FaceImage]] =
+    DB.FaceImageTable.filter(r => r.netId.toLowerCase === netId.toLowerCase && r.faceId === "").result
 
   def create(netId: String, file: File, metadata: FileInfo, faceId: String): XorT[Future, DataAccessErr, FaceImage] = {
     val f = file.toScala
-    val ext = metadata.contentType.mediaType.fileExtensions.headOption.map(ex => "."+ex.replace("jpe", "jpg")).getOrElse("")
-    val imgId = Random.alphanumeric.take(5 + Random.nextInt(3)).mkString + ext
+    val ext = metadata.contentType.mediaType.subType
+    val imgId = Random.alphanumeric.take(5 + Random.nextInt(3)).mkString + "." + ext
     val img = FaceImage(imgId, netId, faceId)
 
     f.moveTo(img.path.toFile.createIfNotExists(), overwrite = true)
     (DB.FaceImageTable += img).map(_ => img)
+  }
+
+  implicit class PostfixOps(faceImage: FaceImage) {
+    def update(): XorT[Future, DataAccessErr, Unit] =
+      DB.FaceImageTable.filter(_.id === faceImage.id).update(faceImage)
+
+    def delete(): XorT[Future, DataAccessErr, Unit] = {
+      Try(faceImage.path.toFile.delete(ignoreIOExceptions = true))
+      DB.FaceImageTable.filter(_.id === faceImage.id).delete
+    }
   }
 }
 
