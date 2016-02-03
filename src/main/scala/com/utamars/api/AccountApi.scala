@@ -1,6 +1,5 @@
 package com.utamars.api
 
-import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.std.all._
@@ -8,7 +7,6 @@ import com.github.t3hnar.bcrypt._
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAssistantForm, UpdateInstructorForm}
 import com.utamars.util.FacePP
-import spray.json._
 
 import scala.concurrent.ExecutionContext
 
@@ -22,63 +20,63 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
         'empid, 'title, 'titlecode, 'threshold.as[Double].?).as(CreateAssistantForm) { form =>
 
         val result = for {
-          _ <- Account.createFromForm(form.copy(pass = form.pass.bcrypt)).leftMap(_.toHttpResponse)
+          _ <- Account.createFromForm(form.copy(pass = form.pass.bcrypt)).leftMap(err2HttpResp)
           _ <- FacePP.personCreate(s"mars_${form.netId}")
         } yield ()
 
-        complete(result.fold(errResponse => { Account.deleteBy(form.user); errResponse }, succ => HttpResponse(OK)))
+        complete(result.reply(succ => OK, errResp => { Account.deleteBy(form.user); errResp }))
       }
     } ~
     (post & path("account"/"instructor")) {
       formFields('netid, 'user, 'pass, 'email, 'first, 'last).as(CreateInstructorAccForm) { form =>
-        Account.createFromForm(form.copy(pass = form.pass.bcrypt)).responseWith(OK)
+        complete(Account.createFromForm(form.copy(pass = form.pass.bcrypt)).reply(_ => OK))
       }
     } ~
     (get & path("account") & authnAndAuthz()) { (acc) =>
-      Account.findBy(acc.username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint) // hide password
+      complete(Account.findBy(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat)) // hide password
     } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
-      Account.findBy(username).responseWith(acc => acc.copy(passwd = "").toJson.compactPrint)
+      complete(Account.findBy(username).reply(acc => acc.copy(passwd = "").jsonCompat))
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
       val result = for {
-        acc <- Account.findBy(username).leftMap(_.toHttpResponse)
+        acc <- Account.findBy(username).leftMap(err2HttpResp)
         _   <- FacePP.personDelete(s"mars_${acc.netId}")
-        _   <- Account.deleteBy(username).leftMap(_.toHttpResponse)
+        _   <- Account.deleteBy(username).leftMap(err2HttpResp)
       } yield ()
 
-      complete(result.fold(errResponse => errResponse , succ => HttpResponse(OK)))
+      complete(result.reply(_ => OK))
     } ~
     ((post|put) & path("account"/"change-password") & authnAndAuthz()) { acc =>
       formField('newpassword) { newPass =>
-        acc.changePassword(newPass.bcrypt).responseWith(OK)
+        complete(acc.changePassword(newPass.bcrypt).reply(_ => OK))
       }
     } ~
     ((post|put) & path("account"/"change-password"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
       formField('newpassword) { newPass =>
-        Account.changePassword(username, newPass.bcrypt).responseWith(OK)
+        complete(Account.changePassword(username, newPass.bcrypt).reply(_ => OK))
       }
     } ~
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>
-      Assistant.findBy(acc.netId).responseWith(asst => asst.toJson.compactPrint)
+      complete(Assistant.findBy(acc.netId).reply(asst => asst.jsonCompat))
     } ~
     (get & path("assistant"/Segment) & authnAndAuthz(Role.Instructor, Role.Admin)) { (netId, _) =>
-      Assistant.findBy(netId).responseWith(asst => asst.toJson.compactPrint)
+      complete(Assistant.findBy(netId).reply(asst => asst.jsonCompat))
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>
       formFields('rate.as[Double].?, 'dept.?, 'title.?, 'titlecode.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
-        Assistant.update(acc.netId, form).responseWith(OK)
+        complete(Assistant.update(acc.netId, form).reply(_ => OK))
       }
     } ~
     (get & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>
-      Instructor.findBy(acc.netId).responseWith(inst => inst.toJson.compactPrint)
+      complete(Instructor.findBy(acc.netId).reply(inst => inst.jsonCompat))
     } ~
     (get & path("instructor"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>
-      Instructor.findBy(netId).responseWith(inst => inst.toJson.compactPrint)
+      complete(Instructor.findBy(netId).reply(inst => inst.jsonCompat))
     } ~
     ((post|put) & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>
       formFields('email.?, 'lastname.?, 'firstname.?).as(UpdateInstructorForm) { form =>
-        Instructor.update(acc.netId, form).responseWith(OK)
+        complete(Instructor.update(acc.netId, form).reply(_ => OK))
       }
     }
 }

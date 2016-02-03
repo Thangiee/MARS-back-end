@@ -1,10 +1,12 @@
 package com.utamars.api
 
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, HttpChallenge, HttpCredentials}
+import akka.http.scaladsl.model.{StatusCode, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import cats.data.Xor
+import cats.data.{Xor, XorT}
+import cats.std.all._
 import com.github.t3hnar.bcrypt._
 import com.softwaremill.session.SessionDirectives._
 import com.softwaremill.session.SessionOptions._
@@ -12,9 +14,12 @@ import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Try, Success}
+import scala.language.implicitConversions
+import scala.util.{Success, Try}
 
 trait Api extends AnyRef with LazyLogging {
+
+  def route: Route
 
   /** Limit this service to only the included roles */
   def defaultAuthzRoles: Seq[Role] = Nil
@@ -58,6 +63,32 @@ trait Api extends AnyRef with LazyLogging {
   def authnAndAuthz(authzRoles: Role*)(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
     authn.flatMap(acc => authz(acc, if (authzRoles.isEmpty) defaultAuthzRoles else authzRoles))
 
-  def route: Route
+
+  implicit class XorHttpResponseImplicit[L <: HttpResponse, R](future: XorT[Future, L, R]) {
+    def reply(onSucc: (R) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(response => response, onSucc)
+    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(onErr, onSucc)
+  }
+
+  implicit class XorDataAccessErrImplicit[L <: DataAccessErr, R](future: XorT[Future, L, R]) {
+    def reply(onSucc: (R) => Response)(implicit ec: ExecutionContext) : Future[Response] = future.fold(err => err2HttpResp(err), onSucc)
+    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(onErr, onSucc)
+  }
+
+  implicit def tuple2HttpResponse(response: (StatusCode, String)): HttpResponse = {
+    val (code, msg) = response
+    HttpResponse(code, entity = msg)
+  }
+
+  def err2HttpResp(err: DataAccessErr): HttpResponse = err match {
+    case NotFound             => HttpResponse(StatusCodes.NotFound)
+    case SqlDuplicateKey(msg) => HttpResponse(StatusCodes.Conflict, entity = msg)
+    case SqlErr(code, msg) =>
+      logger.error(s"SQL error code: $code | $msg")
+      HttpResponse(StatusCodes.InternalServerError)
+    case InternalErr(error)  =>
+      logger.error(error.getMessage)
+      error.printStackTrace()
+      HttpResponse(StatusCodes.InternalServerError)
+  }
 }
 

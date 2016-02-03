@@ -44,7 +44,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
         _         = EMailer.mailTo(inst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)
       } yield ()
 
-      result.responseWith(OK)
+      complete(result.reply(_ => OK))
     } else {
       complete(HttpResponse(BadRequest, entity = s"Not a valid date: month=$month year=$year"))
     }
@@ -59,7 +59,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
         _         = EMailer.mailTo(asst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)
       } yield ()
 
-      result.responseWith(OK)
+      complete(result.reply(_ => OK))
     } else {
       complete(HttpResponse(BadRequest, entity = s"Not a valid date: month=$month year=$year"))
     }
