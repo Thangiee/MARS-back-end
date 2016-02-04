@@ -7,13 +7,13 @@ import com.softwaremill.session.{RefreshTokenStorage, SessionManager}
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
-import com.utamars.util.TimeConversion
+import com.utamars.util.TimeImplicits
 import org.joda.time.LocalDate
 import spray.json._
 
 import scala.language.implicitConversions
 
-package object api extends AnyRef with TimeConversion with DefaultJsonProtocol with NullOptions with LazyLogging {
+package object api extends AnyRef with TimeImplicits with DefaultJsonProtocol with NullOptions with LazyLogging {
 
   private[api] val config = ConfigFactory.load()
 

@@ -39,7 +39,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
     instAlice.create()
     asstBob.create()
 
-    import com.utamars.util.TimeConversion._
+    import com.utamars.util.TimeImplicits._
     ClockInOutRecord(None, "b123", new DateTime(2015, 9, 4, 11, 45), Some(new DateTime(2015, 9, 4, 13, 15)), Some("incomp"), Some("outcomp")).create()
     ClockInOutRecord(None, "b123", new DateTime(2015, 9, 2, 13, 0), Some(new DateTime(2015, 9, 2, 14, 0)), Some("incomp"), Some("outcomp")).create()
     ClockInOutRecord(None, "b123", new DateTime(2015, 9, 12, 14, 0), Some(new DateTime(2015, 9, 12, 18, 0)), Some("incomp"), Some("outcomp")).create()

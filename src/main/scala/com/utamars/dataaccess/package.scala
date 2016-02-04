@@ -3,7 +3,7 @@ package com.utamars
 import akka.dispatch.ExecutionContexts
 import cats.data.{Xor, XorT}
 import com.typesafe.config.ConfigFactory
-import com.utamars.util.TimeConversion
+import com.utamars.util.TimeImplicits
 import org.postgresql.util.PSQLException
 import slick.dbio.{Effect, DBIOAction, NoStream}
 
@@ -11,7 +11,7 @@ import scala.concurrent.Future
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.language.implicitConversions
 
-package object dataaccess extends AnyRef with TimeConversion {
+package object dataaccess extends AnyRef with TimeImplicits {
 
   private[dataaccess] val config = ConfigFactory.load()
   private val parallelism: Int = config.getInt("db.parallelism")
