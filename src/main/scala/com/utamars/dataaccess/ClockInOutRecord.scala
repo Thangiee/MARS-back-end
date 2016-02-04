@@ -34,7 +34,10 @@ object ClockInOutRecord {
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption
 
   def findBetween(start: LocalDate, end: LocalDate, netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
-    DB.ClockInOutRecordTable.filter(r => r.netId.toLowerCase === netId.toLowerCase && r.inTime >= start.toStartOfDayTs && r.inTime <= end.toEndOfDayTs)
+    DB.ClockInOutRecordTable
+      .filter(r => r.netId.toLowerCase === netId.toLowerCase &&
+                   r.inTime >= start.toStartOfDayTimestamp &&
+                   r.outTime.map(_ <= end.toEndOfDayTimestamp).getOrElse(false)) // record with no out time will be excluded
       .sortBy(_.inTime.desc).result
 
   def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] =

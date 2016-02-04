@@ -20,8 +20,8 @@ trait TimeConversion {
   implicit def jodaLocalDateFrom(ts: Timestamp): LocalDate = new LocalDate(ts.getTime)
 
   implicit class LocalDateConversion(localDate: LocalDate) {
-    def toStartOfDayTs: Timestamp = new Timestamp(localDate.toDateTimeAtStartOfDay.getMillis)
-    def toEndOfDayTs: Timestamp = new Timestamp((localDate.toDateTimeAtStartOfDay + 1.day - 1.milli).getMillis)
+    def toStartOfDayTimestamp: Timestamp = new Timestamp(localDate.toDateTimeAtStartOfDay.getMillis)
+    def toEndOfDayTimestamp: Timestamp = new Timestamp((localDate.toDateTimeAtStartOfDay + 1.day - 1.milli).getMillis)
   }
 }
 

@@ -12,9 +12,6 @@ import org.joda.time.{Days, LocalDate, ReadablePartial}
 
 import scala.concurrent.Future
 
-// todo: what to do on with multiple clock in/out on the same day
-// todo: how to fill time cell when clocks out after midnight
-// todo: what to do when assistant has not clock out before the end of a pay period
 object TimeSheet {
 
   private val printDt = (pattern: String, date: ReadablePartial) =>  DateTimeFormat.forPattern(pattern).print(date)
@@ -47,7 +44,7 @@ object TimeSheet {
       fields.setField("Period", printDt("MM-dd-YYYY", end))
       fields.setField("PayDate", printDt("MM-dd-YYYY", UtaDate.payDate(end)))
       fields.setField("DueDate", printDt("MM-dd-YYYY", UtaDate.dueDate(end)))
-      fields.setField("PercentOfTime", "TODO") // todo: input type?
+      fields.setField("PercentOfTime", "<50%")
       fields.setField("Rate", "$" + s"${asst.rate}/hr")
 
       // fill in the Day and Date rows
@@ -58,20 +55,44 @@ object TimeSheet {
         fields.setField(s"Date$timeBox", printDt("MM/dd", current))
       }
 
-      val payPeriodTotalTime = records.map { r =>
-        // fill in clock in time cells
-        val inTimeBoxField = (if (r.inTime.getHourOfDay <= 12) "AmIn" else "PmIn") + getTimeBox(r.inTime)
-        fields.setField(inTimeBoxField, printDt("h:mm", r.inTime.toLocalTime))
+      val completedRecords = records.filter(_.outTime.isDefined) // i.e. records that has been clocked out
+      val recordsGroupBySameDay = completedRecords.groupBy(r => new DateTime(r.inTime.getMillis).dayOfMonth()).values
 
-        // fill in clock out time cells
-        val outTime = r.outTime.getOrElse(end.toEndOfDayTs)
-        val outTimeBoxField = (if (outTime.getHourOfDay <= 12) "AmOut" else "PmOut") + getTimeBox(outTime)
-        fields.setField(outTimeBoxField, printDt("h:mm", outTime.toLocalTime))
+      // fill in clock in time cells
+      recordsGroupBySameDay.foreach { sameDayRecords =>
+        val (amRecords, pmRecords) = sameDayRecords.reverse.partition(_.inTime.getHourOfDay <= 12)
 
+        if (amRecords.nonEmpty) {
+          val inTimes = amRecords.map(r => printDt("h:mm", r.inTime.toLocalTime)).mkString("\n")
+          fields.setField("AmIn" + getTimeBox(amRecords.head.inTime), inTimes)
+        }
+
+        if (pmRecords.nonEmpty) {
+          val inTimes = pmRecords.map(r => printDt("h:mm", r.inTime.toLocalTime)).mkString("\n")
+          fields.setField("PmIn" + getTimeBox(pmRecords.head.inTime), inTimes)
+        }
+      }
+
+      // fill in clock out time cells
+      recordsGroupBySameDay.foreach { sameDayRecords =>
+        val (amRecords, pmRecords) = sameDayRecords.reverse.partition(_.outTime.get.getHourOfDay <= 12)
+
+        if (amRecords.nonEmpty) {
+          val outTimes = amRecords.map(r => printDt("h:mm", r.outTime.get.toLocalTime)).mkString("\n")
+          fields.setField("AmOut" + getTimeBox(amRecords.head.outTime.get), outTimes)
+        }
+
+        if (pmRecords.nonEmpty) {
+          val outTimes = pmRecords.map(r => printDt("h:mm", r.outTime.get.toLocalTime)).mkString("\n")
+          fields.setField("PmOut" + getTimeBox(pmRecords.head.outTime.get), outTimes)
+        }
+      }
+
+      val payPeriodTotalTime = recordsGroupBySameDay.map { sameDayRecords =>
+        val total = sameDayRecords.foldRight(new Duration(0))((r,total) => new Duration(r.inTime.getTime, r.outTime.get.getTime) + total)
         // file in the daily total hrs
-        val total = new Duration(r.inTime.getTime, outTime.getTime)
         fields.setExtraMargin(0, 8) // top margins to center vertically
-        fields.setField(s"Total${getTimeBox(r.inTime)}", f"${total.getStandardHours + total.getStandardMinutes % 60 / 60.0}%1.2f")
+        fields.setField(s"Total${getTimeBox(sameDayRecords.head.outTime.get)}", f"${total.getStandardHours + total.getStandardMinutes % 60 / 60.0}%1.2f")
         fields.setExtraMargin(0, 0) // reset margins
 
         total // return the the daily total so we can sum up the whole pay period total
