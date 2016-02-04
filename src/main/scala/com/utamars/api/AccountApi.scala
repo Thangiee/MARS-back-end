@@ -35,6 +35,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("account") & authnAndAuthz()) { (acc) =>
       complete(Account.findBy(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat)) // hide password
     } ~
+    (get & path("account"/"all") & authnAndAuthz(Role.Admin)) { _ =>
+      complete(Account.all().reply(acc => Map("accounts" -> acc).jsonCompat))
+    } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
       complete(Account.findBy(username).reply(acc => acc.copy(passwd = "").jsonCompat))
     } ~
@@ -60,6 +63,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>
       complete(Assistant.findBy(acc.netId).reply(asst => asst.jsonCompat))
     } ~
+    (get & path("assistant"/"all") & authnAndAuthz(Role.Admin, Role.Instructor)) { _ =>
+      complete(Assistant.all().reply(assts => Map("assistants" -> assts).jsonCompat))
+    } ~
     (get & path("assistant"/Segment) & authnAndAuthz(Role.Instructor, Role.Admin)) { (netId, _) =>
       complete(Assistant.findBy(netId).reply(asst => asst.jsonCompat))
     } ~
@@ -70,6 +76,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     } ~
     (get & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>
       complete(Instructor.findBy(acc.netId).reply(inst => inst.jsonCompat))
+    } ~
+    (get & path("instructor"/"all") & authnAndAuthz(Role.Admin)) { _ =>
+      complete(Instructor.all().reply(inst => Map("instructors" -> inst).jsonCompat))
     } ~
     (get & path("instructor"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>
       complete(Instructor.findBy(netId).reply(inst => inst.jsonCompat))

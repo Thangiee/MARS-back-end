@@ -11,6 +11,8 @@ case class Instructor(netId: String, email: String, lastName: String, firstName:
 
 object Instructor {
 
+  def all(): XorT[Future, DataAccessErr, Seq[Instructor]] = DB.InstructorTable.result
+
   def findBy(netId: String): XorT[Future, DataAccessErr, Instructor] =
     DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 

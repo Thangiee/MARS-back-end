@@ -28,6 +28,9 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
     (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>
       complete(getRecords(dateFilter, acc.netId))
     } ~
+    (get & path("records"/"all") & authnAndAuthz(Role.Instructor)) { _ =>
+      complete(ClockInOutRecord.all().reply(records => Map("records" -> records).jsonCompat))
+    } ~
     (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Instructor)) { (netId, dateFilter, _) =>
       complete(getRecords(dateFilter, netId))
     } ~
@@ -60,22 +63,22 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
     dateFilter match {
       case Some("pay-period")  =>
         val (start, end) = halfMonth(today.getMonthOfYear, today.getYear, first = today.getDayOfMonth < 16)
-        ClockInOutRecord.findBetween(start, end, netId).reply(records => ("records" -> records).jsonCompat)
+        ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
       case Some("month")       =>
         val start = today.dayOfMonth().withMaximumValue()
         val end   = today.dayOfMonth().withMaximumValue()
-        ClockInOutRecord.findBetween(start, end, netId).reply(records => ("records" -> records).jsonCompat)
+        ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
       case Some("year") =>
         val start = today.monthOfYear().withMinimumValue().dayOfMonth().withMinimumValue()
         val end   = today.monthOfYear().withMaximumValue().dayOfMonth().withMaximumValue()
-        ClockInOutRecord.findBetween(start, end, netId).reply(records => ("records" -> records).jsonCompat)
+        ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
       case Some(_) => Future.successful((BadRequest, "Invalid parameter: filter"))
 
       case None => // no filter, get all records
-        ClockInOutRecord.findBy(netId).reply(records => ("records" -> records).jsonCompat)
+        ClockInOutRecord.findBy(netId).reply(records => Map("records" -> records).jsonCompat)
     }
   }
 }

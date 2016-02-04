@@ -64,7 +64,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
     FaceImage.findAllGood(netId)
       .map(imgs => imgs.map(img => Image(img.id, s"$baseUrl/${img.id}")))
-      .reply(imgs => ("images" -> imgs).jsonCompat)
+      .reply(imgs => Map("images" -> imgs).jsonCompat)
   }
 
   private def doFacialRecognition(acc: Account, metadata: FileInfo, file: File): Future[Response] = {
@@ -80,7 +80,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
       res => {
         val (confidence, isSamePerson, threshold) = res
           val normalizeConf = if (isSamePerson) confidence / 100.0 else 1 - (confidence / 100.0)
-          val json = Map("confidence" -> normalizeConf, "threshold" -> threshold).toJson.compactPrint
+          val json = Map("confidence" -> normalizeConf, "threshold" -> threshold).jsonCompat
           HttpResponse(OK, entity = json)
       },
       errResp => errResp match {
@@ -92,7 +92,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
           // todo: email the admin that facial recognition is down?
           logger.error(s">>> Face++ Recognition ISSUE <<<: $code, $entity")
           FaceImage.findAllBad(acc.netId).map(imgs => imgs.foreach(_.delete())) //clean up
-          HttpResponse(OK, entity = Map("confidence" -> 100.0, "threshold" -> 0.0).toJson.compactPrint)
+          HttpResponse(OK, entity = Map("confidence" -> 100.0, "threshold" -> 0.0).jsonCompat)
         case response              =>
           FaceImage.findAllBad(acc.netId).map(imgs => imgs.foreach(_.delete())) //clean up
           response
@@ -111,7 +111,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     } yield img.id
 
     result.reply(
-      imgId => (OK, ("url" -> s"$baseUrl/$imgId").jsonCompat),
+      imgId => (OK, Map("url" -> s"$baseUrl/$imgId").jsonCompat),
       resp  => {
         FaceImage.findAllBad(acc.netId).map(imgs => imgs.foreach(_.delete())) //clean up
         resp

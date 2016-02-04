@@ -4,6 +4,8 @@ import cats.data.XorT
 import cats.implicits._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateAssistantForm
+import slick.dbio.Effect.Read
+import slick.profile.FixedSqlStreamingAction
 
 import scala.concurrent.Future
 
@@ -11,6 +13,8 @@ case class Assistant(netId: String, rate: Double, email: String, job: String, de
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
 object Assistant {
+
+  def all(): XorT[Future, DataAccessErr, Seq[Assistant]] = DB.AssistantTable.result
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
     DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption

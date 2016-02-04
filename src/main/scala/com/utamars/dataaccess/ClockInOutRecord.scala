@@ -22,6 +22,8 @@ case class ClockInOutRecord(
 
 object ClockInOutRecord {
 
+  def all(): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] = DB.ClockInOutRecordTable.sortBy(_.inTime.desc).result
+
   def findBy(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result
 

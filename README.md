@@ -67,6 +67,7 @@ Get info of the current account or specify {*username*} to get info about a spec
 | Method   | Route                | Authorized                    |
 |:--------:|----------------------|-------------------------------|
 | GET      | /account             | Admin, Instructor, Assistant  |
+| GET      | /account/all         | Admin                         |
 | GET      | /account/{*username*}| Admin                         |
 
 Returning
@@ -88,6 +89,7 @@ Get info of the current assistant or specify {*netid*} to get info about a speci
 | Method   | Route                  | Authorized                    |
 |:--------:|------------------------|-------------------------------|
 | GET      | /assistant             | Assistant                     |
+| GET      | /assistant/all         | Admin, Instructor             |
 | GET      | /assistant/{*netid*}   | Admin, Instructor             |
 
 Returning
@@ -176,6 +178,7 @@ Get info of the current instructor or specify {*netid*} to get info about a spec
 | Method   | Route                   | Authorized                    |
 |:--------:|-------------------------|-------------------------------|
 | GET      | /instructor             | Instructor                    |
+| GET      | /instructor/all         | Admin                         |
 | GET      | /instructor/{*netid*}   | Admin                         |
 
 Returning
@@ -356,12 +359,13 @@ filter {*option*}:
   * `month` - get records only from the current month
   * `year`  - get records only from the current year
 
-| Method      | Route                | Authorized                    |
-|:-----------:|----------------------|-------------------------------|
-| GET         | /records             | Assistant                     |
+| Method      | Route                                  | Authorized                    |
+|:-----------:|----------------------------------------|-------------------------------|
+| GET         | /records                               | Assistant                     |
 | GET         | /records?filter={*option*}             | Assistant                     |
-| GET         | /records/{*netid*}   | Instructor                    |
+| GET         | /records/{*netid*}                     | Instructor                    |
 | GET         | /records/{*netid*}?filter={*option*}   | Instructor                    |
+| GET         | /records/all                           | Instructor                    |
 
 Returning
 

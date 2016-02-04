@@ -13,6 +13,8 @@ case class Account(netId: String, username: String, passwd: String, role: String
 
 object Account {
 
+  def all(): XorT[Future, DataAccessErr, Seq[Account]] = DB.AccountTable.result
+
   def createFromForm(form: CreateInstructorAccForm): XorT[Future, DataAccessErr, Unit] =
     DBIO.seq(
       DB.AccountTable += Account(form.netId, form.user, form.pass, Role.Instructor),
