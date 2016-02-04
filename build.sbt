@@ -1,17 +1,14 @@
 name := "MARS-back-end"
-version := "0.4.0"
+version := "0.4.1"
 scalaVersion := "2.11.7"
 scalacOptions += "-Xexperimental"
 
 // akka
-val akkaStreamV = "2.0.2"
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-stream-experimental"             % akkaStreamV,
-  "com.typesafe.akka" %% "akka-http-core-experimental"          % akkaStreamV,
-  "com.typesafe.akka" %% "akka-http-experimental"               % akkaStreamV,
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % akkaStreamV,
-  "com.typesafe.akka" %% "akka-http-testkit-experimental"       % akkaStreamV,
-  "com.typesafe.akka" %% "akka-actor"                           % "2.4.1",
+  "com.typesafe.akka" %% "akka-http-experimental"               % "2.4.2-RC2",
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % "2.4.2-RC2",
+  "com.typesafe.akka" %% "akka-http-testkit-experimental"       % "2.4.2-RC2",
+  "com.typesafe.akka" %% "akka-actor"                           % "2.4.2-RC2",
   "com.softwaremill.akka-http-session" %% "core"                % "0.2.3"
 ).map(_.withJavadoc())
 
