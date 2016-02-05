@@ -3,15 +3,18 @@ package com.utamars
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.RouteResult.Complete
 import akka.http.scaladsl.server.directives.LogEntry
+import akka.http.scaladsl.server.{AuthenticationFailedRejection, RejectionHandler}
 import akka.stream.ActorMaterializer
 import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
+import com.utamars.CustomRejection.NotApprove
 import com.utamars.api._
 import com.utamars.dataaccess.DB
 
@@ -68,6 +71,13 @@ object Boot extends App with CorsSupport with LazyLogging {
         """.stripMargin, Logging.InfoLevel))
     case _ => None // other kind of responses
   }
+
+  implicit def myRejectionHandler = RejectionHandler.newBuilder()
+    .handle {
+      case AuthenticationFailedRejection(_, _) => complete(HttpResponse(Unauthorized, entity = "Invalid username or password."))
+      case NotApprove() => complete(HttpResponse(Forbidden, entity = "This account has not be approve by the administrator."))
+    }
+    .result()
 
   val routes = logRequestResult(customLogging _) {
     pathPrefix("api") { cors(services.map(_.route).reduce(_ ~ _)) }

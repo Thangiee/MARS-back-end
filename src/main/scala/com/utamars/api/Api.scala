@@ -11,6 +11,7 @@ import com.github.t3hnar.bcrypt._
 import com.softwaremill.session.SessionDirectives._
 import com.softwaremill.session.SessionOptions._
 import com.typesafe.scalalogging.LazyLogging
+import com.utamars.CustomRejection.NotApprove
 import com.utamars.dataaccess._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -57,7 +58,8 @@ trait Api extends AnyRef with LazyLogging {
 
   /** Authorize the account by checking if the user's role is in [[Api#authzRoles]] */
   def authz(acc: Account, authzRoles: Seq[Role]=defaultAuthzRoles): Directive1[Account] =
-    if (authzRoles contains acc.role) provide(acc) else reject(AuthorizationFailedRejection)
+    if (authzRoles contains acc.role) { if (acc.approve) provide(acc) else reject(NotApprove()) }
+    else reject(AuthorizationFailedRejection)
 
   /** check authentication and then check Authorization */
   def authnAndAuthz(authzRoles: Role*)(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =

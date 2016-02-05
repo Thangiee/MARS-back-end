@@ -42,6 +42,7 @@ All Endpoints
 * [Instructor Account Creation](#instructor-account-creation)
 * [Update Instructor](#update-instructor)
 * [Change Account Password](#change-account-password)
+* [Approve Account](#approve-account)
 * [Account Deletion](#account-deletion)
 * [Clock In](#clock-in)
 * [Clock Out](#clock-out)
@@ -76,6 +77,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [account](#account)            |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -98,6 +100,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [Assistant](#assistant)        |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -136,7 +139,6 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Assistant account created             |
 |        400       | [Bad request](#400-bad-request)       |
-|        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Net Id or username already exists |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -166,6 +168,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Assistant updated                     |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -187,6 +190,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [Instructor](#instructor)      |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -218,7 +222,6 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Instructor account created            |
 |        400       | [Bad request](#400-bad-request)       |
-|        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Net Id or username already exists |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -246,6 +249,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Instructor updated                    |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -272,6 +276,34 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Account password changed              |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Approve Account 
+
+Approve or un-approve a specific account.
+
+| Method      | Route                                 | Authorized                    |
+|:-----------:|---------------------------------------|-------------------------------|
+| POST or PUT | /account/change-approve/{*username*}  | Admin                         |
+
+Parameters
+
+| Key         | Type   | Required | Description               |
+|-------------|--------|----------|---------------------------|
+| approve     | Boolean| yes      | Account need to be approved to have access to resources |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Account approve changed               |
+|        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -292,6 +324,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Account deleted                       |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -318,6 +351,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Clock in success                      |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Assistant is already clocked in |
 |        500       | [Internal Error](#500-internal-error) |
@@ -344,6 +378,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Clock out success                     |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        409       | Conflict. Assistant is already clocked out |
 |        500       | [Internal Error](#500-internal-error) |
@@ -373,6 +408,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [ClockInOutRecord](#clockinoutrecord) |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -402,6 +438,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Record updated                        |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -429,8 +466,9 @@ Returning
 |        200       | Return [Recognition Result](#recognition-result) |
 |        400       | [Bad request](#400-bad-request)       |
 |        400       | Can't find a face on the uploaded image |
-|        413       | The included image is too large       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
+|        413       | The included image is too large       |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
@@ -456,6 +494,7 @@ Returning
 |        200       | Return [Image URL](#url)              |
 |        400       | [Bad request](#400-bad-request)       |
 |        400       | Can't find a face on the uploaded image |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        413       | The included image is too large       |
 |        500       | [Internal Error](#500-internal-error) |
@@ -476,6 +515,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Image removed                         | 
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -498,6 +538,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [Image Info](#image-info)      |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -524,6 +565,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Return [UUID metadata](#uuid-metadata)|
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -543,6 +585,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | The UUID is valid at the time of the request. Return the given UUID. |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        410       | Gone. Either the UUID was not registered or it has been expired |
 |        500       | [Internal Error](#500-internal-error) |
@@ -564,6 +607,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Successfully login to a session       |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -583,6 +627,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Successfully log out of a session     |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
@@ -616,6 +661,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Successfully generated and emailed the time-sheet |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -650,6 +696,7 @@ Returning
 |:----------------:|---------------------------------------|
 |        200       | Successfully generated and emailed the time-sheet |
 |        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
@@ -664,6 +711,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 | Key           | Type   | Description                                             |
 |:-------------:|--------|---------------------------------------------------------|
+| approve       | Boolean| Account need to be approved to have access to resources |
 | netID         | String | The UT Arlington netID                                  |
 | role          | String | The account role (admin, instructor, or assistant)      |
 | username      | String | The account username                                    |
@@ -674,6 +722,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 ```json
 // example json response
 {
+    "approve": true,
     "netId": "tql7155",
     "role": "assistant",
     "username": "thangiee",
@@ -834,10 +883,14 @@ Common HTTP Error Codes
 
 The request contains bad syntax or invalid parameters/form-data.
 
+#### 401 Unauthorized
+
+The account is not properly authenticated due to invalid username and/or password.
+
 #### 403 Forbidden
 
 You don't have access to this resource because:
-  * the account is not properly authenticated so check the username and password.
+  * the account has not be approve by the administrator.
   * the account role is not authorized. 
 
 #### 404 Not Found

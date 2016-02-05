@@ -21,12 +21,14 @@ import scala.concurrent.duration._
 trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with Matchers with ScalaFutures with GeneratorDrivenPropertyChecks {
   val config = ConfigFactory.load()
 
-  val adminAcc     = Account("00000", "admin", "password", Role.Admin)
-  val instAliceAcc = Account("ali840", "alice123", "password", Role.Instructor)
-  val asstBobAcc   = Account("b123", "bob123", "password", Role.Assistant)
+  val adminAcc     = Account("00000", "admin", "password", Role.Admin, approve = true)
+  val instAliceAcc = Account("ali840", "alice123", "password", Role.Instructor, approve = true)
+  val asstBobAcc   = Account("b123", "bob123", "password", Role.Assistant, approve = true)
+  val asstEveAcc   = Account("e123", "eve123", "password", Role.Assistant, approve = false)
 
   val instAlice = Instructor(instAliceAcc.netId, "alice@gmail.com", "A", "Alice")
   val asstBob   = Assistant(asstBobAcc.netId, 10.50, "bob@gmail.com", Job.Teaching, "CSE", "B", "bob", "1000", "", "", .4)
+  val asstEve   = Assistant(asstEveAcc.netId, 10.50, "eve@gmail.com", Job.Grading, "CSE", "E", "eve", "1001", "", "", .4)
 
   def initDataBase(): Unit = DB.createSchema()
 
@@ -34,10 +36,12 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
     Account.add(
       adminAcc.copy(passwd = adminAcc.passwd.bcrypt),
       instAliceAcc.copy(passwd = instAliceAcc.passwd.bcrypt),
-      asstBobAcc.copy(passwd = asstBobAcc.passwd.bcrypt)
+      asstBobAcc.copy(passwd = asstBobAcc.passwd.bcrypt),
+      asstEveAcc.copy(passwd = asstEveAcc.passwd.bcrypt)
     )
     instAlice.create()
     asstBob.create()
+    asstEve.create()
 
     import com.utamars.util.TimeImplicits._
     ClockInOutRecord(None, "b123", new DateTime(2015, 9, 4, 11, 45), Some(new DateTime(2015, 9, 4, 13, 15)), Some("incomp"), Some("outcomp")).create()

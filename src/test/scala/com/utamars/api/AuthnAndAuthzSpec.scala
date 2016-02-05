@@ -3,12 +3,15 @@ package com.utamars.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.utamars.ServiceSpec
+import com.utamars.{Boot, ServiceSpec}
 import com.utamars.dataaccess.Role
 
 class AuthnAndAuthzSpec extends ServiceSpec {
 
+  implicit val rejectionHandler = Boot.myRejectionHandler
+
   val testService = new Api {
+
     override val defaultAuthzRoles: Seq[Role] = Seq(Role.Admin, Role.Instructor)
 
     override val route: Route =
@@ -29,7 +32,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
     val request  = requestWithCredentials(Get("/admin-and-inst-only"), Route.seal(testService.route)) _
     val request2 = requestWithCredentials(Get("/asst-only"), Route.seal(testService.route)) _
 
-    "response with 200 on authenticated and authorized account" in {
+    "response with 200 on authenticated, authorized, and approved account" in {
       Seq(adminAcc, instAliceAcc).foreach{ acc =>
         request(acc.username, acc.passwd) ~> check {
           status shouldEqual StatusCodes.OK
@@ -43,7 +46,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
       }
     }
 
-    "response with 403 on invalid username and/or password" in {
+    "response with 401 on invalid username and/or password" in {
       val userAndPass = Seq(
         ("bad_username", "bad_passwd"),
         (adminAcc.username, "bad_passwd"),
@@ -51,7 +54,7 @@ class AuthnAndAuthzSpec extends ServiceSpec {
 
       userAndPass.foreach { case (user, passwd) =>
         request(user, passwd) ~> check {
-          status shouldEqual StatusCodes.Forbidden
+          status shouldEqual StatusCodes.Unauthorized
         }
       }
     }
@@ -62,6 +65,12 @@ class AuthnAndAuthzSpec extends ServiceSpec {
       }
 
       request2(adminAcc.username, adminAcc.passwd) ~> check {
+        status shouldEqual StatusCodes.Forbidden
+      }
+    }
+
+    "response with 403 on authenticated and authorized account but not approved" in {
+      request2(asstEveAcc.username, asstEveAcc.passwd) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
     }

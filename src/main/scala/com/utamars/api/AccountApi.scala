@@ -60,6 +60,11 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
         complete(Account.changePassword(username, newPass.bcrypt).reply(_ => OK))
       }
     } ~
+    ((post|put) & path("account"/"change-approve"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
+      formField('approve.as[Boolean]) { newApprove =>
+        complete(Account.findBy(username).flatMap(_.copy(approve = newApprove).update()).reply(_ => OK))
+      }
+    } ~
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>
       complete(Assistant.findBy(acc.netId).reply(asst => asst.jsonCompat))
     } ~
