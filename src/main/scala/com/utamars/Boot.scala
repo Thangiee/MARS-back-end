@@ -75,7 +75,7 @@ object Boot extends App with CorsSupport with LazyLogging {
   implicit def myRejectionHandler = RejectionHandler.newBuilder()
     .handle {
       case AuthenticationFailedRejection(_, _) => complete(HttpResponse(Unauthorized, entity = "Invalid username or password."))
-      case NotApprove() => complete(HttpResponse(Forbidden, entity = "This account has not be approve by the administrator."))
+      case NotApprove() => complete(HttpResponse(Forbidden, entity = "This account has not been approve by the administrator."))
     }
     .result()
 
