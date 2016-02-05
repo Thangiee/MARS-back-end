@@ -731,6 +731,38 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 }
 ```
 
+```json
+// example json response for multiple accounts
+{
+  "accounts": [
+    {
+      "approve": false,
+      "netId": "demo123",
+      "role": "assistant",
+      "username": "demo_asst",
+      "createTime": 1451762754206,
+      "passwd": ""
+    }, 
+    {
+      "approve": true,
+      "netId": "abc123",
+      "role": "instructor",
+      "username": "Ewing",
+      "createTime": 1451583070262,
+      "passwd": ""
+    },
+    {
+      "approve": true,
+      "netId": "mw002",
+      "role": "assistant",
+      "username": "test_minglu",
+      "createTime": 1454347847628,
+      "passwd": ""
+    }
+  ]
+}
+```
+
 #### Assistant
 
 | Key        | Type   | Description               |
@@ -764,6 +796,40 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 }
 ```
 
+```json
+/// example json response for multiple assistants
+{
+  "assistants": [
+    {
+      "rate": 10.4,
+      "netId": "demo123",
+      "email": "abc0@gmail.com",
+      "job": "teaching",
+      "department": "CSE",
+      "lastName": "user",
+      "firstName": "test",
+      "employeeId": "10001234567",
+      "threshold": 0.4,
+      "title": "some title",
+      "titleCode": "123"
+    },
+    {
+      "rate": 10.4,
+      "netId": "aaa123",
+      "email": "aaa@gmail.com",
+      "job": "grading",
+      "department": "CSE",
+      "lastName": "grader",
+      "firstName": "test",
+      "employeeId": "10001234560",
+      "threshold": 0.4,
+      "title": "some title",
+      "titleCode": "123"
+    }
+  ]
+}
+```
+
 #### Instructor
 
 | Key        | Type   | Description               |
@@ -778,8 +844,28 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 {
   "netId": "abc123",
   "email": "aaa@gmail.com",
-  "lastName": "Ewing",
+  "lastName": "E",
   "firstName": "David"
+}
+```
+
+```json
+// example json response for multiple instructors
+{
+  "instructors": [
+    {
+      "netId": "abc123",
+      "email": "aaa@gmail.com",
+      "lastName": "E",
+      "firstName": "David"
+    },
+    {
+      "netId": "abcd123",
+      "email": "bbb@gmail.com",
+      "lastName": "B",
+      "firstName": "Bob"
+    }
+  ]
 }
 ```
 
@@ -805,6 +891,14 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
       "id": 3,
       "outTime": 1441390500000,
       "outComputerId": null
+    },
+    {
+      "inTime": 1472839200000,
+      "inComputerId": "incomp",
+      "netId": "demo123",
+      "id": 2,
+      "outTime": 1472842800000,
+      "outComputerId": "outcomp"
     }
   ]
 }
