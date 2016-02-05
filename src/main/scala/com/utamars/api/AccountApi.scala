@@ -36,7 +36,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       complete(Account.findBy(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat)) // hide password
     } ~
     (get & path("account"/"all") & authnAndAuthz(Role.Admin)) { _ =>
-      complete(Account.all().reply(acc => Map("accounts" -> acc).jsonCompat))
+      complete(Account.all().reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
     } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>
       complete(Account.findBy(username).reply(acc => acc.copy(passwd = "").jsonCompat))
