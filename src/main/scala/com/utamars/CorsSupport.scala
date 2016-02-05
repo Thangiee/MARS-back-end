@@ -3,26 +3,29 @@ package com.utamars
 import akka.http.scaladsl.model.HttpHeader
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Credentials`
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Methods`
-import akka.http.scaladsl.model.headers.`Access-Control-Allow-Origin`
-import akka.http.scaladsl.model.headers.Origin
+import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.server.Directive0
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.MethodRejection
 import akka.http.scaladsl.server.RejectionHandler
+import com.github.nscala_time.time.Imports._
 
 // https://groups.google.com/forum/#!topic/akka-user/5RCZIJt7jHo
 // https://gist.github.com/pcting/2e65c36f868c5cee7d6a
 trait CorsSupport {
 
-  protected def corsAllowOrigins: List[String]
+  protected def corsAllowOrigins: List[String] = List("*")
 
-  protected def corsAllowedHeaders: List[String]
+  protected def corsAllowedHeaders: List[String] = List("Origin", "X-Requested-With", "Authorization",
+    "Content-Type", "Accept", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent")
 
-  protected def corsAllowCredentials: Boolean
+  protected def corsAllowCredentials: Boolean = true
 
-  protected def optionsCorsHeaders: List[HttpHeader]
+  protected def optionsCorsHeaders: List[HttpHeader] = List[HttpHeader](
+    `Access-Control-Allow-Headers`(corsAllowedHeaders.mkString(", ")),
+    `Access-Control-Max-Age`(20.days.seconds), // cache pre-flight response for 20 days
+    `Access-Control-Allow-Credentials`(corsAllowCredentials)
+  )
 
   protected def corsRejectionHandler(allowOrigin: `Access-Control-Allow-Origin`) = RejectionHandler
     .newBuilder().handle {
