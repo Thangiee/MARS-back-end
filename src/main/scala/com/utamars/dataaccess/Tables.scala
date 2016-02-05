@@ -18,13 +18,14 @@ private [dataaccess] trait Tables {
     InstructorTable.schema ++ FaceImageTable.schema
 
   class AccountTable(_tableTag: Tag) extends Table[Account](_tableTag, "account") {
-    def * = (netId, username, passwd, role, createTime) <>(Account.apply _ tupled, Account.unapply)
+    def * = (netId, username, passwd, role, createTime, approve) <>(Account.apply _ tupled, Account.unapply)
 
     val netId     : Rep[String]    = column[String]("net_id", O.PrimaryKey, O.Length(128, varying = true))
     val username  : Rep[String]    = column[String]("username", O.Length(128, varying = true))
     val passwd    : Rep[String]    = column[String]("passwd", O.Length(128, varying = true))
     val role      : Rep[String]    = column[String]("role", O.Length(128, varying = true))
     val createTime: Rep[Timestamp] = column[java.sql.Timestamp]("create_time")
+    val approve   : Rep[Boolean]   = column[Boolean]("approve", O.Default(false))
 
     val index1 = index("account_idx", username, unique = true)
   }

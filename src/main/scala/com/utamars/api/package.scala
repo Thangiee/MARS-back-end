@@ -58,7 +58,7 @@ package object api extends AnyRef with TimeImplicits with DefaultJsonProtocol wi
     }
   }
 
-  implicit val accJsonFormat    = jsonFormat5(Account.apply)
+  implicit val accJsonFormat    = jsonFormat6(Account.apply)
   implicit val asstJsonFormat   = jsonFormat11(Assistant.apply)
   implicit val instJsonFormat   = jsonFormat4(Instructor.apply)
   implicit val recordJsonFormat = jsonFormat6(ClockInOutRecord.apply)
