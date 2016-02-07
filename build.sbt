@@ -1,5 +1,5 @@
 name := "MARS-back-end"
-version := "0.4.1"
+version := "0.5.0"
 scalaVersion := "2.11.7"
 scalacOptions += "-Xexperimental"
 
