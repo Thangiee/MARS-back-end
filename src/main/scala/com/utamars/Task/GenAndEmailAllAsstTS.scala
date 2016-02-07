@@ -25,13 +25,14 @@ case class GenAndEmailAllAsstTS() extends Runnable with LazyLogging {
             .map(ts => (asst.email, ts))
             .leftMap(err => (asst.netId, err))
         }
-
         mails.par.foreach {
           case Xor.Right((email, ts)) => EMailer.mailTo(email, subject=ts.nameWithoutExtension.replace("_", " "), ts)
           case Xor.Left((netId, err)) => logger.error(s"Unable to email $netId(netID) timesheet because $err")
         }
+
       case Xor.Left(dataAccessErr) => logger.error(dataAccessErr.toString)
     }
   }
+
 }
 

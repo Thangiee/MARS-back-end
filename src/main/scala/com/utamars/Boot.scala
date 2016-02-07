@@ -15,9 +15,9 @@ import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
-import com.utamars.Task.GenAndEmailAllAsstTS
+import com.utamars.Task.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 import com.utamars.api._
-import com.utamars.dataaccess.DB
+import com.utamars.dataaccess.{ClockInOutRecord, Assistant, DB}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -92,6 +92,11 @@ object Boot extends App with CorsSupport with LazyLogging {
     val (_, payPeriodEnd) = today.toLocalDate.halfMonth
     if (today.getDayOfMonth == payPeriodEnd.getDayOfMonth) GenAndEmailAllAsstTS().run()
   }
+
+  // run every day at ~5:00am to clock out any assistants still
+  // clocked in and notify them via email.
+  val timeTil5AmNextDay = ((DateTime.now().withHour(5).withMinute(0) + 1.day) - DateTime.now().getMillis).getMillis.toInt
+  system.scheduler.schedule(timeTil5AmNextDay.millis, 24.hours)(ClockOutAndNotify().run())
 
   val interface = config.getString("http.addr.private")
   val port      = config.getInt("http.port")

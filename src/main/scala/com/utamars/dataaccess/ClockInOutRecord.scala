@@ -7,6 +7,8 @@ import cats.implicits._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateRecordForm
+import slick.dbio
+import slick.dbio.Effect.Transactional
 
 import scala.concurrent.Future
 
@@ -47,6 +49,14 @@ object ClockInOutRecord {
         .map(r => (r.outTime, r.outComputerId))
         .update((Some(DateTime.now()), computerId))
     ).transactionally
+
+  def clockOutAll(computerId: Option[String]): XorT[Future, DataAccessErr, Seq[String]] = {
+    val records = DB.ClockInOutRecordTable.filter(r => r.outTime.isEmpty)
+    (for {
+      y <- records.map(_.netId).result
+      x <- records.map(r => (r.outTime, r.outComputerId)).update((Some(DateTime.now()), computerId))
+    } yield y).transactionally
+  }
 
   def update(id: Int, form: UpdateRecordForm): XorT[Future, DataAccessErr, Unit] = {
     findBy(id).flatMap { record =>

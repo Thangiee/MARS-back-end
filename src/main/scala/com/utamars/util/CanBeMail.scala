@@ -56,7 +56,7 @@ object EMailer extends AnyRef with LazyLogging {
     )
 
     sendMail.onComplete {
-      case Success(_) => logger.info(s"Successfully sent $subject e-mail to $addr")
+      case Success(_) => logger.info(s"Successfully sent '$subject' e-mail to $addr")
       case Failure(e) => logger.error(e.getMessage, e.getCause)
     }
   }
