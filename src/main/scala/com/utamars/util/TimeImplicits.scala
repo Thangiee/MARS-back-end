@@ -22,6 +22,21 @@ trait TimeImplicits {
   implicit class LocalDateOps(localDate: LocalDate) {
     def toStartOfDayTimestamp: Timestamp = new Timestamp(localDate.toDateTimeAtStartOfDay.getMillis)
     def toEndOfDayTimestamp: Timestamp = new Timestamp((localDate.toDateTimeAtStartOfDay + 1.day - 1.milli).getMillis)
+
+    def halfMonth: (LocalDate, LocalDate) = {
+      val y = localDate.getYear
+      val m = localDate.getMonthOfYear
+
+      if (localDate.getDayOfMonth < 16) {  // first half of the month; day 1 to 15.
+      val start = new LocalDate(y, m, 1)
+        val end   = new LocalDate(y, m, 15)
+        (start, end)
+      } else {      // second half of the month; day 16 to last day of the month
+      val start = new LocalDate(y, m, 16)
+        val end   = new LocalDate(y, m, 28).dayOfMonth().withMaximumValue()
+        (start, end)
+      }
+    }
   }
 
   implicit class DateTimeOps(dateTime: DateTime) {

@@ -62,7 +62,7 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
     val today = LocalDate.now()
     dateFilter match {
       case Some("pay-period")  =>
-        val (start, end) = halfMonth(today.getMonthOfYear, today.getYear, first = today.getDayOfMonth < 16)
+        val (start, end) = today.halfMonth
         ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
       case Some("month")       =>

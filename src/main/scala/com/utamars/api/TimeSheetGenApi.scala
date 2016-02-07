@@ -39,7 +39,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
       val result = for {
         inst      <- Instructor.findBy(acc.netId)
         asst      <- Assistant.findBy(netId)
-        payPeriod =  halfMonth(month, year, isFirst)
+        payPeriod =  new LocalDate(year, month, if (isFirst) 1 else 28).halfMonth
         timeSheet <- TimeSheet.fromDateRange(payPeriod, asst)
         _         = EMailer.mailTo(inst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)
       } yield ()
@@ -54,7 +54,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
     if ((1 to 12).contains(month) && (year > 0)) {
       val result = for {
         asst      <- Assistant.findBy(netId)
-        payPeriod =  halfMonth(month, year, isFirst)
+        payPeriod =  new LocalDate(year, month, if (isFirst) 1 else 28).halfMonth
         timeSheet <- TimeSheet.fromDateRange(payPeriod, asst)
         _         = EMailer.mailTo(asst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)
       } yield ()
