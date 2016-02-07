@@ -15,6 +15,7 @@ import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
+import com.utamars.Task.GenAndEmailAllAsstTS
 import com.utamars.api._
 import com.utamars.dataaccess.DB
 
@@ -81,6 +82,15 @@ object Boot extends App with CorsSupport with LazyLogging {
 
   val routes = logRequestResult(customLogging _) {
     pathPrefix("api") { cors(services.map(_.route).reduce(_ ~ _)) }
+  }
+
+  // check every day at ~7:00pm for the end of the pay period date
+  // to generate and email timesheet for all assistants.
+  val timeTil7Pm = (new LocalTime(19, 0) - LocalTime.now().getMillisOfDay.millis).getMillisOfDay
+  system.scheduler.schedule(timeTil7Pm.millis, 24.hours) {
+    val today = DateTime.now()
+    val (_, payPeriodEnd) = today.toLocalDate.halfMonth
+    if (today.getDayOfMonth == payPeriodEnd.getDayOfMonth) GenAndEmailAllAsstTS().run()
   }
 
   val interface = config.getString("http.addr.private")

@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 import courier._
 import simulacrum._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import scala.util.{Failure, Success}
 
 @typeclass trait CanBeMail[A] {
