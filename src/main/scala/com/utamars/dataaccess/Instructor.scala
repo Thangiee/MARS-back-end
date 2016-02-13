@@ -16,6 +16,9 @@ object Instructor {
   def findBy(netId: String): XorT[Future, DataAccessErr, Instructor] =
     DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
+  def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Instructor]] =
+    DB.InstructorTable.filter(_.netId inSetBind netIds).result
+
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.InstructorTable.filter(i => i.netId === i.netId).delete
 
   def update(netId: String, form: UpdateInstructorForm): XorT[Future, DataAccessErr, Unit] = {

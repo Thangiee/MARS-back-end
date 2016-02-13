@@ -110,6 +110,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>          // get current instructor info
       complete(Instructor.findBy(acc.netId).reply(inst => inst.jsonCompat))
     } ~
+    (get & path("instructor"/) & netIdsParam & authnAndAuthz(Role.Admin)) { (ids, _) =>       // Get instructors info by net ids
+      complete(Instructor.findByNetIds(ids.toSet).reply(inst => Map("instructors" -> inst).jsonCompat))
+    } ~
     (get & path("instructor"/"all") & authnAndAuthz(Role.Admin)) { _ =>                       // get all instructors info
       complete(Instructor.all().reply(inst => Map("instructors" -> inst).jsonCompat))
     } ~

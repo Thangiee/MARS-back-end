@@ -89,7 +89,7 @@ Returning
 
 Get info of the current assistant or specify {*netid*} to get info about a specific assistant.
 
-To get multiple specific accounts info, specify {*netids*}, which is comma separated net ids. <br/>
+To get multiple specific assistants info by specifying {*netids*}, which are net ids separated by comma. <br/>
 Example: `http://52.33.35.165:8080/api/assistant/?net-ids=demo123,aaa123`
 
 | Method   | Route                           | Authorized         |
@@ -183,11 +183,15 @@ Returning
 
 Get info of the current instructor or specify {*netid*} to get info about a specific instructor.
 
-| Method   | Route                   | Authorized                    |
-|:--------:|-------------------------|-------------------------------|
-| GET      | /instructor             | Admin, Instructor             |
-| GET      | /instructor/all         | Admin                         |
-| GET      | /instructor/{*netid*}   | Admin                         |
+To get multiple specific instructors info by specifying {*netids*}, which are net ids separated by comma. <br/>
+Example: `http://52.33.35.165:8080/api/instructor/?net-ids=demo123,aaa123`
+
+| Method   | Route                          | Authorized                    |
+|:--------:|--------------------------------|-------------------------------|
+| GET      | /instructor                    | Admin, Instructor             |
+| GET      | /instructor/all                | Admin                         |
+| GET      | /instructor/?net-ids={*netids*}| Admin                         |
+| GET      | /instructor/{*netid*}          | Admin                         |
 
 Returning
 
