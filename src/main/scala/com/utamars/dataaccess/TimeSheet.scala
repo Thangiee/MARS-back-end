@@ -29,7 +29,7 @@ object TimeSheet {
       s"$weeks[${days%8}]"
     }
 
-    ClockInOutRecord.findBetween(start, end, asst.netId).map { records =>
+    ClockInOutRecord.findBetween(start, end, asst.netId, inclusive=false).map { records => // get records that has been clocked out
 
       val reader = new PdfReader(getClass.getClassLoader.getResourceAsStream("timesheet-template.pdf"))
       if (!outDir.toFile.exists) outDir.toFile.createDirectories()
@@ -57,8 +57,7 @@ object TimeSheet {
         fields.setField(s"Date$timeBox", printDt("MM/dd", current))
       }
 
-      val completedRecords = records.filter(_.outTime.isDefined) // i.e. records that has been clocked out
-      val recordsGroupBySameDay = completedRecords
+      val recordsGroupBySameDay = records
         .map(r => Record(timestamp2DateTime(r.inTime).roundToQuarterHr, timestamp2DateTime(r.outTime.get).roundToQuarterHr))
         .groupBy(_.inTime.dayOfMonth())
         .values
