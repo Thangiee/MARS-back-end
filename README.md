@@ -624,8 +624,8 @@ Returning
 
 #### Session Login
 
-Start a session. The server will generate a cookie and give it to the client for identifying the session. 
-Most web browser will automatically set the cookie for you.
+Start a session. The server will generate a authentication cookie and give it to the client for identifying the session.
+Said cookies is in the Http response header. 
 
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
@@ -635,7 +635,7 @@ Returning
 
 | HTTP Status Code | Description                           |
 |:----------------:|---------------------------------------|
-|        200       | Successfully login to a session       |
+|        200       | Successfully login to a session. Also return the [account info](#account). |
 |        400       | [Bad request](#400-bad-request)       |
 |        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |

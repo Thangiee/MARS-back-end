@@ -14,7 +14,7 @@ case class SessionApi(implicit sm: SessMgr, rts: RTS) extends Api {
   override val route = pathPrefix("session") {
     ((post|put) & path("login") & authnAndAuthz()) { acc =>
       setSession(refreshable[String], usingCookies, acc.username) {
-        complete(StatusCodes.OK)
+        complete(acc.copy(passwd = "").jsonCompat)
       }
     } ~
     ((post|put) & path("logout") & invalidateSession(refreshable[String], usingCookies)) {
