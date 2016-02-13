@@ -120,7 +120,7 @@ Parameters
 
 | Key       | Type   | Required | Description               |
 |-----------|--------|----------|---------------------------|
-| netid     | String | yes      | The UT Arlington netID    |
+| net_id    | String | yes      | The UT Arlington netID    |
 | user      | String | yes      | The account username      |
 | pass      | String | yes      | The account password      |
 | email     | String | yes      | The assistant email       |
@@ -129,10 +129,10 @@ Parameters
 | dept      | String | yes      | The assistant department  |
 | first     | String | yes      | The assistant first name  |
 | last      | String | yes      | The assistant last name   |
-| empid     | String | yes      | The assistant employee ID |
+| emp_id    | String | yes      | The assistant employee ID |
 | threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. Default is 0.4 if a value is not provided. |
 | title     | String | yes      | The assistant title       |
-| titlecode | String | yes      | The assistant titlecode   |
+| title_code| String | yes      | The assistant titlecode   |
 
 Returning
 
@@ -160,7 +160,7 @@ Parameters
 | rate      | Double | optional | Dollar per hour           |
 | dept      | String | optional | The assistant department  |
 | title     | String | optional | The assistant title       |
-| titlecode | String | optional | The assistant titlecode   |
+| title_code| String | optional | The assistant titlecode   |
 | threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. 
 
 Returning
@@ -210,7 +210,7 @@ Parameter
 
 | Key       | Type   | Required | Description               |
 |-----------|--------|----------|---------------------------|
-| netid     | String | yes      | The UT Arlington netID    |
+| net_id    | String | yes      | The UT Arlington netID    |
 | user      | String | yes      | The account username      |
 | pass      | String | yes      | The account password      |
 | email     | String | yes      | The instructor email      |
@@ -241,8 +241,8 @@ Parameters
 | Key       | Type   | Required | Description               |
 |-----------|--------|----------|---------------------------|
 | email     | String | optional | The assistant email       |
-| firstname | String | optional | The assistant first name  |
-| lastname  | String | optional | The assistant last name   |
+| first_name| String | optional | The assistant first name  |
+| last_name | String | optional | The assistant last name   |
 
 Returning
 
@@ -298,7 +298,7 @@ Parameters
 
 | Key         | Type   | Required | Description               |
 |-------------|--------|----------|---------------------------|
-| newpassword | String | yes      | The account new password  |
+| new_password| String | yes      | The account new password  |
 
 Returning
 
@@ -373,7 +373,7 @@ Parameters
 
 | Key         | Type   | Required | Description                            |
 |-------------|--------|----------|----------------------------------------|
-| computerid  | String | optional | The computer id used register the UUID |
+| computer_id | String | optional | The computer id used register the UUID |
 
 Returning
 
@@ -400,7 +400,7 @@ Parameters
 
 | Key         | Type   | Required | Description                               |
 |-------------|--------|----------|-------------------------------------------|
-| computerid  | String | optional | The computer id used to register the UUID |
+| computer_id | String | optional | The computer id used to register the UUID |
 
 Returning
 
@@ -455,12 +455,12 @@ Update a specific record.
 
 Parameters
 
-| Key       | type   | Required | Discription                                | 
-|-----------|--------|----------|--------------------------------------------| 
-| intime    | long   | yes      | Clock in time, epoch time in milliseconds  | 
-| outtime   | long   | yes      | Clock out time, epoch time in milliseconds | 
-| incompid  | string | optional | The computer id used to register the UUID  | 
-| outcompid | string | optional | The computer id used to register the UUID  | 
+| Key         | type   | Required | Description                                | 
+|-------------|--------|----------|--------------------------------------------| 
+| in_time     | long   | yes      | Clock in time, epoch time in milliseconds  | 
+| out_time    | long   | yes      | Clock out time, epoch time in milliseconds | 
+| in_comp_id  | string | optional | The computer id used to register the UUID  | 
+| out_comp_id | string | optional | The computer id used to register the UUID  | 
 
 Returning
 
@@ -485,7 +485,7 @@ Given a face image, calculate the confidence that face belongs to the same assis
 
 Parameters
 
-| Key       | type       | Required | Discription                                | 
+| Key       | type       | Required | Description                                | 
 |-----------|------------|----------|--------------------------------------------| 
 | img       | byte array | yes      | The binary data of the face image to check |
 
@@ -513,7 +513,7 @@ Add a face to the assistant to be used for calculating recognition results.
 
 Parameters
 
-| Key       | type       | Required | Discription                                | 
+| Key       | type       | Required | Description                                | 
 |-----------|------------|----------|--------------------------------------------| 
 | img       | byte array | yes      | The binary data of the face image          |
 
