@@ -15,7 +15,7 @@ import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
-import com.utamars.Task.{ClockOutAndNotify, GenAndEmailAllAsstTS}
+import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 import com.utamars.api._
 import com.utamars.dataaccess.{ClockInOutRecord, Assistant, DB}
 

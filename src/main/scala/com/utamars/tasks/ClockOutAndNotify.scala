@@ -1,4 +1,4 @@
-package com.utamars.Task
+package com.utamars.tasks
 
 import akka.dispatch.ExecutionContexts
 import cats.data.Xor
