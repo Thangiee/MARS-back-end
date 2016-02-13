@@ -24,7 +24,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
         asstMakeAndSendTimeSheet(acc.netId, month, year, isFirst = false)
       }
     } ~
-    (get & pathPrefix("time-sheet") & authnAndAuthz(Role.Instructor)) { acc =>
+    (get & pathPrefix("time-sheet") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>
       (path(Segment / "first-half-month") & monthYear) { (netId, month, year) =>
         InstMakeAndSendTimeSheet(acc, netId, month, year, isFirst = true)
       } ~

@@ -28,13 +28,13 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
     (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>                     // get current assistant records
       complete(getRecords(dateFilter, acc.netId))
     } ~
-    (get & path("records"/"all") & authnAndAuthz(Role.Instructor)) { _ =>                                       // get all records
+    (get & path("records"/"all") & authnAndAuthz(Role.Admin, Role.Instructor)) { _ =>                           // get all records
       complete(ClockInOutRecord.all().reply(records => Map("records" -> records).jsonCompat))
     } ~
-    (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Instructor)) { (netId, dateFilter, _) =>  // get assistant records by net id
+    (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, dateFilter, _) =>  // get assistant records by net id
       complete(getRecords(dateFilter, netId))
     } ~
-    ((post|put) & path("records"/IntNumber) & authnAndAuthz(Role.Instructor)) { (id, _) =>                      // update a record by its id
+    ((post|put) & path("records"/IntNumber) & authnAndAuthz(Role.Admin, Role.Instructor)) { (id, _) =>          // update a record by its id
       formFields('intime.as[Long].?, 'outtime.as[Long].?, 'incompid.?, 'outcompid.?).as(UpdateRecordForm) { form =>
         complete(ClockInOutRecord.update(id, form).reply(_ => OK))
       }

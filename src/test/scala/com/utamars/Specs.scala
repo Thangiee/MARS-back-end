@@ -26,6 +26,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
   val asstBobAcc   = Account("b123", "bob123", "password", Role.Assistant, approve = true)
   val asstEveAcc   = Account("e123", "eve123", "password", Role.Assistant, approve = false)
 
+  val admin     = Instructor(adminAcc.netId, "admin@gmail.com", "A", "admin")
   val instAlice = Instructor(instAliceAcc.netId, "alice@gmail.com", "A", "Alice")
   val asstBob   = Assistant(asstBobAcc.netId, 10.50, "bob@gmail.com", Job.Teaching, "CSE", "B", "bob", "1000", "", "", .4)
   val asstEve   = Assistant(asstEveAcc.netId, 10.50, "eve@gmail.com", Job.Grading, "CSE", "E", "eve", "1001", "", "", .4)
@@ -39,6 +40,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
       asstBobAcc.copy(passwd = asstBobAcc.passwd.bcrypt),
       asstEveAcc.copy(passwd = asstEveAcc.passwd.bcrypt)
     )
+    admin.create()
     instAlice.create()
     asstBob.create()
     asstEve.create()

@@ -100,7 +100,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
         complete(result.reply(acc => acc.copy(passwd = "").jsonCompat))
       }
     } ~
-    (get & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>                      // get current instructor info
+    (get & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>          // get current instructor info
       complete(Instructor.findBy(acc.netId).reply(inst => inst.jsonCompat))
     } ~
     (get & path("instructor"/"all") & authnAndAuthz(Role.Admin)) { _ =>                       // get all instructors info
@@ -109,7 +109,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("instructor"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>            // get instructor info by netId
       complete(Instructor.findBy(netId).reply(inst => inst.jsonCompat))
     } ~
-    ((post|put) & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>               // Update current instructor info
+    ((post|put) & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>   // Update current instructor info
       formFields('email.?, 'lastname.?, 'firstname.?).as(UpdateInstructorForm) { form =>
         complete(Instructor.update(acc.netId, form).reply(_ => OK))
       }

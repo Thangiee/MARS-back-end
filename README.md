@@ -181,7 +181,7 @@ Get info of the current instructor or specify {*netid*} to get info about a spec
 
 | Method   | Route                   | Authorized                    |
 |:--------:|-------------------------|-------------------------------|
-| GET      | /instructor             | Instructor                    |
+| GET      | /instructor             | Admin, Instructor             |
 | GET      | /instructor/all         | Admin                         |
 | GET      | /instructor/{*netid*}   | Admin                         |
 
@@ -234,7 +234,7 @@ Update an instructor info.
 
 | Method      | Route               | Authorized                    |
 |:-----------:|---------------------|-------------------------------|
-| POST or PUT | /instructor         | Instructor                    |
+| POST or PUT | /instructor         | Admin, Instructor             |
 
 Parameters
 
@@ -428,9 +428,9 @@ filter {*option*}:
 |:-----------:|----------------------------------------|-------------------------------|
 | GET         | /records                               | Assistant                     |
 | GET         | /records?filter={*option*}             | Assistant                     |
-| GET         | /records/{*netid*}                     | Instructor                    |
-| GET         | /records/{*netid*}?filter={*option*}   | Instructor                    |
-| GET         | /records/all                           | Instructor                    |
+| GET         | /records/{*netid*}                     | Admin, Instructor             |
+| GET         | /records/{*netid*}?filter={*option*}   | Admin, Instructor             |
+| GET         | /records/all                           | Admin, Instructor             |
 
 Returning
 
@@ -451,7 +451,7 @@ Update a specific record.
 
 | Method      | Route                | Authorized                    |
 |:-----------:|----------------------|-------------------------------|
-| POST or PUT | /records/{*id*}      | Instructor                    |
+| POST or PUT | /records/{*id*}      | Admin, Instructor             |
 
 Parameters
 
@@ -676,7 +676,7 @@ Time-sheet for pay period 9/1/2015 - 9/15/2015  `/time-sheet/first-half-month?ye
 | Method      | Route                                                                 | Authorized |
 |:-----------:|-----------------------------------------------------------------------|------------|
 | GET         | /time-sheet/first-half-month?year={*year*}&month={*month*}            | Assistant  |
-| GET         | /time-sheet/{*netid*}/first-half-month?year={*year*}&month={*month*}  | Instructor |
+| GET         | /time-sheet/{*netid*}/first-half-month?year={*year*}&month={*month*}  | Admin, Instructor |
 
 Parameters
 
@@ -711,7 +711,7 @@ Time-sheet for pay period 9/16/2015 - 9/30/2015  `/time-sheet/second-half-month?
 | Method      | Route                                    | Authorized |
 |:-----------:|------------------------------------------|------------|
 | GET         | /time-sheet/second-half-month            | Assistant  |
-| GET         | /time-sheet/{*netid*}/second-half-month  | Instructor |
+| GET         | /time-sheet/{*netid*}/second-half-month  | Admin, Instructor |
 
 Parameters
 
