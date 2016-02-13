@@ -75,6 +75,7 @@ object FacePP extends AnyRef with DefaultJsonProtocol with LazyLogging {
       logger.error("Face++: Try to create a person (http://www.faceplusplus.com/personcreate/) but the name already exists.")
       HttpResponse(500, entity = InternalServerError.defaultMessage)
     case _ =>
+      logger.error(s"Face++: $code, $body")
       HttpResponse(code, entity = body)
   }
 
