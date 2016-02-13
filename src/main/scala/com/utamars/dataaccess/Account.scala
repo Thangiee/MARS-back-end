@@ -38,6 +38,9 @@ object Account {
   def findBy(username: String): XorT[Future, DataAccessErr, Account] =
     DB.AccountTable.filter(_.username.toLowerCase === username.toLowerCase).result.headOption
 
+  def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Account]] =
+    DB.AccountTable.filter(_.netId inSetBind netIds).result
+
   def findByNetId(netId: String): XorT[Future, DataAccessErr, Account] =
     DB.AccountTable.filter(_.netId === netId).result.headOption
 

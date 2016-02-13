@@ -66,11 +66,15 @@ All Endpoints
 
 Get info of the current account or specify {*username*} to get info about a specific account.
 
-| Method   | Route                | Authorized                    |
-|:--------:|----------------------|-------------------------------|
-| GET      | /account             | Admin, Instructor, Assistant  |
-| GET      | /account/all         | Admin, Instructor             |
-| GET      | /account/{*username*}| Admin, Instructor             |
+To get multiple specific accounts by specifying {*netids*}, which are net ids separated by comma. <br/>
+Example: `http://52.33.35.165:8080/api/account/?net-ids=demo123,aaa123`
+
+| Method   | Route                           | Authorized                    |
+|:--------:|---------------------------------|-------------------------------|
+| GET      | /account                        | Admin, Instructor, Assistant  |
+| GET      | /account/all                    | Admin                         |
+| GET      | /account/?net-ids={*netids*}    | Admin                         |
+| GET      | /account/{*username*}           | Admin                         |
 
 Returning
 

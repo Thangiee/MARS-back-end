@@ -29,6 +29,9 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (get & path("account"/"all") & authnAndAuthz(Role.Admin)) { _ =>                                        // Get all account info
       complete(Account.all().reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
     } ~
+    (get & path("account"/) & netIdsParam & authnAndAuthz(Role.Admin)) { (ids, _) =>                        // Get accounts info by net ids
+      complete(Account.findByNetIds(ids.toSet).reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
+    } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                          // Get account info by username
       complete(Account.findBy(username).reply(acc => acc.copy(passwd = "").jsonCompat))
     } ~
