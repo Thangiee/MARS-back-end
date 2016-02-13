@@ -69,8 +69,8 @@ Get info of the current account or specify {*username*} to get info about a spec
 | Method   | Route                | Authorized                    |
 |:--------:|----------------------|-------------------------------|
 | GET      | /account             | Admin, Instructor, Assistant  |
-| GET      | /account/all         | Admin                         |
-| GET      | /account/{*username*}| Admin                         |
+| GET      | /account/all         | Admin, Instructor             |
+| GET      | /account/{*username*}| Admin, Instructor             |
 
 Returning
 
@@ -89,11 +89,15 @@ Returning
 
 Get info of the current assistant or specify {*netid*} to get info about a specific assistant.
 
-| Method   | Route                  | Authorized                    |
-|:--------:|------------------------|-------------------------------|
-| GET      | /assistant             | Assistant                     |
-| GET      | /assistant/all         | Admin, Instructor             |
-| GET      | /assistant/{*netid*}   | Admin, Instructor             |
+To get multiple specific accounts info, specify {*netids*}, which is comma separated net ids. <br/>
+Example: `http://52.33.35.165:8080/api/assistant/?net-ids=demo123,aaa123`
+
+| Method   | Route                           | Authorized         |
+|:--------:|---------------------------------|--------------------|
+| GET      | /assistant                      | Assistant          |
+| GET      | /assistant/all                  | Admin, Instructor  |
+| GET      | /assistant/?net-ids={*netids*}  | Admin, Instructor  |
+| GET      | /assistant/{*netid*}            | Admin, Instructor  |
 
 Returning
 

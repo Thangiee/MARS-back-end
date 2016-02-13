@@ -4,8 +4,6 @@ import cats.data.XorT
 import cats.implicits._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateAssistantForm
-import slick.dbio.Effect.Read
-import slick.profile.FixedSqlStreamingAction
 
 import scala.concurrent.Future
 
@@ -18,6 +16,9 @@ object Assistant {
 
   def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
     DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
+
+  def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Assistant]] =
+    DB.AssistantTable.filter(_.netId inSetBind netIds).result
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
 
