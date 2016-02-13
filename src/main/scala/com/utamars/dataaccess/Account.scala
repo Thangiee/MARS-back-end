@@ -38,21 +38,24 @@ object Account {
   def findBy(username: String): XorT[Future, DataAccessErr, Account] =
     DB.AccountTable.filter(_.username.toLowerCase === username.toLowerCase).result.headOption
 
+  def findByNetId(netId: String): XorT[Future, DataAccessErr, Account] =
+    DB.AccountTable.filter(_.netId === netId).result.headOption
+
   def add(accs: Account*): XorT[Future, DataAccessErr, Unit] = DB.AccountTable ++= accs
 
   def deleteBy(username: String): XorT[Future, DataAccessErr, Unit] = findBy(username).flatMap(_.delete())
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable.filter(a => a.netId === a.netId).delete
 
-  def changePassword(username: String, newPass: String): XorT[Future, DataAccessErr, Unit] =
+  def changePassword(username: String, newPass: String): XorT[Future, DataAccessErr, Account] =
     findBy(username).flatMap(acc => acc.changePassword(newPass))
 
   implicit class PostfixOps(acc: Account) {
     def create(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable += acc
 
-    def update(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable.filter(_.username === acc.username).update(acc)
+    def update(): XorT[Future, DataAccessErr, Account] = DB.AccountTable.filter(_.username === acc.username).update(acc).map(_ => acc)
 
-    def changePassword(newPass: String): XorT[Future, DataAccessErr, Unit] = acc.copy(passwd = newPass).update()
+    def changePassword(newPass: String): XorT[Future, DataAccessErr, Account] = acc.copy(passwd = newPass).update()
 
     def delete(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable.filter(_.username === acc.username).delete
   }

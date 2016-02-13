@@ -41,6 +41,7 @@ All Endpoints
 * [Instructor Info](#instructor-info)
 * [Instructor Account Creation](#instructor-account-creation)
 * [Update Instructor](#update-instructor)
+* [Change Instructor Account Admin](#change-instructor-account-admin)
 * [Change Account Password](#change-account-password)
 * [Approve Account](#approve-account)
 * [Account Deletion](#account-deletion)
@@ -251,6 +252,35 @@ Returning
 |        400       | [Bad request](#400-bad-request)       |
 |        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Change Instructor Account Admin 
+
+Change the route of an instructor account between an admin or a regular instructor.
+**Note** that all admins are instructor but not all instructors are admin.
+
+| Method      | Route                                        | Authorized                    |
+|:-----------:|----------------------------------------------|-------------------------------|
+| POST or PUT | /account/instructor/change-role/{*netId*}    | Admin                         |
+
+Parameters
+
+| Key         | Type   | Required | Description                                                          |
+|-------------|--------|----------|----------------------------------------------------------------------|
+| is_admin    | boolean| yes      | True to change role to "admin" else role will be set as "instructor" |
+
+Returning
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | Return updated [account](#account)    |
+|        400       | [Bad request](#400-bad-request)       |
+|        400       | Require an instructor account         |
+|        401       | [Unauthorized](#401-unauthorized)     |
+|        403       | [Forbidden](#403-forbidden)           |
+|        404       | [Not Found](#404-not-found)           |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---
@@ -709,6 +739,8 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 #### Account 
 
+**Note** that all admins are instructor but not all instructors are admin.
+
 | Key           | Type   | Description                                             |
 |:-------------:|--------|---------------------------------------------------------|
 | approve       | Boolean| Account need to be approved to have access to resources |
@@ -831,6 +863,8 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 ```
 
 #### Instructor
+
+**Note** that all admins are instructor but not all instructors are admin.
 
 | Key        | Type   | Description               |
 |------------|--------|---------------------------|

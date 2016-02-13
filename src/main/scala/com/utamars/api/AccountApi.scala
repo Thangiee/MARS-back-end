@@ -1,14 +1,16 @@
 package com.utamars.api
 
+import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
+import cats.data.XorT
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, CreateInstructorAccForm, UpdateAssistantForm, UpdateInstructorForm}
 import com.utamars.util.FacePP
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 
 case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
 
@@ -83,6 +85,19 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (post & path("account"/"instructor")) {                                                   // Create instructor account
       formFields('netid, 'user, 'pass, 'email, 'first, 'last).as(CreateInstructorAccForm) { form =>
         complete(Account.createFromForm(form.copy(pass = form.pass.bcrypt)).reply(_ => OK))
+      }
+    } ~
+    ((post|put) & path("account"/"instructor"/"change-role"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>
+      formField('is_admin.as[Boolean]) { isAdmin =>
+        val result = for {
+          acc    <- Account.findByNetId(netId).leftMap(err2HttpResp)
+          isInst  = acc.role == Role.Admin || acc.role == Role.Instructor
+          newRole = if (isAdmin) Role.Admin else Role.Instructor
+          acc2   <- if (isInst) acc.copy(role = newRole).update().leftMap(err2HttpResp)
+                 else XorT.left[Future, HttpResponse, Account](Future.successful((BadRequest, "Require an instructor account")))
+        } yield acc2
+
+        complete(result.reply(acc => acc.copy(passwd = "").jsonCompat))
       }
     } ~
     (get & path("instructor") & authnAndAuthz(Role.Instructor)) { acc =>                      // get current instructor info
