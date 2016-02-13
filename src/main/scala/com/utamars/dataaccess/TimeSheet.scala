@@ -98,14 +98,14 @@ object TimeSheet {
         val total = sameDayRecords.foldRight(new Duration(0))((r, total) => new Duration(r.inTime, r.outTime) + total)
         // file in the daily total hrs
         fields.setExtraMargin(0, 8) // top margins to center vertically
-        fields.setField(s"Total${getTimeBox(sameDayRecords.head.outTime.toLocalDate)}", f"${total.getStandardHours + total.getStandardMinutes % 60 / 60.0}%1.2f")
+        fields.setField(s"Total${getTimeBox(sameDayRecords.head.outTime.toLocalDate)}", f"${total.getStandardSeconds / 3600.0}%1.2f")
         fields.setExtraMargin(0, 0) // reset margins
 
         total // return the the daily total so we can sum up the whole pay period total
       }.foldLeft(new Duration(0))(_ + _)
 
       // fill in the pay period total hours
-      fields.setField("TotalHours", f"${payPeriodTotalTime.getStandardHours + payPeriodTotalTime.getStandardMinutes % 60 / 60.0}%1.2f")
+      fields.setField("TotalHours", f"${payPeriodTotalTime.getStandardSeconds / 3600.0}%1.2f")
 
       stamper.close()
       reader.close()
