@@ -19,22 +19,22 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
   override val realm            : String    = "mars-app"
 
   override val route: Route =
-    (post & path("records"/"clock-in") & formFields('computerid.?) & authnAndAuthz()) { (compId, account) =>
+    (post & path("records"/"clock-in") & formFields('computerid.?) & authnAndAuthz()) { (compId, account) =>    // clock in
       complete(processClockInRequest(compId, account))
     } ~
-    (post & path("records"/"clock-out") & formField('computerid.?) & authnAndAuthz()) { (compId, account) =>
+    (post & path("records"/"clock-out") & formField('computerid.?) & authnAndAuthz()) { (compId, account) =>    // clock out
       complete(ClockInOutRecord.clockOutAll(account.netId, compId).reply(_ => OK))
     } ~
-    (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>
+    (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>                     // get current assistant records
       complete(getRecords(dateFilter, acc.netId))
     } ~
-    (get & path("records"/"all") & authnAndAuthz(Role.Instructor)) { _ =>
+    (get & path("records"/"all") & authnAndAuthz(Role.Instructor)) { _ =>                                       // get all records
       complete(ClockInOutRecord.all().reply(records => Map("records" -> records).jsonCompat))
     } ~
-    (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Instructor)) { (netId, dateFilter, _) =>
+    (get & path("records"/Segment) & parameter('filter.?) & authnAndAuthz(Role.Instructor)) { (netId, dateFilter, _) =>  // get assistant records by net id
       complete(getRecords(dateFilter, netId))
     } ~
-    ((post|put) & path("records"/IntNumber) & authnAndAuthz(Role.Instructor)) { (id, _) =>
+    ((post|put) & path("records"/IntNumber) & authnAndAuthz(Role.Instructor)) { (id, _) =>                      // update a record by its id
       formFields('intime.as[Long].?, 'outtime.as[Long].?, 'incompid.?, 'outcompid.?).as(UpdateRecordForm) { form =>
         complete(ClockInOutRecord.update(id, form).reply(_ => OK))
       }

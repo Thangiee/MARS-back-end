@@ -21,22 +21,22 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
   private val baseUrl = s"http://$addr:$port/api/assets/face"
 
   override val route: Route = {
-    ((post|put) & path("face"/"recognition") & authnAndAuthz(Role.Assistant)) { acc =>
+    ((post|put) & path("face"/"recognition") & authnAndAuthz(Role.Assistant)) { acc =>        // do facial recognition
       uploadedFile("img") { case (metadata, file) => complete(doFacialRecognition(acc, metadata, file))}
     } ~
-    (post & path("face") & authnAndAuthz(Role.Assistant)) { acc =>
+    (post & path("face") & authnAndAuthz(Role.Assistant)) { acc =>                            // add face to training data
       uploadedFile("img") { case (metadata, file) => complete(addFaceForRecog(acc, metadata, file))}
     } ~
-    (delete & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (id, _) =>
+    (delete & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (id, _) => // delete face from training data
       complete(removeFace(id))
     } ~
-    (get & path("face") & authnAndAuthz(Role.Assistant)) { acc =>
+    (get & path("face") & authnAndAuthz(Role.Assistant)) { acc =>                             // get added faces info for current assistant
       complete(getFaceImages(acc.netId))
     } ~
-    (get & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, _) =>
+    (get & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, _) => // get added faces info for assistant by net id
       complete(getFaceImages(netId))
     } ~
-    (get & path("assets"/"face"/Segment)) { id =>
+    (get & path("assets"/"face"/Segment)) { id =>                                             // get face image
       complete {
         import better.files._
         FaceImage.findBy(id).reply { img =>
