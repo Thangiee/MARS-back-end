@@ -29,7 +29,7 @@ trait Api extends AnyRef with LazyLogging {
 
   def checkSession(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
     requiredSession[String](refreshable[String], usingCookies).flatMap { username =>
-      onComplete(Account.findBy(username).value).flatMap[Tuple1[Account]] {
+      onComplete(Account.findByUsername(username).value).flatMap[Tuple1[Account]] {
         case Success(Xor.Right(acc)) => provide(acc)
         case Success(Xor.Left(err)) =>
           logger.info(s"Fail to authenticate due to $err")
@@ -42,7 +42,7 @@ trait Api extends AnyRef with LazyLogging {
     val challenge = HttpChallenge("MyAuth", realm)
     val authenticator= (credentials: Option[HttpCredentials]) => credentials match {
       case Some(BasicHttpCredentials(providedUser, providedPass)) =>
-        Account.findBy(providedUser).value.map {
+        Account.findByUsername(providedUser).value.map {
           case Xor.Right(acc) =>
             if (Try(providedPass.isBcrypted(acc.passwd)).getOrElse(false)) Right(acc) else Left(challenge)
           case Xor.Left(err) => logger.info(s"Fail to find account for Authn due to $err"); Left(challenge)

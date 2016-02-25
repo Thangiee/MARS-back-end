@@ -19,7 +19,7 @@ case class FaceImage(id: String, netId: String, faceId: String) {
 
 object FaceImage {
 
-  def findBy(id: String): XorT[Future, DataAccessErr, FaceImage] = DB.FaceImageTable.filter(_.id === id).result.headOption
+  def findById(id: String): XorT[Future, DataAccessErr, FaceImage] = DB.FaceImageTable.filter(_.id === id).result.headOption
 
   def findAllGood(netId: String): XorT[Future, DataAccessErr, Seq[FaceImage]] =
     DB.FaceImageTable.filter(r => r.netId.toLowerCase === netId.toLowerCase && r.faceId =!= "").result

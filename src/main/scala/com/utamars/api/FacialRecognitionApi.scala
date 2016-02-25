@@ -48,7 +48,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
   private def doFacialRecognition(acc: Account, metadata: FileInfo, file: File): Future[Response] = {
     val result = for {
-      asst   <- Assistant.findBy(acc.netId).leftMap(err2HttpResp)
+      asst   <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img    <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
       faceId <- FacePP.detectionDetect(s"$baseUrl/${img.id}")
       res    <- FacePP.recognitionVerify(s"mars_${acc.netId}", faceId)
@@ -81,7 +81,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
   private def addFaceForRecog(acc: Account, metadata: FileInfo, file: File): Future[Response] = {
     val result = for {
-      asst     <- Assistant.findBy(acc.netId).leftMap(err2HttpResp)
+      asst     <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img      <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
       faceppId <- FacePP.detectionDetect(s"$baseUrl/${img.id}")
       _        <- FacePP.personAddFace(s"mars_${acc.netId}", faceppId)
@@ -100,7 +100,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
 
   private def removeFace(id: String): Future[Response] = {
     val result = for {
-      img <- FaceImage.findBy(id).leftMap(err2HttpResp)
+      img <- FaceImage.findById(id).leftMap(err2HttpResp)
       _   <- FacePP.personRemoveFace(s"mars_${img.netId}", img.faceId)
       _   <- FacePP.trainVerify(s"mars_${img.netId}")
       _   <- img.delete().leftMap(err2HttpResp)

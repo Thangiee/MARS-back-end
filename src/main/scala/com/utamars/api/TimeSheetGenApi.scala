@@ -37,8 +37,8 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
   private def InstMakeAndSendTimeSheet(acc: Account, netId: String, month: Int, year: Int, isFirst: Boolean): Route = {
     if ((1 to 12).contains(month) && (year > 0)) {
       val result = for {
-        inst      <- Instructor.findBy(acc.netId)
-        asst      <- Assistant.findBy(netId)
+        inst      <- Instructor.findByNetId(acc.netId)
+        asst      <- Assistant.findByNetId(netId)
         payPeriod =  new LocalDate(year, month, if (isFirst) 1 else 28).halfMonth
         timeSheet <- TimeSheet.fromDateRange(payPeriod, asst)
         _         = EMailer.mailTo(inst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)
@@ -53,7 +53,7 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
   private def asstMakeAndSendTimeSheet(netId: String, month: Int, year: Int, isFirst: Boolean): Route = {
     if ((1 to 12).contains(month) && (year > 0)) {
       val result = for {
-        asst      <- Assistant.findBy(netId)
+        asst      <- Assistant.findByNetId(netId)
         payPeriod =  new LocalDate(year, month, if (isFirst) 1 else 28).halfMonth
         timeSheet <- TimeSheet.fromDateRange(payPeriod, asst)
         _         = EMailer.mailTo(asst.email, subject = timeSheet.nameWithoutExtension.replace("_", " "), timeSheet)

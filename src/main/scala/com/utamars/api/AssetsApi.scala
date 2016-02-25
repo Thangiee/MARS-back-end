@@ -20,7 +20,7 @@ case class AssetsApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS) exten
   override val route: Route = {
     (get & path("assets"/"face"/Segment) & parameter('size.as[Int].?)) { (id, size) =>  // get face image
       import better.files._
-      complete(FaceImage.findBy(id).reply { img =>
+      complete(FaceImage.findById(id).reply { img =>
         val imgFile = img.path.toFile
         if (imgFile.exists) {
           val cacheHeader = headers.`Cache-Control`(public, `max-age`(604800)) // 1 week

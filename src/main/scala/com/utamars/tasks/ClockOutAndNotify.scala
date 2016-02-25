@@ -28,7 +28,7 @@ case class ClockOutAndNotify() extends Runnable with LazyLogging {
     Await.result(ClockInOutRecord.clockOutAll(Some("Forgot to clock out")).value, 1.minute) match {
       case Xor.Right(netIds) =>
         val mails = netIds.map { id =>
-          Await.result(Assistant.findBy(id).value, 1.minute).map(_.email).leftMap(err => (id, err))
+          Await.result(Assistant.findByNetId(id).value, 1.minute).map(_.email).leftMap(err => (id, err))
         }
         mails.par.foreach {
           case Xor.Right(email)       => EMailer.mailTo(email, subject, message)

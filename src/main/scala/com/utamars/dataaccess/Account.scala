@@ -35,7 +35,7 @@ object Account {
         form.firstName, form.empId, form.title, form.titleCode, form.threshold.getOrElse(.4))
     ).transactionally
 
-  def findBy(username: String): XorT[Future, DataAccessErr, Account] =
+  def findByUsername(username: String): XorT[Future, DataAccessErr, Account] =
     DB.AccountTable.filter(_.username.toLowerCase === username.toLowerCase).result.headOption
 
   def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Account]] =
@@ -46,12 +46,12 @@ object Account {
 
   def add(accs: Account*): XorT[Future, DataAccessErr, Unit] = DB.AccountTable ++= accs
 
-  def deleteBy(username: String): XorT[Future, DataAccessErr, Unit] = findBy(username).flatMap(_.delete())
+  def deleteByUsername(username: String): XorT[Future, DataAccessErr, Unit] = findByUsername(username).flatMap(_.delete())
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable.filter(a => a.netId === a.netId).delete
 
   def changePassword(username: String, newPass: String): XorT[Future, DataAccessErr, Account] =
-    findBy(username).flatMap(acc => acc.changePassword(newPass))
+    findByUsername(username).flatMap(acc => acc.changePassword(newPass))
 
   implicit class PostfixOps(acc: Account) {
     def create(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable += acc

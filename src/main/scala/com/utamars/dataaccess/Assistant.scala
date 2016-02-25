@@ -14,7 +14,7 @@ object Assistant {
 
   def all(): XorT[Future, DataAccessErr, Seq[Assistant]] = DB.AssistantTable.result
 
-  def findBy(netId: String): XorT[Future, DataAccessErr, Assistant] =
+  def findByNetId(netId: String): XorT[Future, DataAccessErr, Assistant] =
     DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
   def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Assistant]] =
@@ -23,7 +23,7 @@ object Assistant {
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
 
   def update(netId: String, form: UpdateAssistantForm): XorT[Future, DataAccessErr, Unit] = {
-    findBy(netId).flatMap { asst =>
+    findByNetId(netId).flatMap { asst =>
       asst.copy(
         rate = form.rate.getOrElse(asst.rate),
         department = form.department.getOrElse(asst.department),

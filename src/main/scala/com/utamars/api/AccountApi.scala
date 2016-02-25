@@ -24,7 +24,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
 
   private def accountRoutes =
     (get & path("account") & authnAndAuthz()) { (acc) =>                                                    // Get account info
-      complete(Account.findBy(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat))
+      complete(Account.findByUsername(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat))
     } ~
     (get & path("account"/"all") & authnAndAuthz(Role.Admin)) { _ =>                                        // Get all account info
       complete(Account.all().reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
@@ -33,13 +33,13 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       complete(Account.findByNetIds(ids.toSet).reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
     } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                          // Get account info by username
-      complete(Account.findBy(username).reply(acc => acc.copy(passwd = "").jsonCompat))
+      complete(Account.findByUsername(username).reply(acc => acc.copy(passwd = "").jsonCompat))
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                       // Delete account by username
       val result = for {
-        acc <- Account.findBy(username).leftMap(err2HttpResp)
+        acc <- Account.findByUsername(username).leftMap(err2HttpResp)
         _   <- FacePP.personDelete(s"mars_${acc.netId}")
-        _   <- Account.deleteBy(username).leftMap(err2HttpResp)
+        _   <- Account.deleteByUsername(username).leftMap(err2HttpResp)
       } yield ()
 
       complete(result.reply(_ => OK))
@@ -56,7 +56,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     } ~
     ((post|put) & path("account"/"change-approve"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) => // Change account approval by username
       formField('approve.as[Boolean]) { newApprove =>
-        complete(Account.findBy(username).flatMap(_.copy(approve = newApprove).update()).reply(_ => OK))
+        complete(Account.findByUsername(username).flatMap(_.copy(approve = newApprove).update()).reply(_ => OK))
       }
     }
 
@@ -70,11 +70,11 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
           _ <- FacePP.personCreate(s"mars_${form.netId}")
         } yield ()
 
-        complete(result.reply(succ => OK, errResp => { Account.deleteBy(form.user); errResp }))
+        complete(result.reply(succ => OK, errResp => { Account.deleteByUsername(form.user); errResp }))
       }
     } ~
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                                  // Get current assistant info
-      complete(Assistant.findBy(acc.netId).reply(asst => asst.jsonCompat))
+      complete(Assistant.findByNetId(acc.netId).reply(asst => asst.jsonCompat))
     } ~
     (get & path("assistant"/) & netIdsParam & authnAndAuthz(Role.Admin, Role.Instructor)) { (ids, _) =>  // Get assistants info by net ids
       complete(Assistant.findByNetIds(ids.toSet).reply(assts => Map("assistants" -> assts).jsonCompat))
@@ -83,7 +83,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       complete(Assistant.all().reply(assts => Map("assistants" -> assts).jsonCompat))
     } ~
     (get & path("assistant"/Segment) & authnAndAuthz(Role.Instructor, Role.Admin)) { (netId, _) =>      // Get assistant info by netId
-      complete(Assistant.findBy(netId).reply(asst => asst.jsonCompat))
+      complete(Assistant.findByNetId(netId).reply(asst => asst.jsonCompat))
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                           // Update current assistant info
       formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
@@ -111,7 +111,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       }
     } ~
     (get & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>          // get current instructor info
-      complete(Instructor.findBy(acc.netId).reply(inst => inst.jsonCompat))
+      complete(Instructor.findByNetId(acc.netId).reply(inst => inst.jsonCompat))
     } ~
     (get & path("instructor"/) & netIdsParam & authnAndAuthz(Role.Admin)) { (ids, _) =>       // Get instructors info by net ids
       complete(Instructor.findByNetIds(ids.toSet).reply(inst => Map("instructors" -> inst).jsonCompat))
@@ -120,7 +120,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
       complete(Instructor.all().reply(inst => Map("instructors" -> inst).jsonCompat))
     } ~
     (get & path("instructor"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>            // get instructor info by netId
-      complete(Instructor.findBy(netId).reply(inst => inst.jsonCompat))
+      complete(Instructor.findByNetId(netId).reply(inst => inst.jsonCompat))
     } ~
     ((post|put) & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>   // Update current instructor info
       formFields('email.?, 'last_name.?, 'first_name.?).as(UpdateInstructorForm) { form =>

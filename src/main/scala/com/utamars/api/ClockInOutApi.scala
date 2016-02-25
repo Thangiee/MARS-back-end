@@ -78,7 +78,7 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
       case Some(_) => Future.successful((BadRequest, "Invalid parameter: filter"))
 
       case None => // no filter, get all records
-        ClockInOutRecord.findBy(netId).reply(records => Map("records" -> records).jsonCompat)
+        ClockInOutRecord.findByNetId(netId).reply(records => Map("records" -> records).jsonCompat)
     }
   }
 }

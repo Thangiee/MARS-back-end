@@ -26,10 +26,10 @@ object ClockInOutRecord {
 
   def all(): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] = DB.ClockInOutRecordTable.sortBy(_.inTime.desc).result
 
-  def findBy(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
+  def findByNetId(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result
 
-  def findBy(id: Int): XorT[Future, DataAccessErr, ClockInOutRecord] =
+  def findById(id: Int): XorT[Future, DataAccessErr, ClockInOutRecord] =
     DB.ClockInOutRecordTable.filter(_.id === id).sortBy(_.inTime.desc).result.headOption
 
   def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
@@ -59,7 +59,7 @@ object ClockInOutRecord {
   }
 
   def update(id: Int, form: UpdateRecordForm): XorT[Future, DataAccessErr, Unit] = {
-    findBy(id).flatMap { record =>
+    findById(id).flatMap { record =>
       record.copy(
         inTime = if (form.inTime.isDefined) new Timestamp(form.inTime.get) else record.inTime,
         outTime = if (form.outTime.isDefined) Some(new Timestamp(form.outTime.get)) else record.outTime,
