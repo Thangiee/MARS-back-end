@@ -66,7 +66,7 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
         ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
       case Some("month")       =>
-        val start = today.dayOfMonth().withMaximumValue()
+        val start = today.dayOfMonth().withMinimumValue()
         val end   = today.dayOfMonth().withMaximumValue()
         ClockInOutRecord.findBetween(start, end, netId).reply(records => Map("records" -> records).jsonCompat)
 
