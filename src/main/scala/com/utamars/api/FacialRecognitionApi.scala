@@ -4,6 +4,7 @@ import java.io.File
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers.CacheDirectives._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.FileInfo
@@ -46,9 +47,10 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
             case ext if ext.contains(".jpeg") => MediaTypes.`image/jpeg`
             case _                            => MediaTypes.`image/pict`
           }
-
-          if (img.path.toFile.exists) HttpResponse(entity = HttpEntity(imgType, img.path.toFile.byteArray))
-          else {
+          if (img.path.toFile.exists) {
+            val cacheHeader = headers.`Cache-Control`(public, `max-age`(604800)) // 1 week
+            HttpResponse(entity = HttpEntity(imgType, img.path.toFile.byteArray), headers = List(cacheHeader))
+          } else {
             // file no longer exist, clean up database
             img.delete()
             Gone
