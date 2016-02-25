@@ -42,7 +42,8 @@ libraryDependencies ++= Seq(
   "com.github.pathikrit"   %% "better-files"          % "2.13.0",   // files
   "org.scalaj"             %% "scalaj-http"           % "2.1.0",    // http request
   "com.github.cb372"       %% "scalacache-guava"      % "0.7.3",    // caching
-  "net.virtual-void"       %% "json-lenses"           % "0.6.1"     // json
+  "net.virtual-void"       %% "json-lenses"           % "0.6.1",    // json
+  "com.sksamuel.scrimage"  %% "scrimage-core"         % "2.1.5"     // image processing
 ).map(_.withJavadoc())
 
 // logging

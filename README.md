@@ -995,6 +995,14 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 #### Image Info 
 
+You can appending `size` parameter at the end of the url to have that image 
+resized with its width and height equal to `size` pixels. `size` can have a value
+anywhere between 3 to 512.
+
+For example, the image located at `http://localhost:8080/api/assets/face/zwxNke.jpg`
+can be resized to 64x64 px with `http://localhost:8080/api/assets/face/zwxNke.jpg?size=64`
+
+
 | Key           | Type     | Description                                                                                  |
 |---------------|----------|----------------------------------------------------------------------------------------------|
 | id            | String   | Image id
