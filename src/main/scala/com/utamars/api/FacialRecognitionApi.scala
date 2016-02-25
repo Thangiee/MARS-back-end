@@ -4,14 +4,12 @@ import java.io.File
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.CacheDirectives._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.FileInfo
 import cats.std.all._
 import com.utamars.dataaccess.{Account, Assistant, FaceImage, Role}
 import com.utamars.util.FacePP
-import spray.json._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,27 +34,6 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     } ~
     (get & path("face"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, _) => // get added faces info for assistant by net id
       complete(getFaceImages(netId))
-    } ~
-    (get & path("assets"/"face"/Segment)) { id =>                                             // get face image
-      complete {
-        import better.files._
-        FaceImage.findBy(id).reply { img =>
-          val imgType = id match {
-            case ext if ext.contains(".png")  => MediaTypes.`image/png`
-            case ext if ext.contains(".jpg")  => MediaTypes.`image/jpeg`
-            case ext if ext.contains(".jpeg") => MediaTypes.`image/jpeg`
-            case _                            => MediaTypes.`image/pict`
-          }
-          if (img.path.toFile.exists) {
-            val cacheHeader = headers.`Cache-Control`(public, `max-age`(604800)) // 1 week
-            HttpResponse(entity = HttpEntity(imgType, img.path.toFile.byteArray), headers = List(cacheHeader))
-          } else {
-            // file no longer exist, clean up database
-            img.delete()
-            Gone
-          }
-        }
-      }
     }
   }
 

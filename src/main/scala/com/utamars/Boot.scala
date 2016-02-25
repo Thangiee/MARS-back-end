@@ -15,9 +15,9 @@ import com.softwaremill.session._
 import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
-import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 import com.utamars.api._
-import com.utamars.dataaccess.{ClockInOutRecord, Assistant, DB}
+import com.utamars.dataaccess.DB
+import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -36,7 +36,7 @@ object Boot extends App with CorsSupport with LazyLogging {
   implicit val dispatcher   = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  // services' dependencies that will be injected implicitly
+  // AIPs' dependencies that will be injected implicitly
   implicit val scalaCache   = ScalaCache(GuavaCache())
   implicit val sessionManager = new SessionManager[Username](sessionConfig)
   implicit val sessionStorage = new RefreshTokenStorage[Username] { // todo: better to store in DB?
@@ -52,13 +52,14 @@ object Boot extends App with CorsSupport with LazyLogging {
 
   if (config.getBoolean("db.create")) DB.createSchema()
 
-  val services =
+  val APIs =
     AccountApi() ::
     SessionApi() ::
     RegisterUUIDApi() ::
     ClockInOutApi()   ::
     TimeSheetGenApi() ::
     FacialRecognitionApi() ::
+    AssetsApi() ::
     Nil
 
   def customLogging(req: HttpRequest): Any => Option[LogEntry] = {
@@ -81,7 +82,7 @@ object Boot extends App with CorsSupport with LazyLogging {
     .result()
 
   val routes = logRequestResult(customLogging _) {
-    pathPrefix("api") { cors(services.map(_.route).reduce(_ ~ _)) }
+    pathPrefix("api") { cors(APIs.map(_.route).reduce(_ ~ _)) }
   }
 
   // check every day at ~7:00pm for the end of the pay period date
