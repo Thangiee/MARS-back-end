@@ -5,10 +5,10 @@ scalacOptions += "-Xexperimental"
 
 // akka
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http-experimental"               % "2.4.2-RC2",
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % "2.4.2-RC2",
-  "com.typesafe.akka" %% "akka-http-testkit-experimental"       % "2.4.2-RC2",
-  "com.typesafe.akka" %% "akka-actor"                           % "2.4.2-RC2",
+  "com.typesafe.akka" %% "akka-http-experimental"               % "2.4.2",
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % "2.4.2",
+  "com.typesafe.akka" %% "akka-http-testkit"                    % "2.4.2",
+  "com.typesafe.akka" %% "akka-actor"                           % "2.4.2",
   "com.softwaremill.akka-http-session" %% "core"                % "0.2.3"
 ).map(_.withJavadoc())
 
