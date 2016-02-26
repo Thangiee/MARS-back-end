@@ -38,6 +38,9 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
       formFields('in_time.as[Long].?, 'out_time.as[Long].?, 'in_comp_id.?, 'out_comp_id.?).as(UpdateRecordForm) { form =>
         complete(ClockInOutRecord.update(id, form).reply(_ => OK))
       }
+    } ~
+    (delete & path("records"/IntNumber) & authnAndAuthz(Role.Admin, Role.Instructor)) { (id, _) =>
+      complete(ClockInOutRecord.deleteById(id).reply(_ => OK))
     }
 
   private def processClockInRequest(compId: Option[String], account: Account): Future[Response] = {

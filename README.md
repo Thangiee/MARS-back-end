@@ -48,6 +48,7 @@ All Endpoints
 * [Clock In](#clock-in)
 * [Clock Out](#clock-out)
 * [Clock In/Out Record Info](#clock-inout-record-info)
+* [Record Deletion](#record-deletion)
 * [Update Clock In/Out Record](#update-clock-inout-record)
 * [Facial Recognition](#facial-recognition)
 * [Add Face For Recognition](#add-face-for-recognition)
@@ -483,6 +484,26 @@ Returning
 |        401       | [Unauthorized](#401-unauthorized)     |
 |        403       | [Forbidden](#403-forbidden)           |
 |        404       | [Not Found](#404-not-found)           |
+|        500       | [Internal Error](#500-internal-error) |
+
+---
+
+#### Record Deletion
+
+Delete a specific clock in/out record by its {*id*}.
+
+| Method      | Route                 | Authorized                    |
+|:-----------:|-----------------------|-------------------------------|
+| DELETE      | /records/{*id*}       | Admin, Instructor             |
+
+Returning 
+
+| HTTP Status Code | Description                           |
+|:----------------:|---------------------------------------|
+|        200       | record deleted                        |
+|        400       | [Bad request](#400-bad-request)       |
+|        401       | [Unauthorized](#401-unauthorized)     |
+|        403       | [Forbidden](#403-forbidden)           |
 |        500       | [Internal Error](#500-internal-error) |
 
 ---

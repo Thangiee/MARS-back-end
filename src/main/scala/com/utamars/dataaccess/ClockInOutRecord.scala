@@ -69,6 +69,8 @@ object ClockInOutRecord {
     }
   }
 
+  def deleteById(id: Int): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(_.id === id).delete
+
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(r => r.netId === r.netId).delete
 
   implicit class PostfixOps(record: ClockInOutRecord) {
