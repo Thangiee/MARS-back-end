@@ -11,14 +11,23 @@ case class Assistant(netId: String, rate: Double, email: String, job: String, de
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
 object Assistant {
+  private val asstAccTable = for { (asst, acc) <- DB.AssistantTable join DB.AccountTable on (_.netId === _.netId) } yield (asst, acc)
 
   def all(): XorT[Future, DataAccessErr, Seq[Assistant]] = DB.AssistantTable.result
+
+  def allWithAcc(): XorT[Future, DataAccessErr, Seq[(Assistant, Account)]] = asstAccTable.result
 
   def findByNetId(netId: String): XorT[Future, DataAccessErr, Assistant] =
     DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
+  def findByNetIdWithAcc(netId: String): XorT[Future, DataAccessErr, (Assistant, Account)] =
+    asstAccTable.filter(_._1.netId === netId).result.headOption
+
   def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Assistant]] =
     DB.AssistantTable.filter(_.netId inSetBind netIds).result
+
+  def findByNetIdsWithAcc(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[(Assistant, Account)]] =
+    asstAccTable.filter(_._1.netId inSetBind netIds).result
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
 

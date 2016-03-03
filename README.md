@@ -833,8 +833,12 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 | Key        | Type   | Description               |
 |------------|--------|---------------------------|
 | rate       | Double | Dollar per hour           |
+| approve    | Boolean| Account need to be approved to have access to resources |
 | netId      | String | The UT Arlington netID    |
 | email      | String | The assistant email       |
+| role       | String | The account role (admin, instructor, or assistant)      |
+| username   | String | The account username                                    |
+| createTime | Long   | When the account was created, epoch time in milliseconds|
 | job        | String | The assistant job         |
 | department | String | The assistant department  |
 | firstName  | String | The assistant first name  |
@@ -847,17 +851,21 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 ```json
 // example json response
 {
-  "rate": 10.50,
-  "netId": "tql7155",
-  "email": "abc@gmail.com",
+  "rate": 10.4,
+  "approve": false,
+  "netId": "aaa123",
+  "email": "aaa@mavs.uta.edu",
+  "role": "assistant",
+  "username": "demo_grader",
+  "createTime": 1453571578410,
   "job": "grading",
   "department": "CSE",
-  "lastName": "Smith",
-  "firstName": "Bob",
-  "employeeId": "123456789",
-  "threshold":0.4
+  "lastName": "grader",
+  "firstName": "test",
+  "employeeId": "10001234560",
+  "threshold": 0.4,
   "title": "some title",
-  "titleCode": "some title code"
+  "titleCode": "123"
 }
 ```
 
@@ -867,26 +875,34 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
   "assistants": [
     {
       "rate": 10.4,
-      "netId": "demo123",
-      "email": "abc0@gmail.com",
-      "job": "teaching",
+      "approve": false,
+      "netId": "aaa123",
+      "email": "aaa@mavs.uta.edu",
+      "role": "assistant",
+      "username": "demo_grader",
+      "createTime": 1453571578410,
+      "job": "grading",
       "department": "CSE",
-      "lastName": "user",
+      "lastName": "grader",
       "firstName": "test",
-      "employeeId": "10001234567",
+      "employeeId": "10001234560",
       "threshold": 0.4,
       "title": "some title",
       "titleCode": "123"
     },
     {
       "rate": 10.4,
-      "netId": "aaa123",
-      "email": "aaa@gmail.com",
-      "job": "grading",
+      "approve": true,
+      "netId": "demo123",
+      "email": "bbb0@gmail.com",
+      "role": "assistant",
+      "username": "demo_asst",
+      "createTime": 1451762754206,
+      "job": "teaching",
       "department": "CSE",
-      "lastName": "grader",
+      "lastName": "user",
       "firstName": "test",
-      "employeeId": "10001234560",
+      "employeeId": "10001234567",
       "threshold": 0.4,
       "title": "some title",
       "titleCode": "123"

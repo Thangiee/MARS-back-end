@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
+import com.utamars.api.DAOs.AssistantDAO
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, UpdateAssistantForm}
 import com.utamars.util.FacePP
@@ -29,16 +30,16 @@ case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) ex
       }
     } ~
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                                  // Get current assistant info
-      complete(Assistant.findByNetId(acc.netId).reply(asst => asst.jsonCompat))
+      complete(Assistant.findByNetId(acc.netId).reply(asst => AssistantDAO(asst, acc).jsonCompat))
     } ~
     (get & path("assistant"/) & netIdsParam & authnAndAuthz(Role.Admin, Role.Instructor)) { (ids, _) =>  // Get assistants info by net ids
-      complete(Assistant.findByNetIds(ids.toSet).reply(assts => Map("assistants" -> assts).jsonCompat))
+      complete(Assistant.findByNetIdsWithAcc(ids.toSet).reply(assts => Map("assistants" -> assts.map(AssistantDAO(_))).jsonCompat))
     } ~
     (get & path("assistant"/"all") & authnAndAuthz(Role.Admin, Role.Instructor)) { _ =>                 // Get all assistants info
-      complete(Assistant.all().reply(assts => Map("assistants" -> assts).jsonCompat))
+      complete(Assistant.allWithAcc().reply(assts => Map("assistants" -> assts.map(AssistantDAO(_))).jsonCompat))
     } ~
     (get & path("assistant"/Segment) & authnAndAuthz(Role.Instructor, Role.Admin)) { (netId, _) =>      // Get assistant info by netId
-      complete(Assistant.findByNetId(netId).reply(asst => asst.jsonCompat))
+      complete(Assistant.findByNetIdWithAcc(netId).reply(asst => AssistantDAO(asst).jsonCompat))
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                           // Update current assistant info
       formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
