@@ -1,9 +1,10 @@
 package com.utamars
 
-import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.{HttpResponse, HttpRequest}
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.server.Route._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
 import com.softwaremill.session.{InMemoryRefreshTokenStorage, SessionConfig, SessionManager, SessionUtil}
 import com.typesafe.config.ConfigFactory
 import com.utamars.api.{Api, Username}
@@ -13,6 +14,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
 import spray.json.DefaultJsonProtocol
+import spray.json._
 import com.github.t3hnar.bcrypt._
 
 import scala.concurrent.Await
@@ -84,4 +86,11 @@ trait ApiSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProtocol 
 
   def requestWithCredentials(acc: Account)(request: Account => HttpRequest): RouteTestResult =
     request(acc) ~> addCredentials(BasicHttpCredentials(acc.username, acc.passwd)) ~> seal(api.route)
+
+  def responseTo[T: JsonReader](implicit a: FromResponseUnmarshaller[String], b: ClassManifest[String]): T =
+    responseAs[String].parseJson.convertTo[T]
+
+  import spray.json.lenses.JsonLenses._
+  def responseToSeq[T: JsonReader](symbol: Symbol)(implicit a: FromResponseUnmarshaller[String], b: ClassManifest[String]): Seq[T] =
+    responseAs[String].parseJson.extract[JsValue](symbol / *).map(_.convertTo[T])
 }
