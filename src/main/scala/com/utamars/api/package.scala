@@ -8,7 +8,6 @@ import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
 import com.utamars.util.TimeImplicits
-import org.joda.time.LocalDate
 import spray.json._
 
 import scala.language.implicitConversions
@@ -47,8 +46,6 @@ package object api extends AnyRef with TimeImplicits with DefaultJsonProtocol wi
   }
 
   implicit val accJsonFormat    = jsonFormat6(Account.apply)
-  implicit val asstJsonFormat   = jsonFormat11(Assistant.apply)
-  implicit val instJsonFormat   = jsonFormat4(Instructor.apply)
   implicit val recordJsonFormat = jsonFormat6(ClockInOutRecord.apply)
 
   implicit class JsonImplicits[T](data: T) {

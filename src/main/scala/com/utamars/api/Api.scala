@@ -64,7 +64,7 @@ trait Api extends AnyRef with LazyLogging {
     if (authzRoles contains acc.role) { if (acc.approve) provide(acc) else reject(NotApprove()) }
     else reject(AuthorizationFailedRejection)
 
-  /** check authentication and then check Authorization */
+  /** check authentication and then check Authorization. Also pass along the account that made the request. */
   def authnAndAuthz(authzRoles: Role*)(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
     authn.flatMap(acc => authz(acc, if (authzRoles.isEmpty) defaultAuthzRoles else authzRoles))
 
