@@ -10,14 +10,23 @@ import scala.concurrent.Future
 case class Instructor(netId: String, email: String, lastName: String, firstName: String)
 
 object Instructor {
+  private val InstAccTable = for { (inst, acc) <- DB.InstructorTable join DB.AccountTable on (_.netId === _.netId) } yield (inst, acc)
 
   def all(): XorT[Future, DataAccessErr, Seq[Instructor]] = DB.InstructorTable.result
+
+  def allWithAcc(): XorT[Future, DataAccessErr, Seq[(Instructor, Account)]] = InstAccTable.result
 
   def findByNetId(netId: String): XorT[Future, DataAccessErr, Instructor] =
     DB.InstructorTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
+  def findByNetIdWithAcc(netId: String): XorT[Future, DataAccessErr, (Instructor, Account)] =
+    InstAccTable.filter(_._1.netId === netId).result.headOption
+
   def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Instructor]] =
     DB.InstructorTable.filter(_.netId inSetBind netIds).result
+
+  def findByNetIdsWithAcc(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[(Instructor, Account)]] =
+    InstAccTable.filter(_._1.netId inSetBind netIds).result
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.InstructorTable.filter(i => i.netId === i.netId).delete
 

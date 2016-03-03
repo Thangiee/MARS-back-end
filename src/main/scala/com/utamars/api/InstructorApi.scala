@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import cats.data.XorT
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
+import com.utamars.api.DAOs.InstructorDAO
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateInstructorAccForm, UpdateInstructorForm}
 
@@ -36,16 +37,16 @@ case class InstructorApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) e
       }
     } ~
     (get & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>          // get current instructor info
-      complete(Instructor.findByNetId(acc.netId).reply(inst => inst.jsonCompat))
+      complete(Instructor.findByNetId(acc.netId).reply(inst => InstructorDAO(inst, acc).jsonCompat))
     } ~
     (get & path("instructor"/) & netIdsParam & authnAndAuthz(Role.Admin)) { (ids, _) =>       // Get instructors info by net ids
-      complete(Instructor.findByNetIds(ids.toSet).reply(inst => Map("instructors" -> inst).jsonCompat))
+      complete(Instructor.findByNetIdsWithAcc(ids.toSet).reply(inst => Map("instructors" -> inst.map(InstructorDAO(_))).jsonCompat))
     } ~
     (get & path("instructor"/"all") & authnAndAuthz(Role.Admin)) { _ =>                       // get all instructors info
-      complete(Instructor.all().reply(inst => Map("instructors" -> inst).jsonCompat))
+      complete(Instructor.allWithAcc().reply(inst => Map("instructors" -> inst.map(InstructorDAO(_))).jsonCompat))
     } ~
     (get & path("instructor"/Segment) & authnAndAuthz(Role.Admin)) { (netId, _) =>            // get instructor info by netId
-      complete(Instructor.findByNetId(netId).reply(inst => inst.jsonCompat))
+      complete(Instructor.findByNetIdWithAcc(netId).reply(inst => InstructorDAO(inst).jsonCompat))
     } ~
     ((post|put) & path("instructor") & authnAndAuthz(Role.Admin, Role.Instructor)) { acc =>   // Update current instructor info
       formFields('email.?, 'last_name.?, 'first_name.?).as(UpdateInstructorForm) { form =>

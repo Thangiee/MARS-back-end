@@ -917,18 +917,26 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 
 | Key        | Type   | Description               |
 |------------|--------|---------------------------|
+| approve    | Boolean| Account need to be approved to have access to resources |
 | netId      | String | The UT Arlington netID    |
 | email      | String | The assistant email       |
-| firstName  | String | The assistant first name  |
+| role       | String | The account role (admin, instructor, or assistant)      |
+| username   | String | The account username                                    |
+| createTime | Long   | When the account was created, epoch time in milliseconds|
 | lastName   | String | The assistant last name   |
+| firstName  | String | The assistant first name  |
 
 ```json
 // example json response
 {
+  "approve": true,
   "netId": "abc123",
-  "email": "aaa@gmail.com",
-  "lastName": "E",
-  "firstName": "David"
+  "email": "eee@gmail.com",
+  "role": "admin",
+  "username": "Ewing",
+  "createTime": 1451583070262,
+  "lastName": "Ewing",
+  "firstName": "D"
 }
 ```
 
@@ -937,14 +945,22 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 {
   "instructors": [
     {
+      "approve": true,
       "netId": "abc123",
-      "email": "aaa@gmail.com",
-      "lastName": "E",
-      "firstName": "David"
+      "email": "eee@gmail.com",
+      "role": "admin",
+      "username": "Ewing",
+      "createTime": 1451583070262,
+      "lastName": "Ewing",
+      "firstName": "D"
     },
     {
+      "approve": true,
       "netId": "abcd123",
-      "email": "bbb@gmail.com",
+      "email": "bbbb@gmail.com",
+      "role": "instructor",
+      "username": "bob123",
+      "createTime": 1451583070262,
       "lastName": "B",
       "firstName": "Bob"
     }
