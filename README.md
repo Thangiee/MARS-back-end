@@ -161,6 +161,7 @@ Update an assistant info.
 | Method      | Route              | Authorized                    |
 |:-----------:|--------------------|-------------------------------|
 | POST or PUT | /assistant         | Assistant                     |
+| POST or PUT | /assistant/{*netId*}| Admin, Instructor            |
 
 Parameters
 
@@ -170,7 +171,7 @@ Parameters
 | dept      | String | optional | The assistant department  |
 | title     | String | optional | The assistant title       |
 | title_code| String | optional | The assistant titlecode   |
-| threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. 
+| threshold | Double | optional | **Only admin and instructor can set this field.** <br> Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. 
 
 Returning
 

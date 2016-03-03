@@ -1,5 +1,6 @@
 package com.utamars.api
 
+import akka.http.scaladsl.model.{StatusCodes, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.std.all._
@@ -9,7 +10,7 @@ import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, UpdateAssistantForm}
 import com.utamars.util.FacePP
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import scala.language.postfixOps
 
 case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
@@ -43,7 +44,18 @@ case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) ex
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                           // Update current assistant info
       formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
-        complete(Assistant.update(acc.netId, form).reply(_ => OK))
+        complete(updateAsst(acc.netId, acc.role, form))
+      }
+    } ~
+    ((post|put) & path("assistant"/Segment) & authnAndAuthz()) { (netId, acc) =>                       // Update assistant info by netId
+      formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
+        complete(updateAsst(netId, acc.role, form))
       }
     }
+
+  private def updateAsst(netId: String, role: Role, form: UpdateAssistantForm): Future[Response] =
+    if (Seq(Role.Admin, Role.Instructor) contains role)
+      Assistant.update(netId, form).reply(_ => OK)
+    else
+      Future.successful(HttpResponse(StatusCodes.Forbidden, entity = "Only admin or instructor can set 'threshold'."))
 }
