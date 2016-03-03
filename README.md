@@ -58,8 +58,7 @@ All Endpoints
 * [Verify Registered UUID](#verify-registered-uuid)
 * [Session Login](#session-login)
 * [Session Logout](#session-logout)
-* [1st Half-month Time-sheet](#1st-half-month-time-sheet)
-* [2nd Half-month Time-Sheet](#2nd-half-month-time-sheet)
+* [Email Time-sheet](#email-time-sheet)
 
 --
 
@@ -697,55 +696,23 @@ Returning
 
 ---
 
-#### 1st Half-month Time-sheet
+#### Email Time-sheet
 
-Generate and email a time-sheet for the first half month(1-15) of a specific {*year*} and {*month*} for  
-the current assistant or specify {*netid*} for a specific assistant. E-mail many take up to a few minutes
-to arrive.
-
-Example: 
-
-Time-sheet for pay period 9/1/2015 - 9/15/2015  `/time-sheet/first-half-month?year=2015&month=9`	
-
-| Method      | Route                                                                 | Authorized |
-|:-----------:|-----------------------------------------------------------------------|------------|
-| GET         | /time-sheet/first-half-month?year={*year*}&month={*month*}            | Assistant  |
-| GET         | /time-sheet/{*netid*}/first-half-month?year={*year*}&month={*month*}  | Admin, Instructor |
-
-Parameters
-
-| Key         | Type   | Required | Description                               |
-|-------------|--------|----------|-------------------------------------------|
-| year        | Int    | yes      | The year                                  |
-| month       | Int    | yes      | The month [1..12]                         |
-
-Returning
-
-| HTTP Status Code | Description                           |
-|:----------------:|---------------------------------------|
-|        200       | Successfully generated and emailed the time-sheet |
-|        400       | [Bad request](#400-bad-request)       |
-|        401       | [Unauthorized](#401-unauthorized)     |
-|        403       | [Forbidden](#403-forbidden)           |
-|        404       | [Not Found](#404-not-found)           |
-|        500       | [Internal Error](#500-internal-error) |
-
----
-
-#### 2nd Half-month Time-Sheet
-
-Generate and email a time-sheet for the second half month(16 to last day of the month) of a 
-specific {*year*} and {*month*} for the current assistant or specify {*netid*} for a specific assistant. 
+Generate and email a time-sheet for the first half month(1-15) or second half month(16 to last day of the month)
+of a specific {*year*} and {*month*} for the current assistant or specify {*netid*} for a specific assistant. 
 E-mail many take up to a few minutes to arrive.
 
 Example: 
 
+Time-sheet for pay period 9/1/2015 - 9/15/2015  `/time-sheet/first-half-month?year=2015&month=9`	
 Time-sheet for pay period 9/16/2015 - 9/30/2015  `/time-sheet/second-half-month?year=2015&month=9`	
 
-| Method      | Route                                    | Authorized |
-|:-----------:|------------------------------------------|------------|
-| GET         | /time-sheet/second-half-month            | Assistant  |
-| GET         | /time-sheet/{*netid*}/second-half-month  | Admin, Instructor |
+| Method      | Route                                                                 | Authorized |
+|:-----------:|-----------------------------------------------------------------------|------------|
+| GET         | /time-sheet/first-half-month?year={*year*}&month={*month*}            | Assistant  |
+| GET         | /time-sheet/second-half-month?year={*year*}&month={*month*}           | Assistant  |
+| GET         | /time-sheet/{*netid*}/first-half-month?year={*year*}&month={*month*}  | Admin, Instructor |
+| GET         | /time-sheet/{*netid*}/second-half-month?year={*year*}&month={*month*} | Admin, Instructor |
 
 Parameters
 
