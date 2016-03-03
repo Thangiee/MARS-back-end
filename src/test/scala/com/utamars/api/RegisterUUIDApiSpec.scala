@@ -4,7 +4,7 @@ import java.util.UUID
 
 import akka.http.scaladsl.model.{FormData, StatusCodes}
 import com.github.nscala_time.time.Imports._
-import com.utamars.ServiceSpec
+import com.utamars.ApiSpec
 import spray.json._
 
 import scala.concurrent.Await
@@ -12,9 +12,9 @@ import scalacache._
 import scalacache.guava.GuavaCache
 
 
-class RegisterUUIDApiSpec extends ServiceSpec {
+class RegisterUUIDApiSpec extends ApiSpec {
   implicit val scalaCache = ScalaCache(GuavaCache())
-  val service = new RegisterUUIDApi()
+  val api = new RegisterUUIDApi()
   val ttl     = config.getInt("service.registerUUID.ttl-in-sec").seconds.toMillis
 
   after {
@@ -25,7 +25,7 @@ class RegisterUUIDApiSpec extends ServiceSpec {
 
     "registering a VALID UUID" must {
       val uuid = UUID.randomUUID().toString
-      def post = Post("/register-uuid", FormData("uuid" -> uuid)) ~> service.route
+      def post = Post("/register-uuid", FormData("uuid" -> uuid)) ~> api.route
       def regTime = System.currentTimeMillis()
 
       "response with status code ok (200)" in post ~> check {
@@ -47,7 +47,7 @@ class RegisterUUIDApiSpec extends ServiceSpec {
 
       "response with status code bad request (400)" in {
         forAll("Bad UUID") { (badUUID: String) =>
-          Post("/register-uuid", FormData("uuid" -> badUUID)) ~> service.route ~> check {
+          Post("/register-uuid", FormData("uuid" -> badUUID)) ~> api.route ~> check {
             status shouldEqual StatusCodes.BadRequest
           }
         }
@@ -60,13 +60,13 @@ class RegisterUUIDApiSpec extends ServiceSpec {
       "response with status code 200 if it has been registered" in {
         scalacache.sync.cachingWithTTL(uuid)(2.seconds)("")  // simulate registering the uuid
 
-        Get(s"/register-uuid/verify/$uuid") ~> service.route ~> check {
+        Get(s"/register-uuid/verify/$uuid") ~> api.route ~> check {
           status shouldEqual StatusCodes.OK
         }
       }
 
       "response with status code GONE (410) if it has not been registered" in {
-        Get(s"/register-uuid/verify/$uuid") ~> service.route ~> check {
+        Get(s"/register-uuid/verify/$uuid") ~> api.route ~> check {
           status shouldEqual StatusCodes.Gone
         }
       }
@@ -74,7 +74,7 @@ class RegisterUUIDApiSpec extends ServiceSpec {
       "response with status code GONE (410) if it has expired" in {
         scalacache.sync.cachingWithTTL(uuid)(500.millis)("")  // simulate registering the uuid
         Thread.sleep(1.second.millis)
-        Get(s"/register-uuid/verify/$uuid") ~> service.route ~> check {
+        Get(s"/register-uuid/verify/$uuid") ~> api.route ~> check {
           status shouldEqual StatusCodes.Gone
         }
       }

@@ -5,21 +5,21 @@ import akka.http.scaladsl.model.{DateTime, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.softwaremill.session.{SessionConfig, SessionManager, SessionUtil}
-import com.utamars.ServiceSpec
+import com.utamars.ApiSpec
 
-class SessionApiSpec extends ServiceSpec {
+class SessionApiSpec extends ApiSpec {
   override val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(1),
     refreshTokenMaxAgeSeconds = 1
   )
   override implicit val sessionManager = new SessionManager[Username](sessionConfig)
 
-  val sessionService = SessionApi()
+  val api = SessionApi()
   val protectedService = new Api {
     override val route = (path("resources") & authn) { _ => complete(StatusCodes.OK) }
   }
 
-  def loginRequest = requestWithCredentials(Post("/session/login"), adminAcc.username, adminAcc.passwd)(sessionService.route)
+  def loginRequest = adminRequest(_ => Post("/session/login"))
 
   val sessionCookieName = sessionConfig.sessionCookieConfig.name
   val refreshTokenCookieName = sessionConfig.refreshTokenCookieConfig.name
@@ -51,9 +51,9 @@ class SessionApiSpec extends ServiceSpec {
   }
 
   "Without credentials and a session, the system" should {
-    "responses with a 403" in {
+    "responses with a 401" in {
       Get("/resources") ~> Route.seal(protectedService.route) ~> check {
-        status shouldEqual StatusCodes.Forbidden
+        status shouldEqual StatusCodes.Unauthorized
       }
     }
   }
@@ -75,10 +75,10 @@ class SessionApiSpec extends ServiceSpec {
         status shouldEqual StatusCodes.OK
 
         Post("/session/logout") ~> addHeader(setSessionHeader()) ~> addHeader(setRefreshTokenHeader()) ~>
-          sessionService.route ~> check {
+          api.route ~> check {
           Get("/resources") ~>
             Route.seal(protectedService.route) ~> check {
-            status shouldEqual StatusCodes.Forbidden
+            status shouldEqual StatusCodes.Unauthorized
           }
         }
       }
@@ -98,7 +98,7 @@ class SessionApiSpec extends ServiceSpec {
 
         Get("/resources") ~> addHeader(setSessionHeader()) ~> addHeader(setRefreshTokenHeader()) ~>
           Route.seal(protectedService.route) ~> check {
-          status shouldEqual StatusCodes.Forbidden
+          status shouldEqual StatusCodes.Unauthorized
         }
       }
     }

@@ -2,11 +2,11 @@ package com.utamars
 
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.headers.BasicHttpCredentials
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Route._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.softwaremill.session.{InMemoryRefreshTokenStorage, SessionConfig, SessionManager, SessionUtil}
 import com.typesafe.config.ConfigFactory
-import com.utamars.api.Username
+import com.utamars.api.{Api, Username}
 import com.utamars.dataaccess._
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
@@ -64,7 +64,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
   def deleteDataBase(): Unit = DB.dropSchema()
 }
 
-trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProtocol {
+trait ApiSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProtocol {
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(30),
     refreshTokenMaxAgeSeconds = 1.minute.toSeconds
@@ -74,12 +74,14 @@ trait ServiceSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProto
     override def log(msg: String): Unit = println(msg)
   }
 
-  def requestWithCredentials(request: HttpRequest, user: String, pass: String)(route: Route): RouteTestResult =
-    request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
+  implicit val rejectionHandler = Boot.myRejectionHandler
 
-  def requestWithCredentials(user: String, pass: String, route: Route)(request: HttpRequest): RouteTestResult =
-    request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
+  def api: Api
 
-  def requestWithCredentials(request: HttpRequest, route: Route)(user: String, pass: String): RouteTestResult =
-    request ~> addCredentials(BasicHttpCredentials(user, pass)) ~> route
+  val adminRequest = requestWithCredentials(adminAcc)(_)
+  val instRequest  = requestWithCredentials(instAliceAcc)(_)
+  val asstRequest  = requestWithCredentials(asstBobAcc)(_)
+
+  def requestWithCredentials(acc: Account)(request: Account => HttpRequest): RouteTestResult =
+    request(acc) ~> addCredentials(BasicHttpCredentials(acc.username, acc.passwd)) ~> seal(api.route)
 }

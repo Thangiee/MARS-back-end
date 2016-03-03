@@ -3,17 +3,14 @@ package com.utamars.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import better.files._
-import com.utamars.ServiceSpec
+import com.utamars.ApiSpec
 import org.jvnet.mock_javamail.Mailbox
 
-class TimeSheetGenApiSpec extends ServiceSpec {
+class TimeSheetGenApiSpec extends ApiSpec {
 
-  val service    = TimeSheetGenApi()
+  val api = TimeSheetGenApi()
 
-  val bobRequest = requestWithCredentials(asstBobAcc.username, asstBobAcc.passwd, Route.seal(service.route)) _
   val bobMailbox = Mailbox.get(asstBob.email)
-
-  val aliceRequest = requestWithCredentials(instAliceAcc.username, instAliceAcc.passwd, Route.seal(service.route)) _
   val aliceMailbox = Mailbox.get(instAlice.email)
 
   override def beforeAll(): Unit = {
@@ -37,7 +34,7 @@ class TimeSheetGenApiSpec extends ServiceSpec {
   "Assistant" should {
 
     "be able to request a (first-half-month) timesheet to be generated and emailed to them" in {
-      bobRequest(Get("/time-sheet/first-half-month?year=2015&month=9")) ~> check {
+      asstRequest(_ => Get("/time-sheet/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         bobMailbox.size shouldEqual 1
@@ -47,7 +44,7 @@ class TimeSheetGenApiSpec extends ServiceSpec {
     }
 
     "be able to request a (second-half-month) timesheet to be generated and emailed to them" in {
-      bobRequest(Get("/time-sheet/second-half-month?year=2015&month=9")) ~> check {
+      asstRequest(_ => Get("/time-sheet/second-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         bobMailbox.size shouldEqual 1
@@ -61,7 +58,7 @@ class TimeSheetGenApiSpec extends ServiceSpec {
   "Instructor" should {
 
     "be able to request an assistant timesheet to be generated and emailed to the instructor" in {
-      aliceRequest(Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=9")) ~> check {
+      instRequest(_ => Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         aliceMailbox.size shouldEqual 1
@@ -73,16 +70,16 @@ class TimeSheetGenApiSpec extends ServiceSpec {
 
   "The system" should {
     "response with 404 if the system can not find the assistant from the instructor request" in {
-      aliceRequest(Get(s"/time-sheet/NotExistNetId/first-half-month?year=2015&month=9")) ~> check {
+      instRequest(_ => Get(s"/time-sheet/NotExistNetId/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.NotFound
       }
     }
 
     "response with 400 if the request is made with invalid date" in {
-      bobRequest(Get("/time-sheet/first-half-month?year=2015&month=13")) ~> check {
+      asstRequest(_ => Get("/time-sheet/first-half-month?year=2015&month=13")) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
-      aliceRequest(Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=0")) ~> check {
+      instRequest(_ => Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=0")) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
     }

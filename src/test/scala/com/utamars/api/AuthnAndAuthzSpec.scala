@@ -3,17 +3,13 @@ package com.utamars.api
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import com.utamars.{Boot, ServiceSpec}
-import com.utamars.dataaccess.Role
+import com.utamars.{Boot, ApiSpec}
+import com.utamars.dataaccess.{Account, Role}
 
-class AuthnAndAuthzSpec extends ServiceSpec {
+class AuthnAndAuthzSpec extends ApiSpec {
 
-  implicit val rejectionHandler = Boot.myRejectionHandler
-
-  val testService = new Api {
-
+  val api = new Api {
     override val defaultAuthzRoles: Seq[Role] = Seq(Role.Admin, Role.Instructor)
-
     override val route: Route =
       (path("admin-and-inst-only") & authnAndAuthz()) { account => // use default authzRoles
         complete(account.username)
@@ -29,48 +25,48 @@ class AuthnAndAuthzSpec extends ServiceSpec {
   }
 
   "Services with authentication and Authorization" should {
-    val request  = requestWithCredentials(Get("/admin-and-inst-only"), Route.seal(testService.route)) _
-    val request2 = requestWithCredentials(Get("/asst-only"), Route.seal(testService.route)) _
+    def adminInstOnly  = requestWithCredentials(_: Account)(_ => Get("/admin-and-inst-only"))
+    def asstOnly       = requestWithCredentials(_: Account)(_ => Get("/asst-only"))
 
     "response with 200 on authenticated, authorized, and approved account" in {
       Seq(adminAcc, instAliceAcc).foreach{ acc =>
-        request(acc.username, acc.passwd) ~> check {
+        adminInstOnly(acc) ~> check {
           status shouldEqual StatusCodes.OK
           responseAs[String] shouldEqual acc.username
         }
       }
 
-      request2(asstBobAcc.username, asstBobAcc.passwd) ~> check {
+      asstOnly(asstBobAcc) ~> check {
         status shouldEqual StatusCodes.OK
         responseAs[String] shouldEqual asstBobAcc.username
       }
     }
 
     "response with 401 on invalid username and/or password" in {
-      val userAndPass = Seq(
-        ("bad_username", "bad_passwd"),
-        (adminAcc.username, "bad_passwd"),
-        ("bad_username", adminAcc.passwd))
+      val accs = Seq(
+        adminAcc.copy(passwd = "bad_passwd"),
+        adminAcc.copy(username = "bad_username")
+      )
 
-      userAndPass.foreach { case (user, passwd) =>
-        request(user, passwd) ~> check {
+      accs.foreach { acc =>
+        adminInstOnly(acc) ~> check {
           status shouldEqual StatusCodes.Unauthorized
         }
       }
     }
 
     "response with 403 on authenticated account but not authorized" in {
-      request(asstBobAcc.username, asstBobAcc.passwd) ~> check {
+      adminInstOnly(asstBobAcc) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
 
-      request2(adminAcc.username, adminAcc.passwd) ~> check {
+      asstOnly(adminAcc) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
     }
 
     "response with 403 on authenticated and authorized account but not approved" in {
-      request2(asstEveAcc.username, asstEveAcc.passwd) ~> check {
+      asstOnly(asstEveAcc) ~> check {
         status shouldEqual StatusCodes.Forbidden
       }
     }
