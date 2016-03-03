@@ -24,7 +24,7 @@ object Account {
 
   def createFromForm(form: CreateInstructorAccForm): XorT[Future, DataAccessErr, Unit] =
     DBIO.seq(
-      DB.AccountTable += Account(form.netId, form.user, form.pass, Role.Instructor, approve = true),
+      DB.AccountTable += Account(form.netId, form.user, form.pass, Role.Instructor, approve = false),
       DB.InstructorTable += Instructor(form.netId, form.email, form.lastName, form.firstName)
     ).transactionally
 
