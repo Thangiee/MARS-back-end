@@ -54,6 +54,8 @@ object Boot extends App with CorsSupport with LazyLogging {
 
   val APIs =
     AccountApi() ::
+    AssistantApi() ::
+    InstructorApi() ::
     SessionApi() ::
     RegisterUUIDApi() ::
     ClockInOutApi()   ::

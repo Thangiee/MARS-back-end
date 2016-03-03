@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.{StatusCode, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
+import akka.http.scaladsl.unmarshalling.Unmarshaller._
 import cats.data.{Xor, XorT}
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
@@ -26,6 +27,8 @@ trait Api extends AnyRef with LazyLogging {
   def defaultAuthzRoles: Seq[Role] = Nil
 
   def realm: String = "secure"
+
+  def netIdsParam = parameter("net-ids".as(CsvSeq[String]))
 
   def checkSession(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
     requiredSession[String](refreshable[String], usingCookies).flatMap { username =>
