@@ -10,7 +10,7 @@ import com.utamars.util.FacePP
 import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 
-case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
@@ -30,7 +30,7 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) exte
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                       // Delete account by username
       val result = for {
         acc <- Account.findByUsername(username).leftMap(err2HttpResp)
-        _   <- FacePP.personDelete(s"mars_${acc.netId}")
+        _   <- facePP.personDelete(s"mars_${acc.netId}")
         _   <- Account.deleteByUsername(username).leftMap(err2HttpResp)
       } yield ()
 

@@ -13,7 +13,7 @@ import com.utamars.util.FacePP
 import scala.concurrent.{Future, ExecutionContext}
 import scala.language.postfixOps
 
-case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
@@ -24,7 +24,7 @@ case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) ex
 
         val result = for {
           _ <- Account.createFromForm(form.copy(pass = form.pass.bcrypt)).leftMap(err2HttpResp)
-          _ <- FacePP.personCreate(s"mars_${form.netId}")
+          _ <- facePP.personCreate(s"mars_${form.netId}")
         } yield ()
 
         complete(result.reply(succ => OK, errResp => { Account.deleteByUsername(form.user); errResp }))

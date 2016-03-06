@@ -13,7 +13,7 @@ import com.utamars.util.FacePP
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
 
   private val addr = config.getString("http.addr.public")
   private val port = config.getString("http.port")
@@ -50,8 +50,8 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     val result = for {
       asst   <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img    <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
-      faceId <- FacePP.detectionDetect(s"$baseUrl/${img.id}")
-      res    <- FacePP.recognitionVerify(s"mars_${acc.netId}", faceId)
+      faceId <- facePP.detectionDetect(s"$baseUrl/${img.id}")
+      res    <- facePP.recognitionVerify(s"mars_${acc.netId}", faceId)
       _      <- img.delete().leftMap(err2HttpResp)
     } yield (res._1, res._2, asst.threshold)
 
@@ -83,9 +83,9 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     val result = for {
       asst     <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img      <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
-      faceppId <- FacePP.detectionDetect(s"$baseUrl/${img.id}")
-      _        <- FacePP.personAddFace(s"mars_${acc.netId}", faceppId)
-      _        <- FacePP.trainVerify(s"mars_${acc.netId}")
+      faceppId <- facePP.detectionDetect(s"$baseUrl/${img.id}")
+      _        <- facePP.personAddFace(s"mars_${acc.netId}", faceppId)
+      _        <- facePP.trainVerify(s"mars_${acc.netId}")
       _        <- img.copy(faceId = faceppId).update().leftMap(err2HttpResp)
     } yield img.id
 
@@ -101,8 +101,8 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
   private def removeFace(id: String): Future[Response] = {
     val result = for {
       img <- FaceImage.findById(id).leftMap(err2HttpResp)
-      _   <- FacePP.personRemoveFace(s"mars_${img.netId}", img.faceId)
-      _   <- FacePP.trainVerify(s"mars_${img.netId}")
+      _   <- facePP.personRemoveFace(s"mars_${img.netId}", img.faceId)
+      _   <- facePP.trainVerify(s"mars_${img.netId}")
       _   <- img.delete().leftMap(err2HttpResp)
     } yield ()
 
