@@ -64,7 +64,7 @@ All Endpoints
 
 #### Account Info
 
-Get info of the current account or specify {*username*} to get info about a specific account.
+Get info of the current account or specify {*netid*} to get info about a specific account.
 
 To get multiple specific accounts by specifying {*netids*}, which are net ids separated by comma. <br/>
 Example: `http://52.33.35.165:8080/api/account/?net-ids=demo123,aaa123`
@@ -74,7 +74,7 @@ Example: `http://52.33.35.165:8080/api/account/?net-ids=demo123,aaa123`
 | GET      | /account                        | Admin, Instructor, Assistant  |
 | GET      | /account/all                    | Admin                         |
 | GET      | /account/?net-ids={*netids*}    | Admin                         |
-| GET      | /account/{*username*}           | Admin                         |
+| GET      | /account/{*netid*}           | Admin                         |
 
 Returning
 
@@ -300,12 +300,12 @@ Returning
 
 #### Change Account Password
 
-Change the password of the current account or specify {*username*} to do it for a specific account.
+Change the password of the current account or specify {*netid*} to do it for a specific account.
 
 | Method      | Route                                 | Authorized                    |
 |:-----------:|---------------------------------------|-------------------------------|
 | POST or PUT | /account/change-password              | Admin, Instructor, Assistant  |
-| POST or PUT | /account/change-password/{*username*} | Admin                         |
+| POST or PUT | /account/change-password/{*netid*} | Admin                         |
 
 Parameters
 
@@ -332,7 +332,7 @@ Approve or un-approve a specific account.
 
 | Method      | Route                                 | Authorized                    |
 |:-----------:|---------------------------------------|-------------------------------|
-| POST or PUT | /account/change-approve/{*username*}  | Admin                         |
+| POST or PUT | /account/change-approve/{*netid*}  | Admin                         |
 
 Parameters
 
@@ -359,7 +359,7 @@ Delete a specific account. This action will cascade and **DELETE ALL** other dat
 
 | Method      | Route                 | Authorized                    |
 |:-----------:|-----------------------|-------------------------------|
-| DELETE      | /account/{*username*} | Admin                         |
+| DELETE      | /account/{*netid*} | Admin                         |
 
 Returning 
 

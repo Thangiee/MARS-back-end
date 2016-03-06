@@ -51,19 +51,19 @@ class AccountApiSpec extends ApiSpec {
       val temp = Account("99998", "temp", "password", Role.Instructor, approve = true)
       Await.result(temp.create().value, 10.seconds)
 
-      adminRequest(_ => Get(s"/account/${temp.username}")) ~> check(responseTo[AccountDAO].username should equal(temp.username))
-      adminRequest(_ => Delete(s"/account/${temp.username}")) ~> check(status should equal(OK))
-      adminRequest(_ => Get(s"/account/${temp.username}")) ~> check(status should equal(NotFound))
+      adminRequest(_ => Get(s"/account/${temp.netId}")) ~> check(responseTo[AccountDAO].netId should equal(temp.netId))
+      adminRequest(_ => Delete(s"/account/${temp.netId}")) ~> check(status should equal(OK))
+      adminRequest(_ => Get(s"/account/${temp.netId}")) ~> check(status should equal(NotFound))
     }
 
     "be able to enable/disable account" in {
-      adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.username}", FormData("approve" -> "false"))) ~> check {
+      adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "false"))) ~> check {
         asstRequest(_ => Get("/account")) ~> check {
           status should equal(Forbidden)
         }
 
         // reset the approval
-        adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.username}", FormData("approve" -> "true"))) ~> check {
+        adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "true"))) ~> check {
           asstRequest(_ => Get("/account")) ~> check {
             status should equal(OK)
           }
@@ -72,13 +72,13 @@ class AccountApiSpec extends ApiSpec {
     }
 
     "be able to change any account password" in {
-      adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.username}", FormData("new_password" -> "123"))) ~> check {
+      adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> "123"))) ~> check {
         asstRequest(_ => Get("/account")) ~> check {
           status should equal(Unauthorized)
         }
 
         // reset the password
-        adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.username}", FormData("new_password" -> asstBobAcc.passwd))) ~> check {
+        adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> asstBobAcc.passwd))) ~> check {
           asstRequest(_ => Get("/account")) ~> check {
             status should equal(OK)
           }

@@ -50,8 +50,8 @@ object Account {
 
   def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable.filter(a => a.netId === a.netId).delete
 
-  def changePassword(username: String, newPass: String): XorT[Future, DataAccessErr, Account] =
-    findByUsername(username).flatMap(acc => acc.changePassword(newPass))
+  def changePassword(netId: String, newPass: String): XorT[Future, DataAccessErr, Account] =
+    findByNetId(netId).flatMap(acc => acc.changePassword(newPass))
 
   implicit class PostfixOps(acc: Account) {
     def create(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable += acc
