@@ -6,6 +6,13 @@ import com.utamars.dataaccess.{Instructor, Account, Assistant}
 
 object DAOs {
 
+  case class AccountDAO(netId: String, username: String, role: String, createTime: Timestamp, approve: Boolean)
+
+  object AccountDAO {
+    implicit val accDAO = jsonFormat5(AccountDAO.apply)
+    def apply(acc: Account): AccountDAO = AccountDAO(acc.netId, acc.username, acc.role, acc.createTime, acc.approve)
+  }
+
   case class AssistantDAO(
     netId: String,
     username: String,

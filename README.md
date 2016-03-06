@@ -749,7 +749,6 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 | role          | String | The account role (admin, instructor, or assistant)      |
 | username      | String | The account username                                    |
 | createTime    | Long   | When the account was created, epoch time in milliseconds|
-| passwd        | String | This field will always be an empty string               |
 
 
 ```json
@@ -759,8 +758,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
     "netId": "tql7155",
     "role": "assistant",
     "username": "thangiee",
-    "createTime": 1451077341962,
-    "passwd": ""
+    "createTime": 1451077341962
 }
 ```
 
@@ -773,24 +771,21 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
       "netId": "demo123",
       "role": "assistant",
       "username": "demo_asst",
-      "createTime": 1451762754206,
-      "passwd": ""
+      "createTime": 1451762754206
     }, 
     {
       "approve": true,
       "netId": "abc123",
       "role": "instructor",
       "username": "Ewing",
-      "createTime": 1451583070262,
-      "passwd": ""
+      "createTime": 1451583070262
     },
     {
       "approve": true,
       "netId": "mw002",
       "role": "assistant",
       "username": "test_minglu",
-      "createTime": 1454347847628,
-      "passwd": ""
+      "createTime": 1454347847628
     }
   ]
 }

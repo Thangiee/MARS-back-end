@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import com.softwaremill.session.SessionDirectives._
 import com.softwaremill.session.SessionOptions._
+import com.utamars.api.DAOs.AccountDAO
 import com.utamars.dataaccess.Role
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -14,7 +15,7 @@ case class SessionApi(implicit sm: SessMgr, rts: RTS) extends Api {
   override val route = pathPrefix("session") {
     ((post|put) & path("login") & authnAndAuthz()) { acc =>
       setSession(refreshable[String], usingCookies, acc.username) {
-        complete(acc.copy(passwd = "").jsonCompat)
+        complete(AccountDAO(acc).jsonCompat)
       }
     } ~
     ((post|put) & path("logout") & invalidateSession(refreshable[String], usingCookies)) {

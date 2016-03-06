@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import cats.data.XorT
 import cats.std.all._
 import com.utamars.ApiSpec
+import com.utamars.api.DAOs.AccountDAO
 import com.utamars.dataaccess.{Role, Account}
 import com.utamars.util.FacePP
 
@@ -34,7 +35,7 @@ class AccountApiSpec extends ApiSpec {
   "Any user" must {
     "be able to get their account info" in {
       adminRequest(_ => Get("/account")) ~> check {
-        responseTo[Account].netId should equal (adminAcc.netId)
+        responseTo[AccountDAO].netId should equal (adminAcc.netId)
       }
     }
   }
@@ -42,7 +43,7 @@ class AccountApiSpec extends ApiSpec {
   "Admin user" must {
     "be able to get all account info" in {
       adminRequest(_ => Get("/account/all")) ~> check {
-        responseToSeq[Account]('accounts) should not be empty
+        responseToSeq[AccountDAO]('accounts) should not be empty
       }
     }
 
@@ -50,7 +51,7 @@ class AccountApiSpec extends ApiSpec {
       val temp = Account("99998", "temp", "password", Role.Instructor, approve = true)
       Await.result(temp.create().value, 10.seconds)
 
-      adminRequest(_ => Get(s"/account/${temp.username}")) ~> check(responseTo[Account].username should equal(temp.username))
+      adminRequest(_ => Get(s"/account/${temp.username}")) ~> check(responseTo[AccountDAO].username should equal(temp.username))
       adminRequest(_ => Delete(s"/account/${temp.username}")) ~> check(status should equal(OK))
       adminRequest(_ => Get(s"/account/${temp.username}")) ~> check(status should equal(NotFound))
     }
@@ -83,12 +84,6 @@ class AccountApiSpec extends ApiSpec {
           }
         }
       }
-    }
-  }
-
-  "Getting account info" must {
-    "not expose password hash" in {
-      pending
     }
   }
 }

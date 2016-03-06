@@ -4,6 +4,7 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
+import com.utamars.api.DAOs.AccountDAO
 import com.utamars.dataaccess._
 import com.utamars.util.FacePP
 
@@ -16,16 +17,16 @@ case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, face
 
   override val route =
     (get & path("account") & authnAndAuthz()) { (acc) =>                                                    // Get account info
-      complete(Account.findByUsername(acc.username).reply(acc => acc.copy(passwd = "").jsonCompat))
+      complete(Account.findByUsername(acc.username).reply(AccountDAO(_).jsonCompat))
     } ~
     (get & path("account"/"all") & authnAndAuthz(Role.Admin)) { _ =>                                        // Get all account info
-      complete(Account.all().reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
+      complete(Account.all().reply(accs => Map("accounts" -> accs.map(AccountDAO(_))).jsonCompat))
     } ~
     (get & path("account"/) & netIdsParam & authnAndAuthz(Role.Admin)) { (ids, _) =>                        // Get accounts info by net ids
-      complete(Account.findByNetIds(ids.toSet).reply(accs => Map("accounts" -> accs.map(_.copy(passwd = ""))).jsonCompat))
+      complete(Account.findByNetIds(ids.toSet).reply(accs => Map("accounts" -> accs.map(AccountDAO(_))).jsonCompat))
     } ~
     (get & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                          // Get account info by username
-      complete(Account.findByUsername(username).reply(acc => acc.copy(passwd = "").jsonCompat))
+      complete(Account.findByUsername(username).reply(AccountDAO(_).jsonCompat))
     } ~
     (delete & path("account"/Segment) & authnAndAuthz(Role.Admin)) { (username, _) =>                       // Delete account by username
       val result = for {
