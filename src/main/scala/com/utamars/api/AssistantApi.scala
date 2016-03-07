@@ -53,9 +53,12 @@ case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, fa
       }
     }
 
-  private def updateAsst(netId: String, role: Role, form: UpdateAssistantForm): Future[Response] =
+  private def updateAsst(netId: String, role: Role, form: UpdateAssistantForm): Future[Response] = {
     if (Seq(Role.Admin, Role.Instructor) contains role)
+      Assistant.update(netId, form).reply(_ => OK)
+    else if (form.threshold.isEmpty)
       Assistant.update(netId, form).reply(_ => OK)
     else
       Future.successful(HttpResponse(StatusCodes.Forbidden, entity = "Only admin or instructor can set 'threshold'."))
+  }
 }
