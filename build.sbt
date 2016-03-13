@@ -1,7 +1,9 @@
 name := "MARS-back-end"
 version := "0.6.2"
-scalaVersion := "2.11.7"
-scalacOptions += "-Xexperimental"
+scalaVersion := "2.11.8"
+scalacOptions ++= Seq("-Xexperimental", "-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8", "-Yopt:l:classpath")
+
+libraryDependencies += "org.scala-lang.modules" % "scala-java8-compat_2.11" % "0.7.0"
 
 // akka
 libraryDependencies ++= Seq(
