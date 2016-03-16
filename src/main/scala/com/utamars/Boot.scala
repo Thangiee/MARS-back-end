@@ -87,9 +87,9 @@ object Boot extends App with CorsSupport with LazyLogging {
     pathPrefix("api") { cors(APIs.map(_.route).reduce(_ ~ _)) }
   }
 
-  // check every day at ~7:00pm for the end of the pay period date
+  // check every day at ~11:59pm for the end of the pay period date
   // to generate and email timesheet for all assistants.
-  val timeTil7Pm = (new LocalTime(19, 0) - LocalTime.now().getMillisOfDay.millis).getMillisOfDay
+  val timeTil7Pm = (new LocalTime(23, 59) - LocalTime.now().getMillisOfDay.millis).getMillisOfDay
   system.scheduler.schedule(timeTil7Pm.millis, 24.hours) {
     val today = DateTime.now()
     val (_, payPeriodEnd) = today.toLocalDate.halfMonth
