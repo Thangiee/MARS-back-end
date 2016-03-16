@@ -53,6 +53,12 @@ object Account {
   def changePassword(netId: String, newPass: String): XorT[Future, DataAccessErr, Account] =
     findByNetId(netId).flatMap(acc => acc.changePassword(newPass))
 
+  def findEmailByNetId(netId: String): XorT[Future, DataAccessErr, String] = {
+    val q1 = DB.AssistantTable.filter(_.netId === netId).map(_.email)
+    val q2 = DB.InstructorTable.filter(_.netId === netId).map(_.email)
+    (q1 union q2).result.headOption
+  }
+
   implicit class PostfixOps(acc: Account) {
     def create(): XorT[Future, DataAccessErr, Unit] = DB.AccountTable += acc
 

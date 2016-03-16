@@ -1,17 +1,19 @@
 package com.utamars.api
 
-import akka.http.scaladsl.model.{HttpResponse, FormData}
+import akka.http.scaladsl.model.{FormData, HttpResponse}
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.data.XorT
 import cats.std.all._
 import com.utamars.ApiSpec
 import com.utamars.api.DAOs.AccountDAO
-import com.utamars.dataaccess.{Role, Account}
+import com.utamars.dataaccess.{Account, Role}
 import com.utamars.util.FacePP
 
-import scala.concurrent.{Await, Future, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scalacache.ScalaCache
+import scalacache.guava.GuavaCache
 
 class AccountApiSpec extends ApiSpec {
 
@@ -24,6 +26,8 @@ class AccountApiSpec extends ApiSpec {
     def personAddFace(personName: String, faceId: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, Unit] = ???
     def detectionDetect(url: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, FaceId] = ???
   }
+
+  implicit val scalaCache = ScalaCache(GuavaCache())
 
   val api = AccountApi()
 
