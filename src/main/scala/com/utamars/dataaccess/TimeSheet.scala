@@ -38,9 +38,9 @@ object TimeSheet {
       val fields = stamper.getAcroFields
 
       // fill in assistant info
-      fields.setField("Name", s"${asst.firstName} ${asst.lastName}")
+      fields.setField("Name", s"${asst.firstName.capitalize} ${asst.lastName.capitalize}")
       fields.setField("Id", asst.employeeId)
-      fields.setField("Title", asst.title)
+      fields.setField("Title", asst.title.capitalize)
       fields.setField("Dept", asst.department)
       fields.setField("TitleCode", asst.titleCode)
       fields.setField("Period", printDt("MM-dd-YYYY", end))
