@@ -15,6 +15,12 @@ case class ClockOutAndNotify() extends Runnable with LazyLogging {
 
   private implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(7))
 
+  private var listener: List[Unit => Unit] = Nil
+
+  private def fireEvent(): Unit = listener.foreach(l => l())
+
+  def onClockOut(f: => Unit): ClockOutAndNotify = { listener ::= (Unit => f); this }
+
   override def run(): Unit = {
     logger.info("Task: Clock out assistants that forgot to clock out and notify them.")
 
@@ -27,6 +33,7 @@ case class ClockOutAndNotify() extends Runnable with LazyLogging {
 
     Await.result(ClockInOutRecord.clockOutAll(Some("Forgot to clock out")).value, 1.minute) match {
       case Xor.Right(netIds) =>
+        fireEvent()
         val mails = netIds.map { id =>
           Await.result(Assistant.findByNetId(id).value, 1.minute).map(_.email).leftMap(err => (id, err))
         }

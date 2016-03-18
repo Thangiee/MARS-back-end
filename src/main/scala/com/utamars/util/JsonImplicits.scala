@@ -30,7 +30,7 @@ trait JsonImplicits extends AnyRef with DefaultJsonProtocol with NullOptions {
   }
 
   implicit val accFmt     = jsonFormat6(Account.apply)
-  implicit val jsonFmt    = jsonFormat5(ClockInAsst.apply)
+  implicit val jsonFmt    = jsonFormat6(ClockInAsst.apply)
   implicit val recordFmt  = jsonFormat6(ClockInOutRecord.apply)
   implicit val accDAOFmt  = jsonFormat5(AccountDAO.apply)
   implicit val asstDAOFmt = jsonFormat15(AssistantDAO.apply)

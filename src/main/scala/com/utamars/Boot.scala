@@ -18,6 +18,7 @@ import com.utamars.api._
 import com.utamars.dataaccess.DB
 import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 import com.utamars.util.TimeImplicits
+import com.utamars.ws.ClockInTracker
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
@@ -34,6 +35,7 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
   implicit val system       = ActorSystem("MARS", com.utamars.util.Config.config)
   implicit val dispatcher   = system.dispatcher
   implicit val materializer = ActorMaterializer()
+  implicit val tracker      = new ClockInTracker()
 
   // AIPs' dependencies that will be injected implicitly
   implicit val scalaCache   = ScalaCache(GuavaCache())
@@ -57,7 +59,7 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
     InstructorApi() ::
     SessionApi() ::
     RegisterUUIDApi() ::
-    ClockInOutApi()   ::
+    ClockInOutApi().onClockInOrOut(tracker.refresh())   ::
     TimeSheetGenApi() ::
     FacialRecognitionApi() ::
     AssetsApi() ::
@@ -83,7 +85,7 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
     .result()
 
   val routes = logRequestResult(customLogging _) {
-    pathPrefix("api") { cors(APIs.map(_.route).reduce(_ ~ _)) }
+    pathPrefix("api")(cors(APIs.map(_.route).reduce(_ ~ _))) ~ WebSocket().route
   }
 
   // check every day at ~11:59pm for the end of the pay period date
@@ -98,7 +100,7 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
   // run every day at ~5:00am to clock out any assistants still
   // clocked in and notify them via email.
   val timeTil5AmNextDay = ((DateTime.now().withHour(5).withMinute(0) + 1.day) - DateTime.now().getMillis).getMillis.toInt
-  system.scheduler.schedule(timeTil5AmNextDay.millis, 24.hours)(ClockOutAndNotify().run())
+  system.scheduler.schedule(timeTil5AmNextDay.millis, 24.hours)(ClockOutAndNotify().onClockOut(tracker.refresh()).run())
 
   Http().bindAndHandle(routes, util.Config.privateAddr, util.Config.port)
 }

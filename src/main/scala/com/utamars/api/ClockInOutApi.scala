@@ -8,6 +8,7 @@ import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess.{NotFound, _}
 import com.utamars.forms.UpdateRecordForm
+import com.utamars.ws.ClockInTracker$
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scalacache.{ScalaCache, get => _}
@@ -18,12 +19,18 @@ case class ClockInOutApi(implicit cache: ScalaCache, sm: SessMgr, rts: RTS, ec: 
   override val defaultAuthzRoles: Seq[Role] = Seq(Role.Assistant)
   override val realm            : String    = "mars-app"
 
+  private var listener: List[Unit => Unit] = Nil
+
+  private def fireEvent(): Unit = listener.foreach(l => l())
+
+  def onClockInOrOut(f: => Unit): ClockInOutApi = { listener ::= (Unit => f); this }
+
   override val route: Route =
     (post & path("records"/"clock-in") & formFields('computer_id.?) & authnAndAuthz()) { (compId, account) =>    // clock in
-      complete(processClockInRequest(compId, account))
+      complete(processClockInRequest(compId, account).map(response => { fireEvent(); response }))
     } ~
     (post & path("records"/"clock-out") & formField('computer_id.?) & authnAndAuthz()) { (compId, account) =>    // clock out
-      complete(ClockInOutRecord.clockOutAll(account.netId, compId).reply(_ => OK))
+      complete(ClockInOutRecord.clockOutAll(account.netId, compId).reply(_ => { fireEvent(); OK }))
     } ~
     (get & path("records") & parameter('filter.?) & authnAndAuthz()) { (dateFilter, acc) =>                     // get current assistant records
       complete(getRecords(dateFilter, acc.netId))

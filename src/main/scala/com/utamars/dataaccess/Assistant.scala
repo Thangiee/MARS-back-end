@@ -13,9 +13,9 @@ import scala.concurrent.Future
 case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
-case class ClockInAsst(netId: String, imgId: String, fName: String, lName: String, inTime: Timestamp)
+case class ClockInAsst(netId: String, imgId: String, fName: String, lName: String, inTime: Timestamp, inLoc: String)
 object ClockInAsst {
-  implicit val getResult = GetResult(r => ClockInAsst(r.<<, r.<<, r.<<, r.<<, r.<<))
+  implicit val getResult = GetResult(r => ClockInAsst(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
 }
 
 object Assistant {
@@ -51,9 +51,9 @@ object Assistant {
     }
   }
 
-  def test: XorT[Future, DataAccessErr, Vector[ClockInAsst]] = XorT(
+  def findCurrentClockIn: XorT[Future, DataAccessErr, Vector[ClockInAsst]] = XorT(
     DB.run(
-    sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, r.in_time
+    sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, r.in_time, r.in_computer_id
           FROM assistant a
           LEFT JOIN face_image f USING (net_id)
           LEFT JOIN clock_in_out_record r USING (net_id) WHERE r.out_time IS NULL
