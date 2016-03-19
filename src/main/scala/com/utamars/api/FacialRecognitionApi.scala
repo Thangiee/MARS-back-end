@@ -10,14 +10,11 @@ import akka.http.scaladsl.server.directives.FileInfo
 import cats.std.all._
 import com.utamars.dataaccess.{Account, Assistant, FaceImage, Role}
 import com.utamars.util.FacePP
+import com.utamars.util
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
-
-  private val addr = config.getString("http.addr.public")
-  private val port = config.getString("http.port")
-  private val baseUrl = s"http://$addr:$port/api/assets/face"
 
   override val route: Route = {
     ((post|put) & path("face"/"recognition") & authnAndAuthz(Role.Assistant)) { acc =>        // do facial recognition
@@ -42,7 +39,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     implicit val imageFormat = jsonFormat2(Image.apply)
 
     FaceImage.findAllGood(netId)
-      .map(imgs => imgs.map(img => Image(img.id, s"$baseUrl/${img.id}")))
+      .map(imgs => imgs.map(img => Image(img.id, util.mkFaceImgAssetUrl(img.id))))
       .reply(imgs => Map("images" -> imgs).jsonCompat)
   }
 
@@ -50,7 +47,7 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     val result = for {
       asst   <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img    <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
-      faceId <- facePP.detectionDetect(s"$baseUrl/${img.id}")
+      faceId <- facePP.detectionDetect(util.mkFaceImgAssetUrl(img.id))
       res    <- facePP.recognitionVerify(s"mars_${acc.netId}", faceId)
       _      <- img.delete().leftMap(err2HttpResp)
     } yield (res._1, res._2, asst.threshold)
@@ -83,14 +80,14 @@ case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts:
     val result = for {
       asst     <- Assistant.findByNetId(acc.netId).leftMap(err2HttpResp)
       img      <- FaceImage.create(acc.netId, file, metadata, "").leftMap(err2HttpResp)
-      faceppId <- facePP.detectionDetect(s"$baseUrl/${img.id}")
+      faceppId <- facePP.detectionDetect(util.mkFaceImgAssetUrl(img.id))
       _        <- facePP.personAddFace(s"mars_${acc.netId}", faceppId)
       _        <- facePP.trainVerify(s"mars_${acc.netId}")
       _        <- img.copy(faceId = faceppId).update().leftMap(err2HttpResp)
     } yield img.id
 
     result.reply(
-      imgId => (OK, Map("url" -> s"$baseUrl/$imgId").jsonCompat),
+      imgId => (OK, Map("url" -> util.mkFaceImgAssetUrl(imgId)).jsonCompat),
       resp  => {
         FaceImage.findAllBad(acc.netId).map(imgs => imgs.foreach(_.delete())) //clean up
         resp

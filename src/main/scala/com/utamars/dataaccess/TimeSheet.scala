@@ -15,7 +15,7 @@ import scala.concurrent.Future
 object TimeSheet {
 
   private val printDt = (pattern: String, date: ReadablePartial) =>  DateTimeFormat.forPattern(pattern).print(date)
-  private val outDir = config.getString("service.timesheet.dir")
+  private val outDir = com.utamars.util.Config.timeSheetDir
   private case class Record(inTime: DateTime, outTime: DateTime)
 
   def fromDateRange(range: (LocalDate, LocalDate), asst: Assistant): XorT[Future, DataAccessErr, File] = fromDateRange(range._1, range._2, asst)

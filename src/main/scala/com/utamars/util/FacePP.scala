@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.model.StatusCodes._
 import cats.data.{Xor, XorT}
 import cats.std.all._
-import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import spray.json._
 import spray.json.lenses.JsonLenses._
@@ -34,10 +33,9 @@ object FacePP extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
   implicit val defaultFacePP = new FacePP {
     private val baseUrl = "https://apius.faceplusplus.com/v2"
-    private val config = ConfigFactory.load()
 
     private def POST(route: String) = Http(baseUrl + route).timeout(10000, 10000).method("POST")
-      .params("api_secret" -> config.getString("facepp.secret"), "api_key" -> config.getString("facepp.key"))
+      .params("api_secret" -> Config.faceppSecret, "api_key" -> Config.faceppKey)
 
     def detectionDetect(url: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, FaceId] =
       call(POST("/detection/detect").param("url", url)).flatMap(json =>

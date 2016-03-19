@@ -9,7 +9,7 @@ import scala.util.Try
 
 object DB extends AnyRef with Tables {
 
-  val driver = config.getString("db.driver") match {
+  val driver = com.utamars.util.Config.config.getString("db.driver") match {
     case "org.postgresql.Driver" => slick.driver.PostgresDriver
     case "org.h2.Driver"         => slick.driver.H2Driver
     case _                       => throw new RuntimeException(s"Driver is not supported. Try using org.postgresql.Driver or org.h2.Driver.")

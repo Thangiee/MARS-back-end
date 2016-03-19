@@ -10,7 +10,7 @@ import scalacache.ScalaCache
 
 case class RegisterUUIDApi(implicit cache: ScalaCache) extends Api {
 
-  private val ttl = config.getInt("service.registerUUID.ttl-in-sec").seconds
+  private val ttl = com.utamars.util.Config.uuidTTL.seconds
 
   override val route: Route = {
     (post & path("register-uuid") & formField('uuid)) { uuid =>

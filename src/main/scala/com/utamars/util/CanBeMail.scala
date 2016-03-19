@@ -5,12 +5,11 @@ import javax.activation.{MailcapCommandMap, CommandMap}
 import javax.mail.internet.InternetAddress
 
 import better.files.File
-import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import courier._
 import simulacrum._
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @typeclass trait CanBeMail[A] {
@@ -42,11 +41,10 @@ object EMailer extends AnyRef with LazyLogging {
   mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed")
   mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822")
 
-  private val config = ConfigFactory.load()
-  private val envelope = Envelope.from(new InternetAddress(config.getString("email.addr")))
-  private val mailer = Mailer(config.getString("email.host"), config.getInt("email.port"))
+  private val envelope = Envelope.from(new InternetAddress(Config.emailAddr))
+  private val mailer = Mailer(Config.emailHost, Config.emailPort)
     .auth(true)
-    .as(config.getString("email.SMTP-user"), config.getString("email.SMTP-password"))
+    .as(Config.STMPUser, Config.STMPPasswd)
     .startTtls(true)()
 
   def mailTo[T: CanBeMail](addr: String, subject: String = "", canBeMail: T)(implicit ec: ExecutionContext): Unit = {

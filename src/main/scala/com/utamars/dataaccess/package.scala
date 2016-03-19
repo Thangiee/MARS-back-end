@@ -13,9 +13,7 @@ import scala.language.implicitConversions
 
 package object dataaccess extends AnyRef with TimeImplicits {
 
-  private[dataaccess] val config = ConfigFactory.load()
-  private val parallelism: Int = config.getInt("db.parallelism")
-  private[dataaccess] implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(parallelism))
+  private[dataaccess] implicit val executionCtx = ExecutionContexts.fromExecutor(new ForkJoinPool(util.Config.dbParallelism))
 
   type Role = String
   object Role {
@@ -36,7 +34,7 @@ package object dataaccess extends AnyRef with TimeImplicits {
   case class SqlErr(code: String, msg: String) extends DataAccessErr
   case class InternalErr(err: Throwable) extends DataAccessErr
 
-  private val defaultErrHandler = PartialFunction[Throwable, Xor.Left[DataAccessErr]] {
+  private[dataaccess] val defaultErrHandler = PartialFunction[Throwable, Xor.Left[DataAccessErr]] {
     case ex: PSQLException =>
       ex.getSQLState match {
         case "23505" => Xor.Left(SqlDuplicateKey(ex.getServerErrorMessage.getDetail))

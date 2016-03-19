@@ -12,7 +12,6 @@ import akka.http.scaladsl.server.{AuthenticationFailedRejection, RejectionHandle
 import akka.stream.ActorMaterializer
 import com.github.nscala_time.time.Imports._
 import com.softwaremill.session._
-import com.typesafe.config.ConfigFactory
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
 import com.utamars.api._
@@ -21,18 +20,17 @@ import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
-import scalacache._
+import scalacache.ScalaCache
 import scalacache.guava._
 
 object Boot extends App with CorsSupport with LazyLogging {
-  val config = ConfigFactory.load()
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(24.hours.toSeconds),
     sessionEncryptData = true,
     refreshTokenMaxAgeSeconds = 14.days.seconds
   )
 
-  implicit val system       = ActorSystem("MARS", config)
+  implicit val system       = ActorSystem("MARS", com.utamars.util.Config.config)
   implicit val dispatcher   = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
@@ -50,7 +48,7 @@ object Boot extends App with CorsSupport with LazyLogging {
     override def remove(selector: String): Future[Unit] = scalacache.remove(selector)
   }
 
-  if (config.getBoolean("db.create")) DB.createSchema()
+  if (util.Config.createSchema) DB.createSchema()
 
   val APIs =
     AccountApi() ::
@@ -101,8 +99,6 @@ object Boot extends App with CorsSupport with LazyLogging {
   val timeTil5AmNextDay = ((DateTime.now().withHour(5).withMinute(0) + 1.day) - DateTime.now().getMillis).getMillis.toInt
   system.scheduler.schedule(timeTil5AmNextDay.millis, 24.hours)(ClockOutAndNotify().run())
 
-  val interface = config.getString("http.addr.private")
-  val port      = config.getInt("http.port")
-  Http().bindAndHandle(routes, interface, port)
+  Http().bindAndHandle(routes, util.Config.privateAddr, util.Config.port)
 }
 

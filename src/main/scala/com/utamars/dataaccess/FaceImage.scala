@@ -12,7 +12,7 @@ import scala.util.{Try, Random}
 
 case class FaceImage(id: String, netId: String, faceId: String) {
   def path: String = {
-    val dir = config.getString("service.face-recognition.dir")
+    val dir = com.utamars.util.Config.faceImgDir
     s"$dir/$netId/$id"
   }
 }
