@@ -17,13 +17,14 @@ import com.utamars.CustomRejection.NotApprove
 import com.utamars.api._
 import com.utamars.dataaccess.DB
 import com.utamars.tasks.{ClockOutAndNotify, GenAndEmailAllAsstTS}
+import com.utamars.util.TimeImplicits
 
 import scala.concurrent.Future
 import scala.concurrent.duration.Duration
 import scalacache.ScalaCache
 import scalacache.guava._
 
-object Boot extends App with CorsSupport with LazyLogging {
+object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(24.hours.toSeconds),
     sessionEncryptData = true,

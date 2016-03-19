@@ -1,7 +1,7 @@
 package com.utamars.api
 
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, HttpChallenge, HttpCredentials}
-import akka.http.scaladsl.model.{StatusCode, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpResponse, StatusCode, StatusCodes}
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
@@ -14,12 +14,13 @@ import com.softwaremill.session.SessionOptions._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
 import com.utamars.dataaccess._
+import com.utamars.util.{JsonImplicits, TimeImplicits}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import scala.util.{Success, Try}
 
-trait Api extends AnyRef with LazyLogging {
+trait Api extends AnyRef with TimeImplicits with JsonImplicits with LazyLogging {
 
   def route: Route
 

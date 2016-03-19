@@ -4,6 +4,9 @@ import com.typesafe.config.ConfigFactory
 
 package object util {
 
+  trait Implicits extends AnyRef with TimeImplicits with JsonImplicits
+  object Implicits extends Implicits
+
   object Config {
     val config = ConfigFactory.load()
 

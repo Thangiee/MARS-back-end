@@ -9,7 +9,6 @@ object DAOs {
   case class AccountDAO(netId: String, username: String, role: String, createTime: Timestamp, approve: Boolean)
 
   object AccountDAO {
-    implicit val accDAO = jsonFormat5(AccountDAO.apply)
     def apply(acc: Account): AccountDAO = AccountDAO(acc.netId, acc.username, acc.role, acc.createTime, acc.approve)
   }
 
@@ -32,8 +31,6 @@ object DAOs {
   )
 
   object AssistantDAO {
-    implicit val asstDAO = jsonFormat15(AssistantDAO.apply)
-
     def apply(data: (Assistant, Account)): AssistantDAO = apply(data._1, data._2)
     def apply(asst: Assistant, acc: Account): AssistantDAO = AssistantDAO(
       acc.netId, acc.username, acc.role, acc.createTime, acc.approve, asst.rate, asst.email, asst.job, asst.department,
@@ -53,8 +50,6 @@ object DAOs {
   )
 
   object InstructorDAO {
-    implicit val instDAO = jsonFormat8(InstructorDAO.apply)
-
     def apply(data: (Instructor, Account)): InstructorDAO = apply(data._1, data._2)
     def apply(inst: Instructor, acc: Account): InstructorDAO = InstructorDAO(
       acc.netId, acc.username, acc.role, acc.createTime, acc.approve, inst.email, inst.lastName, inst.firstName

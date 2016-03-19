@@ -66,7 +66,7 @@ trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with 
   def deleteDataBase(): Unit = DB.dropSchema()
 }
 
-trait ApiSpec extends BaseSpec with ScalatestRouteTest with DefaultJsonProtocol {
+trait ApiSpec extends BaseSpec with ScalatestRouteTest with util.Implicits {
   val sessionConfig = SessionConfig.default(SessionUtil.randomServerSecret()).copy(
     sessionMaxAgeSeconds = Some(30),
     refreshTokenMaxAgeSeconds = 1.minute.toSeconds
