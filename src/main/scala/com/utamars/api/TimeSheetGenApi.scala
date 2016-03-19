@@ -7,11 +7,13 @@ import akka.http.scaladsl.server.Route
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess._
-import com.utamars.util.EMailer
+import com.utamars.util.{EMailer, UtaDate}
 
 import scala.concurrent.ExecutionContext
 
 case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+
+  override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
   private val monthYear =  parameter('month.as[Int], 'year.as[Int])
 
@@ -30,6 +32,18 @@ case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS)
       } ~
       (path(Segment / "second-half-month") & monthYear) { (netId, month, year) =>
         InstMakeAndSendTimeSheet(acc, netId, month, year, isFirst = false)
+      }
+    } ~
+    (get & path("pay-period-info") & parameter('timestamp.as[Long].?) & authnAndAuthz()) { (ts, acc) => // todo: doc
+      val today = ts.map(new LocalDate(_)).getOrElse(new LocalDate())
+      val (start, end) = today.halfMonth
+      complete {
+        Map(
+          "start" -> start.toStartOfDayTimestamp.getMillis,
+          "end" -> end.toStartOfDayTimestamp.getMillis,
+          "due" -> UtaDate.dueDate(end).toStartOfDayTimestamp.getMillis,
+          "pay" -> UtaDate.payDate(end).toStartOfDayTimestamp.getMillis
+        ).jsonCompat
       }
     }
   }
