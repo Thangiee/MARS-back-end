@@ -8,7 +8,6 @@ import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateAssistantForm
 import slick.jdbc.GetResult
 
-import scala.concurrent.Future
 
 case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
@@ -21,25 +20,25 @@ object ClockInAsst {
 object Assistant {
   private val asstAccTable = for { (asst, acc) <- DB.AssistantTable join DB.AccountTable on (_.netId === _.netId) } yield (asst, acc)
 
-  def all(): XorT[Future, DataAccessErr, Seq[Assistant]] = DB.AssistantTable.result
+  def all(): DataAccessIO[Seq[Assistant]] = DB.AssistantTable.result
 
-  def allWithAcc(): XorT[Future, DataAccessErr, Seq[(Assistant, Account)]] = asstAccTable.result
+  def allWithAcc(): DataAccessIO[Seq[(Assistant, Account)]] = asstAccTable.result
 
-  def findByNetId(netId: String): XorT[Future, DataAccessErr, Assistant] =
+  def findByNetId(netId: String): DataAccessIO[Assistant] =
     DB.AssistantTable.filter(_.netId.toLowerCase === netId.toLowerCase).result.headOption
 
-  def findByNetIdWithAcc(netId: String): XorT[Future, DataAccessErr, (Assistant, Account)] =
+  def findByNetIdWithAcc(netId: String): DataAccessIO[(Assistant, Account)] =
     asstAccTable.filter(_._1.netId === netId).result.headOption
 
-  def findByNetIds(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[Assistant]] =
+  def findByNetIds(netIds: Set[String]): DataAccessIO[Seq[Assistant]] =
     DB.AssistantTable.filter(_.netId inSetBind netIds).result
 
-  def findByNetIdsWithAcc(netIds: Set[String]): XorT[Future, DataAccessErr, Seq[(Assistant, Account)]] =
+  def findByNetIdsWithAcc(netIds: Set[String]): DataAccessIO[Seq[(Assistant, Account)]] =
     asstAccTable.filter(_._1.netId inSetBind netIds).result
 
-  def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
+  def deleteAll(): DataAccessIO[Unit] = DB.AssistantTable.filter(a => a.netId === a.netId).delete
 
-  def update(netId: String, form: UpdateAssistantForm): XorT[Future, DataAccessErr, Unit] = {
+  def update(netId: String, form: UpdateAssistantForm): DataAccessIO[Unit] = {
     findByNetId(netId).flatMap { asst =>
       asst.copy(
         rate = form.rate.getOrElse(asst.rate),
@@ -51,7 +50,7 @@ object Assistant {
     }
   }
 
-  def findCurrentClockIn: XorT[Future, DataAccessErr, Vector[ClockInAsst]] = XorT(
+  def findCurrentClockIn: DataAccessIO[Vector[ClockInAsst]] = XorT(
     DB.run(
     sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, r.in_time, r.in_computer_id
           FROM assistant a
@@ -62,8 +61,8 @@ object Assistant {
   )
 
   implicit class PostfixOps(asst: Assistant) {
-    def create(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable += asst
+    def create(): DataAccessIO[Unit] = DB.AssistantTable += asst
 
-    def update(): XorT[Future, DataAccessErr, Unit] = DB.AssistantTable.filter(_.netId === asst.netId).update(asst)
+    def update(): DataAccessIO[Unit] = DB.AssistantTable.filter(_.netId === asst.netId).update(asst)
   }
 }

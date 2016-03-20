@@ -2,15 +2,10 @@ package com.utamars.dataaccess
 
 import java.sql.Timestamp
 
-import cats.data.XorT
 import cats.implicits._
 import com.github.nscala_time.time.Imports._
 import com.utamars.dataaccess.DB.driver.api._
 import com.utamars.forms.UpdateRecordForm
-import slick.dbio
-import slick.dbio.Effect.Transactional
-
-import scala.concurrent.Future
 
 
 case class ClockInOutRecord(
@@ -24,25 +19,25 @@ case class ClockInOutRecord(
 
 object ClockInOutRecord {
 
-  def all(): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] = DB.ClockInOutRecordTable.sortBy(_.inTime.desc).result
+  def all(): DataAccessIO[Seq[ClockInOutRecord]] = DB.ClockInOutRecordTable.sortBy(_.inTime.desc).result
 
-  def findByNetId(netId: String): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
+  def findByNetId(netId: String): DataAccessIO[Seq[ClockInOutRecord]] =
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result
 
-  def findById(id: Int): XorT[Future, DataAccessErr, ClockInOutRecord] =
+  def findById(id: Int): DataAccessIO[ClockInOutRecord] =
     DB.ClockInOutRecordTable.filter(_.id === id).sortBy(_.inTime.desc).result.headOption
 
-  def findMostRecent(netId: String): XorT[Future, DataAccessErr, ClockInOutRecord] =
+  def findMostRecent(netId: String): DataAccessIO[ClockInOutRecord] =
     DB.ClockInOutRecordTable.filter(_.netId.toLowerCase === netId.toLowerCase).sortBy(_.inTime.desc).result.headOption
 
-  def findBetween(start: LocalDate, end: LocalDate, netId: String, inclusive: Boolean=true): XorT[Future, DataAccessErr, Seq[ClockInOutRecord]] =
+  def findBetween(start: LocalDate, end: LocalDate, netId: String, inclusive: Boolean=true): DataAccessIO[Seq[ClockInOutRecord]] =
     DB.ClockInOutRecordTable
       .filter(r => r.netId.toLowerCase === netId.toLowerCase &&
                    r.inTime >= start.toStartOfDayTimestamp &&
                    r.outTime.map(_ <= end.toEndOfDayTimestamp).getOrElse(inclusive)) // if inclusive is false, record with no out time will be excluded
       .sortBy(_.inTime.desc).result
 
-  def clockOutAll(netId: String, computerId: Option[String]): XorT[Future, DataAccessErr, Unit] =
+  def clockOutAll(netId: String, computerId: Option[String]): DataAccessIO[Unit] =
     DBIO.seq(
       DB.ClockInOutRecordTable
         .filter(r => r.netId.toLowerCase === netId.toLowerCase && r.outTime.isEmpty)
@@ -50,7 +45,7 @@ object ClockInOutRecord {
         .update((Some(DateTime.now()), computerId))
     ).transactionally
 
-  def clockOutAll(computerId: Option[String]): XorT[Future, DataAccessErr, Seq[String]] = {
+  def clockOutAll(computerId: Option[String]): DataAccessIO[Seq[String]] = {
     val records = DB.ClockInOutRecordTable.filter(r => r.outTime.isEmpty)
     (for {
       y <- records.map(_.netId).result
@@ -58,7 +53,7 @@ object ClockInOutRecord {
     } yield y).transactionally
   }
 
-  def update(id: Int, form: UpdateRecordForm): XorT[Future, DataAccessErr, Unit] = {
+  def update(id: Int, form: UpdateRecordForm): DataAccessIO[Unit] = {
     findById(id).flatMap { record =>
       record.copy(
         inTime = if (form.inTime.isDefined) new Timestamp(form.inTime.get) else record.inTime,
@@ -69,13 +64,13 @@ object ClockInOutRecord {
     }
   }
 
-  def deleteById(id: Int): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(_.id === id).delete
+  def deleteById(id: Int): DataAccessIO[Unit] = DB.ClockInOutRecordTable.filter(_.id === id).delete
 
-  def deleteAll(): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(r => r.netId === r.netId).delete
+  def deleteAll(): DataAccessIO[Unit] = DB.ClockInOutRecordTable.filter(r => r.netId === r.netId).delete
 
   implicit class PostfixOps(record: ClockInOutRecord) {
-    def create(): XorT[Future, DataAccessErr, Int] = DB.ClockInOutRecordTable += record
+    def create(): DataAccessIO[Int] = DB.ClockInOutRecordTable += record
 
-    def update(): XorT[Future, DataAccessErr, Unit] = DB.ClockInOutRecordTable.filter(_.id === record.id).update(record)
+    def update(): DataAccessIO[Unit] = DB.ClockInOutRecordTable.filter(_.id === record.id).update(record)
   }
 }

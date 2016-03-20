@@ -3,14 +3,11 @@ package com.utamars.dataaccess
 import java.io.FileOutputStream
 
 import better.files._
-import cats.data.XorT
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.itextpdf.text.pdf.{PdfReader, PdfStamper}
 import com.utamars.util.UtaDate
 import org.joda.time.{Days, LocalDate, ReadablePartial}
-
-import scala.concurrent.Future
 
 object TimeSheet {
 
@@ -18,9 +15,9 @@ object TimeSheet {
   private val outDir = com.utamars.util.Config.timeSheetDir
   private case class Record(inTime: DateTime, outTime: DateTime)
 
-  def fromDateRange(range: (LocalDate, LocalDate), asst: Assistant): XorT[Future, DataAccessErr, File] = fromDateRange(range._1, range._2, asst)
+  def fromDateRange(range: (LocalDate, LocalDate), asst: Assistant): DataAccessIO[File] = fromDateRange(range._1, range._2, asst)
 
-  def fromDateRange(start: LocalDate, end: LocalDate, asst: Assistant): XorT[Future, DataAccessErr, File] = {
+  def fromDateRange(start: LocalDate, end: LocalDate, asst: Assistant): DataAccessIO[File] = {
 
     // compute the id of a in/out time field in timesheet-template.pdf
     def getTimeBox(date: LocalDate): String = {
