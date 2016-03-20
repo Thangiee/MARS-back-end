@@ -6,14 +6,15 @@ import akka.http.scaladsl.server.Directives._
 import cats.data.XorT
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
+import com.utamars.ExeCtx
 import com.utamars.api.DAOs.InstructorDAO
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateInstructorAccForm, UpdateInstructorForm}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.postfixOps
 
-case class InstructorApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class InstructorApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 

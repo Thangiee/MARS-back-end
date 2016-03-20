@@ -5,14 +5,14 @@ import java.util.UUID
 import akka.http.scaladsl.model.HttpResponse
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import com.utamars.ExeCtx
 import com.utamars.dataaccess.Role
 import com.utamars.ws.ClockInTracker
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scalacache.ScalaCache
 
-case class WebSocket(implicit cache: ScalaCache ,sm: SessMgr, rts: RTS, ec: ExecutionContext, tracker: ClockInTracker) extends Api {
+case class WebSocket(implicit cache: ScalaCache ,sm: SessMgr, rts: RTS, ec: ExeCtx, tracker: ClockInTracker) extends Api {
 
   val route: Route =
     (get & path("ws"/"current-clock-in-assts-tracker"/JavaUUID)) { token =>

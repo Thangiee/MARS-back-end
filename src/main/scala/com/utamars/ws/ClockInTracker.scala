@@ -8,18 +8,18 @@ import akka.stream.scaladsl.GraphDSL.Implicits._
 import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 import akka.stream.{FlowShape, OverflowStrategy}
 import com.utamars.dataaccess.Assistant
-import com.utamars.util
+import com.utamars.{ExeCtx, util}
 import com.utamars.ws.ClockInTracker._
 import spray.json._
 import com.utamars.util.JsonImplicits._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.Await
 
 /**
  * Provide real time update of currently clocked in assistants over web socket.
  */
-class ClockInTracker(implicit system: ActorSystem, ec: ExecutionContext) {
+class ClockInTracker(implicit system: ActorSystem, ec: ExeCtx) {
 
   private val auxActor = system.actorOf(Props(classOf[AuxActor]))
 

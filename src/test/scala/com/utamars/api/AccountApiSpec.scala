@@ -5,12 +5,12 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.data.XorT
 import cats.std.all._
-import com.utamars.ApiSpec
+import com.utamars.{ExeCtx, ApiSpec}
 import com.utamars.api.DAOs.AccountDAO
 import com.utamars.dataaccess.{Account, Role}
 import com.utamars.util.FacePP
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import scalacache.ScalaCache
 import scalacache.guava.GuavaCache
@@ -18,13 +18,13 @@ import scalacache.guava.GuavaCache
 class AccountApiSpec extends ApiSpec {
 
   implicit val mockFacePP = new FacePP {
-    def personDelete(personName: String)(implicit ec: ExecutionContext) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
-    def personCreate(personName: String)(implicit ec: ExecutionContext) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
-    def recognitionVerify(personName: String, faceId: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, (Confidence, IsSamePerson)] = ???
-    def personRemoveFace(personName: String, faceId: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, Unit] = ???
-    def trainVerify(personName: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, Unit] = ???
-    def personAddFace(personName: String, faceId: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, Unit] = ???
-    def detectionDetect(url: String)(implicit ec: ExecutionContext): XorT[Future, HttpResponse, FaceId] = ???
+    def personDelete(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
+    def personCreate(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
+    def recognitionVerify(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, (Confidence, IsSamePerson)] = ???
+    def personRemoveFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def trainVerify(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def personAddFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def detectionDetect(url: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, FaceId] = ???
   }
 
   implicit val scalaCache = ScalaCache(GuavaCache())

@@ -1,16 +1,9 @@
 package com.utamars.api
 
+import akka.http.scaladsl.model.FormData
 import akka.http.scaladsl.model.StatusCodes._
-import akka.http.scaladsl.model.{FormData, HttpResponse}
-import cats.data.XorT
-import cats.std.all._
 import com.utamars.ApiSpec
-import com.utamars.api.DAOs.{AssistantDAO, AccountDAO}
-import com.utamars.dataaccess.{Account, Role}
-import com.utamars.util.FacePP
-
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import com.utamars.api.DAOs.AssistantDAO
 
 class AssistantApiSpec extends ApiSpec {
 

@@ -10,12 +10,11 @@ import better.files.File
 import com.sksamuel.scrimage.Image
 import com.sksamuel.scrimage.ScaleMethod.Bicubic
 import com.sksamuel.scrimage.nio.JpegWriter
+import com.utamars.ExeCtx
 import com.utamars.dataaccess.FaceImage
 import com.utamars.util.IntOps
 
-import scala.concurrent.ExecutionContext
-
-case class AssetsApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class AssetsApi(implicit ex: ExeCtx, sm: SessMgr, rts: RTS) extends Api {
 
   override val route: Route = {
     (get & path("assets"/"face"/Segment) & parameter('size.as[Int].?)) { (id, size) =>  // get face image

@@ -13,10 +13,11 @@ import com.softwaremill.session.SessionDirectives._
 import com.softwaremill.session.SessionOptions._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.CustomRejection.NotApprove
+import com.utamars.ExeCtx
 import com.utamars.dataaccess._
 import com.utamars.util.{JsonImplicits, TimeImplicits}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.implicitConversions
 import scala.util.{Success, Try}
 
@@ -31,7 +32,7 @@ trait Api extends AnyRef with TimeImplicits with JsonImplicits with LazyLogging 
 
   def netIdsParam = parameter("net-ids".as(CsvSeq[String]))
 
-  def checkSession(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
+  def checkSession(implicit ec: ExeCtx, sm: SessMgr, rts: RTS): Directive1[Account] =
     requiredSession[String](refreshable[String], usingCookies).flatMap { username =>
       onComplete(Account.findByUsername(username).value).flatMap[Tuple1[Account]] {
         case Success(Xor.Right(acc)) => provide(acc)
@@ -42,7 +43,7 @@ trait Api extends AnyRef with TimeImplicits with JsonImplicits with LazyLogging 
       }
     }
 
-  def checkUserAndPass(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] = {
+  def checkUserAndPass(implicit ec: ExeCtx, sm: SessMgr, rts: RTS): Directive1[Account] = {
     val challenge = HttpChallenge("MyAuth", realm)
     val authenticator= (credentials: Option[HttpCredentials]) => credentials match {
       case Some(BasicHttpCredentials(providedUser, providedPass)) =>
@@ -58,7 +59,7 @@ trait Api extends AnyRef with TimeImplicits with JsonImplicits with LazyLogging 
   }
 
   /** Authenticate the account, i.e. check the username and password or an existing session */
-  def authn(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] = checkUserAndPass | checkSession
+  def authn(implicit ec: ExeCtx, sm: SessMgr, rts: RTS): Directive1[Account] = checkUserAndPass | checkSession
 
   /** Authorize the account by checking if the user's role is in [[Api#authzRoles]] */
   def authz(acc: Account, authzRoles: Seq[Role]=defaultAuthzRoles): Directive1[Account] =
@@ -66,18 +67,18 @@ trait Api extends AnyRef with TimeImplicits with JsonImplicits with LazyLogging 
     else reject(AuthorizationFailedRejection)
 
   /** check authentication and then check Authorization. Also pass along the account that made the request. */
-  def authnAndAuthz(authzRoles: Role*)(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS): Directive1[Account] =
+  def authnAndAuthz(authzRoles: Role*)(implicit ec: ExeCtx, sm: SessMgr, rts: RTS): Directive1[Account] =
     authn.flatMap(acc => authz(acc, if (authzRoles.isEmpty) defaultAuthzRoles else authzRoles))
 
 
   implicit class XorHttpResponseImplicit[L <: HttpResponse, R](future: XorT[Future, L, R]) {
-    def reply(onSucc: (R) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(response => response, onSucc)
-    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(onErr, onSucc)
+    def reply(onSucc: (R) => Response)(implicit ec: ExeCtx): Future[Response] = future.fold(response => response, onSucc)
+    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExeCtx): Future[Response] = future.fold(onErr, onSucc)
   }
 
   implicit class XorDataAccessErrImplicit[L <: DataAccessErr, R](future: XorT[Future, L, R]) {
-    def reply(onSucc: (R) => Response)(implicit ec: ExecutionContext) : Future[Response] = future.fold(err => err2HttpResp(err), onSucc)
-    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExecutionContext): Future[Response] = future.fold(onErr, onSucc)
+    def reply(onSucc: (R) => Response)(implicit ec: ExeCtx) : Future[Response] = future.fold(err => err2HttpResp(err), onSucc)
+    def reply(onSucc: (R) => Response, onErr: (L) => Response)(implicit ec: ExeCtx): Future[Response] = future.fold(onErr, onSucc)
   }
 
   implicit def tuple2HttpResponse(response: (StatusCode, String)): HttpResponse = {

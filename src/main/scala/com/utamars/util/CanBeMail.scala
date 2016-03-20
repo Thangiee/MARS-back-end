@@ -4,12 +4,12 @@ import java.io
 import javax.activation.{MailcapCommandMap, CommandMap}
 import javax.mail.internet.InternetAddress
 
+import com.utamars.ExeCtx
 import better.files.File
 import com.typesafe.scalalogging.LazyLogging
 import courier._
 import simulacrum._
 
-import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @typeclass trait CanBeMail[A] {
@@ -47,7 +47,7 @@ object EMailer extends AnyRef with LazyLogging {
     .as(Config.STMPUser, Config.STMPPasswd)
     .startTtls(true)()
 
-  def mailTo[T: CanBeMail](addr: String, subject: String = "", canBeMail: T)(implicit ec: ExecutionContext): Unit = {
+  def mailTo[T: CanBeMail](addr: String, subject: String = "", canBeMail: T)(implicit ec: ExeCtx): Unit = {
     val sendMail = mailer(envelope.to(new InternetAddress(addr))
       .subject(subject)
       .content(canBeMail.composeContent)

@@ -10,11 +10,11 @@ import akka.http.scaladsl.server.directives.FileInfo
 import cats.std.all._
 import com.utamars.dataaccess.{Account, Assistant, FaceImage, Role}
 import com.utamars.util.FacePP
-import com.utamars.util
+import com.utamars.{ExeCtx, util}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-case class FacialRecognitionApi(implicit ex: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
+case class FacialRecognitionApi(implicit ex: ExeCtx, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
 
   override val route: Route = {
     ((post|put) & path("face"/"recognition") & authnAndAuthz(Role.Assistant)) { acc =>        // do facial recognition

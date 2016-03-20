@@ -5,15 +5,16 @@ import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.server.Directives._
 import cats.std.all._
 import com.github.t3hnar.bcrypt._
+import com.utamars.ExeCtx
 import com.utamars.api.DAOs.AssistantDAO
 import com.utamars.dataaccess._
 import com.utamars.forms.{CreateAssistantForm, UpdateAssistantForm}
 import com.utamars.util.FacePP
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.Future
 import scala.language.postfixOps
 
-case class AssistantApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
+case class AssistantApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS, facePP: FacePP) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 

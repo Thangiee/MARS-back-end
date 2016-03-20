@@ -8,15 +8,16 @@ import akka.http.scaladsl.server.Directives._
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
 import com.github.t3hnar.bcrypt._
+import com.utamars.ExeCtx
 import com.utamars.api.DAOs.AccountDAO
 import com.utamars.dataaccess._
 import com.utamars.util.{EMailer, FacePP}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.language.postfixOps
 import scalacache.ScalaCache
 
-case class AccountApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS, facePP: FacePP, cache: ScalaCache) extends Api {
+case class AccountApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS, facePP: FacePP, cache: ScalaCache) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 

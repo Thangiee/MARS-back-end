@@ -6,12 +6,11 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import cats.std.all._
 import com.github.nscala_time.time.Imports._
+import com.utamars.ExeCtx
 import com.utamars.dataaccess._
 import com.utamars.util.{EMailer, UtaDate}
 
-import scala.concurrent.ExecutionContext
-
-case class TimeSheetGenApi(implicit ec: ExecutionContext, sm: SessMgr, rts: RTS) extends Api {
+case class TimeSheetGenApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS) extends Api {
 
   override val defaultAuthzRoles = Seq(Role.Admin, Role.Instructor, Role.Assistant)
 
