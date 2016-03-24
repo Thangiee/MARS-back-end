@@ -11,11 +11,13 @@ Most of the API endpoints require you to be authenticated. You can do that in on
         
     Include the username and password in the URL on every API calls that require authentication.
     `http://username:password@example.com/resource`
+    
+    **Both username and password need to be base 64 encoded!**
   
   * Get a Session (preferably):
     
-    Use the above method to [log into a session](#session-login), afterwards you will not need to 
-    include your credentials for future API calls.
+    Use the above method to [get a session cookie](#session-login), afterwards, you just send the cookie instead the 
+    credentials for future API calls.
 
 
 API Endpoints
