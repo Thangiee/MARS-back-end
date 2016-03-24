@@ -44,6 +44,15 @@ package object dataaccess extends AnyRef with TimeImplicits {
     case ex          => Xor.Left(InternalErr(ex))
   }
 
+  // Implicits conversions below allow us to remove some boilerplate when using slick to query the DB.
+  //
+  // For Example, to get all assistants, instead of:
+  //    def all(): DataAccessIO[Seq[Assistant]] =
+  //      XorT(DB.run(DB.AssistantTable.result).map(assts => Xor.Right(assts)).recover(defaultErrHandler))
+  //
+  // we can just write:
+  //    def all(): DataAccessIO[Seq[Assistant]] = DB.AssistantTable.result
+  // ------------------------------------------------------------------------------------------------------
   private[dataaccess] implicit def withErrHandling[A, B <: NoStream, C <: Effect](action: DBIOAction[A,B,C]): DataAccessIO[A] =
     XorT(DB.run(action).map(a => Xor.Right(a)).recover(defaultErrHandler))
 
