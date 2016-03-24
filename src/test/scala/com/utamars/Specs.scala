@@ -5,10 +5,12 @@ import akka.http.scaladsl.model.headers.BasicHttpCredentials
 import akka.http.scaladsl.server.Route._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.unmarshalling.FromResponseUnmarshaller
+import cats.data.XorT
 import com.softwaremill.session.{InMemoryRefreshTokenStorage, SessionConfig, SessionManager, SessionUtil}
 import com.typesafe.config.ConfigFactory
 import com.utamars.api.{Api, Username}
 import com.utamars.dataaccess._
+import com.utamars.util.FacePP
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -17,7 +19,7 @@ import spray.json.DefaultJsonProtocol
 import spray.json._
 import com.github.t3hnar.bcrypt._
 
-import scala.concurrent.Await
+import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
 trait BaseSpec extends WordSpec with BeforeAndAfter with BeforeAndAfterAll with Matchers with ScalaFutures with GeneratorDrivenPropertyChecks {
@@ -77,6 +79,16 @@ trait ApiSpec extends BaseSpec with ScalatestRouteTest with util.Implicits {
   }
 
   implicit val rejectionHandler = Boot.myRejectionHandler
+
+  class MockFacePP extends FacePP {
+    def personDelete(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def personCreate(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def recognitionVerify(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, (Confidence, IsSamePerson)] = ???
+    def personRemoveFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def trainVerify(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def personAddFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
+    def detectionDetect(url: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, FaceId] = ???
+  }
 
   def api: Api
 

@@ -25,10 +25,10 @@ case class AssistantApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS, facePP: Face
 
         val result = for {
           _ <- Account.createFromForm(form.copy(pass = form.pass.bcrypt)).leftMap(err2HttpResp)
-          _ <- facePP.personCreate(s"mars_${form.netId}")
+          _ <- facePP.personCreate(s"mars_${form.netId}").leftMap(err => { Account.deleteByUsername(form.user); err })
         } yield ()
 
-        complete(result.reply(succ => OK, errResp => { Account.deleteByUsername(form.user); errResp }))
+        complete(result.reply(_ => OK))
       }
     } ~
     (get & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                                  // Get current assistant info

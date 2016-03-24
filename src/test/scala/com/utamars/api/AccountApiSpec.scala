@@ -17,14 +17,9 @@ import scalacache.guava.GuavaCache
 
 class AccountApiSpec extends ApiSpec {
 
-  implicit val mockFacePP = new FacePP {
-    def personDelete(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
-    def personCreate(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
-    def recognitionVerify(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, (Confidence, IsSamePerson)] = ???
-    def personRemoveFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
-    def trainVerify(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
-    def personAddFace(personName: String, faceId: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] = ???
-    def detectionDetect(url: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, FaceId] = ???
+  implicit val mockFacePP = new MockFacePP {
+    override def personDelete(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
+    override def personCreate(personName: String)(implicit ec: ExeCtx) = XorT.right[Future, HttpResponse, Unit](Future.successful(()))
   }
 
   implicit val scalaCache = ScalaCache(GuavaCache())
