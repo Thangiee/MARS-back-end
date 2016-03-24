@@ -5,7 +5,8 @@ import cats.data.Xor
 import com.github.nscala_time.time.Imports._
 import com.typesafe.scalalogging.LazyLogging
 import com.utamars.dataaccess._
-import com.utamars.util.EMailer
+import com.utamars.util.{EMailer, Config}
+import better.files._
 
 import scala.concurrent.Await
 import scala.concurrent.forkjoin.ForkJoinPool
@@ -16,6 +17,7 @@ case class GenAndEmailAllAsstTS() extends Runnable with LazyLogging {
 
   override def run(): Unit = {
     logger.info("Task: Generating and emailing all assistant their time sheet for this pay period.")
+    Config.timeSheetDir.toFile.children.foreach(_.delete())
 
     Await.result(Assistant.all().value, 1.minute) match {
       case Xor.Right(assts) =>
