@@ -60,7 +60,7 @@ private [dataaccess] trait Tables {
     val inComputerId : Rep[Option[String]]    = column[Option[String]]("in_computer_id", O.Length(128, varying = true))
     val outComputerId: Rep[Option[String]]    = column[Option[String]]("out_computer_id", O.Length(128, varying = true))
 
-    lazy val assistantTableFk = foreignKey("clock_in_out_record_net_id_fkey", netId, AssistantTable)(r => r.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
+    lazy val assistantTableFk = foreignKey("clock_in_out_record_net_id_fkey", netId, AssistantTable)(r => r.netId, onUpdate=ForeignKeyAction.NoAction)
   }
 
   class InstructorTable(_tableTag: Tag) extends Table[Instructor](_tableTag, "instructor") {
@@ -83,6 +83,6 @@ private [dataaccess] trait Tables {
     val netId : Rep[String] = column[String]("net_id", O.Length(128, varying = true))
     val faceId: Rep[String] = column[String]("face_id", O.Length(128, varying = true))
 
-    lazy val assistantTableFk = foreignKey("face_image_net_id_fkey", netId, AssistantTable)(asst => asst.netId, onUpdate=ForeignKeyAction.NoAction, onDelete=ForeignKeyAction.Cascade)
+    lazy val assistantTableFk = foreignKey("face_image_net_id_fkey", netId, AssistantTable)(asst => asst.netId, onUpdate=ForeignKeyAction.NoAction)
   }
 }
