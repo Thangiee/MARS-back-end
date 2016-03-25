@@ -78,13 +78,13 @@ private class AuxActor extends Actor {
 
     // only when there are clients, create a child actor to get the current clock in assists
     case Refresh           => if (clients.nonEmpty) context.actorOf(Props[ChildActor]) ! "fetch"
-      
+
     // notify by child actor that it finish fetching the data. Send the new data to all clients
     case Finish(data)     => cacheData = Some(data); clients.values.foreach(_ ! Send(data))
-      
+
     case _ =>
   }
-  
+
 }
 
 private class ChildActor extends Actor {
@@ -94,7 +94,7 @@ private class ChildActor extends Actor {
       Await.result(Assistant.findCurrentClockIn.value, 10.seconds).fold(
         err => self ! PoisonPill,
         data => {
-          sender() ! Finish(data.map(a => a.copy(imgId = util.mkFaceImgAssetUrl(a.imgId))).toJson.compactPrint) // tell parent we finish
+          sender() ! Finish(data.map(a => a.copy(imgId = Some(util.mkFaceImgAssetUrl(a.imgId)))).toJson.compactPrint) // tell parent we finish
           self ! PoisonPill
         }
       )
