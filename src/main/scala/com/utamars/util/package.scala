@@ -29,7 +29,8 @@ package object util {
   }
 
   /* face_image.id, NOT face_img.face_id */
-  def mkFaceImgAssetUrl(id: String) = Config.publicUrl + "/api/assets/face/" +id
+  def mkFaceImgAssetUrl(id: String): String = Config.publicUrl + "/api/assets/face/" +id
+  def mkFaceImgAssetUrl(id: Option[String]): Option[String] = id.map(mkFaceImgAssetUrl(_))
 
 
   implicit class IntOps(i: Int) {

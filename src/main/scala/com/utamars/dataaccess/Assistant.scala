@@ -12,7 +12,7 @@ import slick.jdbc.GetResult
 case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
-case class ClockInAsst(netId: String, imgId: String, fName: String, lName: String, inTime: Timestamp, inLoc: String)
+case class ClockInAsst(netId: String, imgId: Option[String], fName: String, lName: String, inTime: Timestamp, inLoc: String)
 object ClockInAsst {
   implicit val getResult = GetResult(r => ClockInAsst(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
 }
@@ -54,8 +54,10 @@ object Assistant {
     DB.run(
     sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, r.in_time, r.in_computer_id
           FROM assistant a
+          LEFT JOIN account acc USING (net_id)
           LEFT JOIN face_image f USING (net_id)
-          LEFT JOIN clock_in_out_record r USING (net_id) WHERE r.out_time IS NULL
+          LEFT JOIN clock_in_out_record r USING (net_id)
+          WHERE acc.approve = TRUE AND r.out_time IS NULL AND r.in_time NOTNULL AND r.in_computer_id NOTNULL
           ORDER BY a.net_id, f.id, r.in_time DESC""".as[ClockInAsst]
     ).map(res => Xor.Right(res)).recover(defaultErrHandler)
   )
