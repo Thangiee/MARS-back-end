@@ -4,11 +4,12 @@ import akka.dispatch.ExecutionContexts
 import cats.data.{Xor, XorT}
 import com.utamars.util.TimeImplicits
 import org.postgresql.util.PSQLException
-import slick.dbio.{Effect, DBIOAction, NoStream}
+import slick.dbio.{DBIOAction, Effect, NoStream}
 
 import scala.concurrent.Future
 import scala.concurrent.forkjoin.ForkJoinPool
 import scala.language.implicitConversions
+import scala.util.Try
 
 package object dataaccess extends AnyRef with TimeImplicits {
 

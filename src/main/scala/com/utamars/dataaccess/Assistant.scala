@@ -1,7 +1,5 @@
 package com.utamars.dataaccess
 
-import java.sql.Timestamp
-
 import cats.data.{Xor, XorT}
 import cats.implicits._
 import com.utamars.dataaccess.DB.driver.api._
@@ -12,7 +10,7 @@ import slick.jdbc.GetResult
 case class Assistant(netId: String, rate: Double, email: String, job: String, department: String,
   lastName: String, firstName: String, employeeId: String, title: String, titleCode: String, threshold: Double)
 
-case class ClockInAsst(netId: String, imgId: Option[String], fName: String, lName: String, duration: Timestamp, inLoc: String)
+case class ClockInAsst(netId: String, imgId: Option[String], fName: String, lName: String, duration: Int, inLoc: String)
 object ClockInAsst {
   implicit val getResult = GetResult(r => ClockInAsst(r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
 }
@@ -52,7 +50,7 @@ object Assistant {
 
   def findCurrentClockIn: DataAccessIO[Vector[ClockInAsst]] = XorT(
     DB.run(
-    sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, now() - r.in_time, r.in_computer_id
+    sql"""SELECT DISTINCT ON (a.net_id) a.net_id, f.id, a.first_name, a.last_name, extract(EPOCH From (now() - r.in_time)) , r.in_computer_id
           FROM assistant a
           LEFT JOIN account acc USING (net_id)
           LEFT JOIN face_image f USING (net_id)
