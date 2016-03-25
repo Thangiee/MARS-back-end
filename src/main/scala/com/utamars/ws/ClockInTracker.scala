@@ -9,7 +9,6 @@ import akka.stream.scaladsl.{Flow, GraphDSL, Merge, Sink, Source}
 import akka.stream.{FlowShape, OverflowStrategy}
 import com.utamars.dataaccess.Assistant
 import com.utamars.{ExeCtx, util}
-import com.utamars.ws.ClockInTracker._
 import spray.json._
 import com.utamars.util.JsonImplicits._
 
@@ -53,48 +52,36 @@ class ClockInTracker(implicit system: ActorSystem, ec: ExeCtx) {
   def refresh(): Unit = auxActor ! Refresh
 }
 
-object ClockInTracker {
-  trait Protocol
-  case class Join(id: String, client: ActorRef) extends Protocol
-  case class Quit(id: String) extends Protocol
-  case class Send(msg: String) extends Protocol
-  case object Refresh extends Protocol
-  case object NoOp extends Protocol
+private trait Protocol
+private case class Join(id: String, client: ActorRef) extends Protocol
+private case class Quit(id: String) extends Protocol
+private case class Send(msg: String) extends Protocol
+private case object Refresh extends Protocol
+private case object NoOp extends Protocol
 
-  case class Finish(data: String)
-}
+private case class Fetch(onComplete: String => Unit)
 
 private class AuxActor extends Actor {
-
   private var clients = Map.empty[String, ActorRef] // track connected clients
-  private var cacheData: Option[String] = None
-  context.actorOf(Props[ChildActor]) ! "fetch"
 
   override def receive: Receive = {
-    // add new client and send the cached data to only that client
-    case Join(id, client) => clients += id -> client; cacheData.foreach(data => client ! Send(data))
-
-    case Quit(id)         => clients -= id
-
-    // only when there are clients, create a child actor to get the current clock in assists
-    case Refresh           => if (clients.nonEmpty) context.actorOf(Props[ChildActor]) ! "fetch"
-
-    // notify by child actor that it finish fetching the data. Send the new data to all clients
-    case Finish(data)     => cacheData = Some(data); clients.values.foreach(_ ! Send(data))
-
+    case Join(id, client)        => clients += id -> client; fetchClockInAsst((data) => client ! Send(data))
+    case Quit(id)                => clients -= id
+    case Refresh                 => if (clients.nonEmpty) fetchClockInAsst((data) => clients.values.foreach(_ ! Send(data)))
     case _ =>
   }
 
+  def fetchClockInAsst(onComplete: String => Unit): Unit = context.actorOf(Props[ChildActor]) ! Fetch(onComplete)
 }
 
 private class ChildActor extends Actor {
-
   override def receive: Receive = {
-    case "fetch" =>
+    case Fetch(onComplete) =>
       Await.result(Assistant.findCurrentClockIn.value, 10.seconds).fold(
         err => self ! PoisonPill,
-        data => {
-          sender() ! Finish(data.map(a => a.copy(imgId = Some(util.mkFaceImgAssetUrl(a.imgId)))).toJson.compactPrint) // tell parent we finish
+        clockInAssts => {
+          val json = clockInAssts.map(a => a.copy(imgId = Some(util.mkFaceImgAssetUrl(a.imgId)))).toJson.compactPrint
+          onComplete(json)
           self ! PoisonPill
         }
       )
