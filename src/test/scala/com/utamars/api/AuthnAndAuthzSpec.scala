@@ -25,8 +25,8 @@ class AuthnAndAuthzSpec extends ApiSpec {
   }
 
   "Services with authentication and Authorization" should {
-    def adminInstOnly  = requestWithCredentials(_: Account)(_ => Get("/admin-and-inst-only"))
-    def asstOnly       = requestWithCredentials(_: Account)(_ => Get("/asst-only"))
+    def adminInstOnly  = requestWithCredentials(_: Account)(Get("/admin-and-inst-only"))
+    def asstOnly       = requestWithCredentials(_: Account)(Get("/asst-only"))
 
     "response with 200 on authenticated, authorized, and approved account" in {
       Seq(adminAcc, instAliceAcc).foreach{ acc =>

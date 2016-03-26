@@ -19,7 +19,7 @@ class SessionApiSpec extends ApiSpec {
     override val route = (path("resources") & authn) { _ => complete(StatusCodes.OK) }
   }
 
-  def loginRequest = adminRequest(_ => Post("/session/login"))
+  def loginRequest = adminRequest(Post("/session/login"))
 
   val sessionCookieName = sessionConfig.sessionCookieConfig.name
   val refreshTokenCookieName = sessionConfig.refreshTokenCookieConfig.name

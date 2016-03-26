@@ -31,19 +31,19 @@ class ClockInOutApiSpec extends ApiSpec {
   "Clock in/out service" should {
 
     "response with 200 on a successful clock in" in {
-      asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+      asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
 
     "response with 200 on a successful clock out" in {
-      asstRequest(_ => Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
+      asstRequest(Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
 
     "save a clock in record into the database after clocking in" in {
-      asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+      asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
         Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
           case Xor.Right(record) =>
             record.netId shouldEqual asstBob.netId
@@ -55,8 +55,8 @@ class ClockInOutApiSpec extends ApiSpec {
     }
 
     "save a clock out record into the database after clocking out" in {
-      asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
-        asstRequest(_ => Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
+      asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+        asstRequest(Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
           Await.result(ClockInOutRecord.findMostRecent(asstBob.netId).value, 1.minute) match {
             case Xor.Right(record) =>
               record.netId shouldEqual asstBob.netId
@@ -69,14 +69,14 @@ class ClockInOutApiSpec extends ApiSpec {
     }
 
     "response with 409 if an assistant try to clock in but is already clocked in" in {
-      asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
-        asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+      asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+        asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
           status shouldEqual StatusCodes.Conflict
         }
 
         // now clock out then in
-        asstRequest(_ => Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
-          asstRequest(_ => Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
+        asstRequest(Post("/records/clock-out", FormData("computer_id" -> "ERB 103"))) ~> check {
+          asstRequest(Post("/records/clock-in", FormData("computer_id" -> "ERB 103"))) ~> check {
             status shouldEqual StatusCodes.OK
           }
         }

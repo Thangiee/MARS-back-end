@@ -33,7 +33,7 @@ class AccountApiSpec extends ApiSpec {
 
   "Any user" must {
     "be able to get their account info" in {
-      adminRequest(_ => Get("/account")) ~> check {
+      adminRequest(Get("/account")) ~> check {
         responseTo[AccountDAO].netId should equal (adminAcc.netId)
       }
     }
@@ -41,7 +41,7 @@ class AccountApiSpec extends ApiSpec {
 
   "Admin user" must {
     "be able to get all account info" in {
-      adminRequest(_ => Get("/account/all")) ~> check {
+      adminRequest(Get("/account/all")) ~> check {
         responseToSeq[AccountDAO]('accounts) should not be empty
       }
     }
@@ -50,20 +50,20 @@ class AccountApiSpec extends ApiSpec {
       val temp = Account("99998", "temp", "password", Role.Instructor, approve = true)
       Await.result(temp.create().value, 10.seconds)
 
-      adminRequest(_ => Get(s"/account/${temp.netId}")) ~> check(responseTo[AccountDAO].netId should equal(temp.netId))
-      adminRequest(_ => Delete(s"/account/${temp.netId}")) ~> check(status should equal(OK))
-      adminRequest(_ => Get(s"/account/${temp.netId}")) ~> check(status should equal(NotFound))
+      adminRequest(Get(s"/account/${temp.netId}")) ~> check(responseTo[AccountDAO].netId should equal(temp.netId))
+      adminRequest(Delete(s"/account/${temp.netId}")) ~> check(status should equal(OK))
+      adminRequest(Get(s"/account/${temp.netId}")) ~> check(status should equal(NotFound))
     }
 
     "be able to enable/disable account" in {
-      adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "false"))) ~> check {
-        asstRequest(_ => Get("/account")) ~> check {
+      adminRequest(Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "false"))) ~> check {
+        asstRequest(Get("/account")) ~> check {
           status should equal(Forbidden)
         }
 
         // reset the approval
-        adminRequest(_ => Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "true"))) ~> check {
-          asstRequest(_ => Get("/account")) ~> check {
+        adminRequest(Post(s"/account/change-approve/${asstBobAcc.netId}", FormData("approve" -> "true"))) ~> check {
+          asstRequest(Get("/account")) ~> check {
             status should equal(OK)
           }
         }
@@ -71,18 +71,17 @@ class AccountApiSpec extends ApiSpec {
     }
 
     "be able to change any account password" in {
-      adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> "123"))) ~> check {
-        asstRequest(_ => Get("/account")) ~> check {
+      adminRequest(Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> "123"))) ~> check {
+        asstRequest(Get("/account")) ~> check {
           status should equal(Unauthorized)
         }
 
         // reset the password
-        adminRequest(_ => Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> asstBobAcc.passwd))) ~> check {
-          asstRequest(_ => Get("/account")) ~> check {
+        adminRequest(Post(s"/account/change-password/${asstBobAcc.netId}", FormData("new_password" -> asstBobAcc.passwd))) ~> check {
+          asstRequest(Get("/account")) ~> check {
             status should equal(OK)
           }
         }
-      }
-    }
+      }}
   }
 }

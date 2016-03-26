@@ -92,12 +92,12 @@ trait ApiSpec extends BaseSpec with ScalatestRouteTest with util.Implicits {
 
   def api: Api
 
-  val adminRequest = requestWithCredentials(adminAcc)(_)
-  val instRequest  = requestWithCredentials(instAliceAcc)(_)
-  val asstRequest  = requestWithCredentials(asstBobAcc)(_)
+  val adminRequest: (HttpRequest) => RouteTestResult = requestWithCredentials(adminAcc)
+  val instRequest : (HttpRequest) => RouteTestResult = requestWithCredentials(instAliceAcc)
+  val asstRequest : (HttpRequest) => RouteTestResult = requestWithCredentials(asstBobAcc)
 
-  def requestWithCredentials(acc: Account)(request: Account => HttpRequest): RouteTestResult =
-    request(acc) ~> addCredentials(BasicHttpCredentials(acc.username, acc.passwd)) ~> seal(api.route)
+  def requestWithCredentials(acc: Account)(request: HttpRequest): RouteTestResult =
+    request ~> addCredentials(BasicHttpCredentials(acc.username, acc.passwd)) ~> seal(api.route)
 
   def responseTo[T: JsonReader](implicit a: FromResponseUnmarshaller[String], b: ClassManifest[String]): T =
     responseAs[String].parseJson.convertTo[T]

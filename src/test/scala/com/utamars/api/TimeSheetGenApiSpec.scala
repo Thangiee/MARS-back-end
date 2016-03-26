@@ -34,7 +34,7 @@ class TimeSheetGenApiSpec extends ApiSpec {
   "Assistant" should {
 
     "be able to request a (first-half-month) timesheet to be generated and emailed to them" in {
-      asstRequest(_ => Get("/time-sheet/first-half-month?year=2015&month=9")) ~> check {
+      asstRequest(Get("/time-sheet/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         bobMailbox.size shouldEqual 1
@@ -44,7 +44,7 @@ class TimeSheetGenApiSpec extends ApiSpec {
     }
 
     "be able to request a (second-half-month) timesheet to be generated and emailed to them" in {
-      asstRequest(_ => Get("/time-sheet/second-half-month?year=2015&month=9")) ~> check {
+      asstRequest(Get("/time-sheet/second-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         bobMailbox.size shouldEqual 1
@@ -58,7 +58,7 @@ class TimeSheetGenApiSpec extends ApiSpec {
   "Instructor" should {
 
     "be able to request an assistant timesheet to be generated and emailed to the instructor" in {
-      instRequest(_ => Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=9")) ~> check {
+      instRequest(Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.OK
         Thread.sleep(100)
         aliceMailbox.size shouldEqual 1
@@ -70,16 +70,16 @@ class TimeSheetGenApiSpec extends ApiSpec {
 
   "The system" should {
     "response with 404 if the system can not find the assistant from the instructor request" in {
-      instRequest(_ => Get(s"/time-sheet/NotExistNetId/first-half-month?year=2015&month=9")) ~> check {
+      instRequest(Get(s"/time-sheet/NotExistNetId/first-half-month?year=2015&month=9")) ~> check {
         status shouldEqual StatusCodes.NotFound
       }
     }
 
     "response with 400 if the request is made with invalid date" in {
-      asstRequest(_ => Get("/time-sheet/first-half-month?year=2015&month=13")) ~> check {
+      asstRequest(Get("/time-sheet/first-half-month?year=2015&month=13")) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
-      instRequest(_ => Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=0")) ~> check {
+      instRequest(Get(s"/time-sheet/${asstBob.netId}/first-half-month?year=2015&month=0")) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
     }
