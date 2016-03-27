@@ -64,8 +64,6 @@ libraryDependencies ++= Seq(
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
-fork in run := true
-
 // deployment settings; run "sbt dist"
 enablePlugins(JavaServerAppPackaging)
 mainClass in Compile := Some("com.utamars.Boot")
