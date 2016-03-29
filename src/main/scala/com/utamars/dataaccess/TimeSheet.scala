@@ -54,13 +54,12 @@ object TimeSheet {
         fields.setField(s"Date$timeBox", printDt("MM/dd", current))
       }
 
-      val recordsGroupBySameDay = records
-        .map(r => Record(timestamp2DateTime(r.inTime).roundToQuarterHr, timestamp2DateTime(r.outTime.get).roundToQuarterHr))
-        .groupBy(_.inTime.dayOfMonth())
-        .values
+      val roundedRecords = records.map(r => Record(timestamp2DateTime(r.inTime).roundToQuarterHr, timestamp2DateTime(r.outTime.get).roundToQuarterHr))
+      val recordsGroupBySameInDay  = roundedRecords.groupBy(_.inTime.dayOfMonth()).values
+      val recordsGroupBySameOutDay = roundedRecords.groupBy(_.outTime.dayOfMonth()).values
 
       // fill in clock in time cells
-      val inTimesGroupBySameDay  = recordsGroupBySameDay.map(_.map(_.inTime))
+      val inTimesGroupBySameDay  = recordsGroupBySameInDay.map(_.map(_.inTime))
       inTimesGroupBySameDay.foreach { sameDayTimes =>
         val (amTimes, pmTimes) = sameDayTimes.reverse.partition(_.getHourOfDay <= 12)
 
@@ -76,7 +75,7 @@ object TimeSheet {
       }
 
       // fill in clock out time cells
-      val outTimesGroupBySameDay = recordsGroupBySameDay.map(_.map(_.outTime))
+      val outTimesGroupBySameDay = recordsGroupBySameOutDay.map(_.map(_.outTime))
       outTimesGroupBySameDay.foreach { sameDayTimes =>
         val (amTimes, pmTimes) = sameDayTimes.reverse.partition(_.getHourOfDay <= 12)
 
@@ -91,7 +90,7 @@ object TimeSheet {
         }
       }
 
-      val payPeriodTotalTime = recordsGroupBySameDay.map { sameDayRecords =>
+      val payPeriodTotalTime = recordsGroupBySameOutDay.map { sameDayRecords =>
         val total = sameDayRecords.foldRight(new Duration(0))((r, total) => new Duration(r.inTime, r.outTime) + total)
         // file in the daily total hrs
         fields.setExtraMargin(0, 8) // top margins to center vertically
