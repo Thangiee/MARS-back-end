@@ -1,5 +1,5 @@
 name := "MARS-back-end"
-version := "0.7.1"
+version := "0.7.2"
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-Xexperimental", "-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8", "-Yopt:l:classpath")
 
@@ -7,10 +7,10 @@ libraryDependencies += "org.scala-lang.modules" % "scala-java8-compat_2.11" % "0
 
 // akka
 libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-http-experimental"               % "2.4.3",
-  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % "2.4.3",
-  "com.typesafe.akka" %% "akka-http-testkit"                    % "2.4.3",
-  "com.typesafe.akka" %% "akka-actor"                           % "2.4.3",
+  "com.typesafe.akka" %% "akka-http-experimental"               % "2.4.4",
+  "com.typesafe.akka" %% "akka-http-spray-json-experimental"    % "2.4.4",
+  "com.typesafe.akka" %% "akka-http-testkit"                    % "2.4.4",
+  "com.typesafe.akka" %% "akka-actor"                           % "2.4.4",
   "com.softwaremill.akka-http-session" %% "core"                % "0.2.3"
 ).map(_.withJavadoc())
 
