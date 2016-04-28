@@ -44,12 +44,12 @@ case class AssistantApi(implicit ec: ExeCtx, sm: SessMgr, rts: RTS, facePP: Face
       complete(Assistant.findByNetIdWithAcc(netId).reply(asst => AssistantDAO(asst).jsonCompat))
     } ~
     ((post|put) & path("assistant") & authnAndAuthz(Role.Assistant)) { acc =>                           // Update current assistant info
-      formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
+      formFields('emp_id.?, 'rate.as[Double].?, 'job.?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
         complete(updateAsst(acc.netId, acc.role, form))
       }
     } ~
-    ((post|put) & path("assistant"/Segment) & authnAndAuthz()) { (netId, acc) =>                       // Update assistant info by netId
-      formFields('rate.as[Double].?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
+    ((post|put) & path("assistant"/Segment) & authnAndAuthz(Role.Admin, Role.Instructor)) { (netId, acc) =>   // Update assistant info by netId
+      formFields('emp_id.?, 'rate.as[Double].?, 'job.?, 'dept.?, 'title.?, 'title_code.?, 'threshold.as[Double].?).as(UpdateAssistantForm) { form =>
         complete(updateAsst(netId, acc.role, form))
       }
     }

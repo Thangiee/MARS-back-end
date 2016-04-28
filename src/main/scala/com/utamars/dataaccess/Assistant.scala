@@ -39,7 +39,9 @@ object Assistant {
   def update(netId: String, form: UpdateAssistantForm): DataAccessIO[Unit] = {
     findByNetId(netId).flatMap { asst =>
       asst.copy(
+        employeeId = form.empId.getOrElse(asst.employeeId),
         rate = form.rate.getOrElse(asst.rate),
+        job = form.job.getOrElse(asst.job).toLowerCase,
         department = form.department.getOrElse(asst.department),
         title = form.title.getOrElse(asst.title),
         titleCode = form.titleCode.getOrElse(asst.titleCode),

@@ -168,7 +168,9 @@ Parameters
 
 | Key       | Type   | Required | Description               |
 |-----------|--------|----------|---------------------------|
+| emp_id    | String | yes      | The assistant employee ID |
 | rate      | Double | optional | Dollar per hour           |
+| job       | String | optional | 'teaching' or 'grading'   |
 | dept      | String | optional | The assistant department  |
 | title     | String | optional | The assistant title       |
 | title_code| String | optional | The assistant titlecode   |
