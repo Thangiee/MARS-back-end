@@ -65,5 +65,51 @@ libraryDependencies ++= Seq(
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
 // deployment settings; run "sbt dist"
-enablePlugins(JavaServerAppPackaging)
+enablePlugins(sbtdocker.DockerPlugin, JavaAppPackaging)
+
 mainClass in Compile := Some("com.utamars.Boot")
+
+// docker settings; run "sbt docker" to generate a docker image and Dockerfile
+// https://github.com/marcuslonnberg/sbt-docker
+dockerfile in docker := {
+  val appDir: File = stage.value
+  val targetDir = "/app"
+  val port = 8080
+
+  new Dockerfile {
+    from("thangiee/mars-base:v1")
+    expose(port)
+
+    // environment variables
+    // see src/main/resources/application.conf for descriptions
+    env("MARS_PRIVATE_ADDR"        , "0.0.0.0")
+    env("MARS_PUBLIC_ADDR"         , "")
+    env("MARS_PORT"                , s"$port")
+    env("MARS_DB_URL"              , "jdbc:postgresql://localhost:5432/postgres")
+    env("MARS_DB_USER"             , "")
+    env("MARS_DB_PASSWORD"         , "")
+    env("MARS_DB_DRIVER"           , "org.postgresql.Driver")
+    env("MARS_EMAIL_ADDR"          , "")
+    env("MARS_EMAIL_HOST"          , "")
+    env("MARS_EMAIL_PORT"          , "587")
+    env("MARS_EMAIL_SMTP_USER"     , "")
+    env("MARS_EMAIL_SMTP_PASSWORD" , "")
+    env("MARS_REG_UUID_TTL_SEC"    , "30")
+    env("MARS_FACEPP_KEY"          , "")
+    env("MARS_FACEPP_SECRET"       , "")
+    env("MARS_TIMESHEET_DIR"       , s"$targetDir/timesheets")
+    env("MARS_FACES_DIR"           , s"$targetDir/faces")
+
+    entryPoint(s"$targetDir/bin/${executableScriptName.value}", "-J-server")
+    copy(appDir, targetDir)
+  }
+}
+
+imageNames in docker := Seq(
+  ImageName(s"thangiee/${name.value.toLowerCase()}:latest"),
+  ImageName(
+    namespace = Some("thangiee"),
+    repository = name.value.toLowerCase(),
+    tag = Some("v" + version.value)
+  )
+)
