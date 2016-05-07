@@ -93,10 +93,10 @@ object FacePP extends AnyRef with DefaultJsonProtocol with LazyLogging {
 
     private def exceptionToError(ex: Throwable): HttpResponse = ex match {
       case ex: ConnectException =>
-        logger.info(s"Face++ ConnectException: ${ex.getMessage}")
+        logger.warn(s"Face++ ConnectException: ${ex.getMessage}")
         HttpResponse(503, entity = ServiceUnavailable.defaultMessage)
       case ex: SocketTimeoutException =>
-        logger.info(s"Face++ SocketTimeoutException: ${ex.getMessage}")
+        logger.warn(s"Face++ SocketTimeoutException: ${ex.getMessage}")
         HttpResponse(503, entity = ServiceUnavailable.defaultMessage)
       case _ =>
         logger.error(ex.getMessage, ex)

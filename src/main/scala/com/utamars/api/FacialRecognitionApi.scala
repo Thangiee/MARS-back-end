@@ -60,7 +60,7 @@ case class FacialRecognitionApi(implicit ex: ExeCtx, sm: SessMgr, rts: RTS, face
           HttpResponse(OK, entity = json)
       },
       errResp => errResp match {
-        case HttpResponse(code, _, entity, _) if Seq(403, 431, 432, 500, 502).contains(code.intValue()) =>
+        case HttpResponse(code, _, entity, _) if Seq(403, 431, 432, 500, 502, 503).contains(code.intValue()) =>
           // For issues with the face++ api that are out of our control, just let the
           // recognition request succeed (less annoying for the users).
           // For details of the error codes, see:
