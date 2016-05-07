@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.RouteResult.Complete
+import akka.http.scaladsl.server.RouteResult.{Complete, Rejected}
 import akka.http.scaladsl.server.directives.LogEntry
 import akka.http.scaladsl.server.{AuthenticationFailedRejection, RejectionHandler}
 import akka.stream.ActorMaterializer
@@ -65,16 +65,16 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
     AssetsApi() ::
     Nil
 
+  val requestLog = (req: HttpRequest, info: String) =>
+    s"\nRequest $info:" +
+      s"\n\t${req.method} ${req.uri}" +
+      s"\n\tHeaders: ${req.headers.mkString(", ")}" +
+      s"\n\t${req.entity.toString.split("\n").take(3).mkString("\n  ")}"
+
   def customLogging(req: HttpRequest): Any => Option[LogEntry] = {
-    case Complete(res: HttpResponse) =>
-      Some(LogEntry(
-        s"""|Request:
-            |  ${req.method} ${req.uri}
-            |  Headers: ${req.headers.mkString(", ")}
-            |  ${req.entity.toString.split("\n").take(3).mkString("\n  ")}
-            |  Response: $res
-        """.stripMargin, Logging.InfoLevel))
-    case _ => None // other kind of responses
+    case Complete(response) => Some(LogEntry(requestLog(req, s"[${response.status}]"), Logging.InfoLevel))
+    case Rejected(_)        => Some(LogEntry(requestLog(req, "[Rejected]"), Logging.InfoLevel))
+    case _                  => None // other kind of responses
   }
 
   implicit def myRejectionHandler = RejectionHandler.newBuilder()
@@ -102,6 +102,7 @@ object Boot extends App with CorsSupport with TimeImplicits with LazyLogging {
   val timeTil5AmNextDay = ((DateTime.now().withHour(5).withMinute(0) + 1.day) - DateTime.now().getMillis).getMillis.toInt
   system.scheduler.schedule(timeTil5AmNextDay.millis, 24.hours)(ClockOutAndNotify().onClockOut(tracker.refresh()).run())
 
+  logger.info(s"Listening on ${util.Config.privateAddr}:${util.Config.port}")
   Http().bindAndHandle(routes, util.Config.privateAddr, util.Config.port)
 }
 
