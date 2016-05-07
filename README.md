@@ -140,7 +140,7 @@ Parameters
 | first     | String | yes      | The assistant first name  |
 | last      | String | yes      | The assistant last name   |
 | emp_id    | String | yes      | The assistant employee ID |
-| threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. Default is 0.4 if a value is not provided. |
+| threshold | Double | optional | Can use to determine pass or fail for this assistant facial recognition result. Value must be between 0 and 1. Default is 0.3 if a value is not provided. |
 | title     | String | yes      | The assistant title       |
 | title_code| String | yes      | The assistant titlecode   |
 
@@ -830,7 +830,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
   "lastName": "grader",
   "firstName": "test",
   "employeeId": "10001234560",
-  "threshold": 0.4,
+  "threshold": 0.3,
   "title": "some title",
   "titleCode": "123"
 }
@@ -853,7 +853,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
       "lastName": "grader",
       "firstName": "test",
       "employeeId": "10001234560",
-      "threshold": 0.4,
+      "threshold": 0.3,
       "title": "some title",
       "titleCode": "123"
     },
@@ -870,7 +870,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
       "lastName": "user",
       "firstName": "test",
       "employeeId": "10001234567",
-      "threshold": 0.4,
+      "threshold": 0.3,
       "title": "some title",
       "titleCode": "123"
     }
@@ -996,7 +996,7 @@ Data encoded in JSON that some APIs will return on an HTTP 200.
 // example json response
 {
   "confidence": 0.673156,
-  "threshold": 0.4
+  "threshold": 0.3
 }
 ```
 
