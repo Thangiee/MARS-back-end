@@ -61,7 +61,14 @@ object FacePP extends AnyRef with DefaultJsonProtocol with LazyLogging {
       call(POST("/person/create").params("person_name" -> personName)).map(_ => Unit)
 
     def personDelete(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] =
-      call(POST("/person/delete").params("person_name" -> personName)).map(_ => Unit)
+      call(POST("/person/delete").params("person_name" -> personName))
+        .recover {
+          // We try to delete an account that exist in the DB but not on Face++ system.
+          // Face++ will return an error. But since we are deleting, we can ignore the error
+          // to helps our DB and Face++ get back in sync.
+          case HttpResponse(Forbidden, _, _, _) => JsString("")
+        }
+        .map(_ => Unit)
 
     def trainVerify(personName: String)(implicit ec: ExeCtx): XorT[Future, HttpResponse, Unit] =
       call(POST("/train/verify").params("person_name" -> personName)).map(_ => Unit)
@@ -76,7 +83,7 @@ object FacePP extends AnyRef with DefaultJsonProtocol with LazyLogging {
     })
 
     private def faceppErrHandler(code: Int, body: String): HttpResponse = code match {
-      case 403 | 500 | 502 =>
+      case 500 | 502 =>
         logger.error(s"Face++: $code, $body")
         HttpResponse(500, entity = InternalServerError.defaultMessage)
       case 431 =>
