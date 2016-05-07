@@ -23,8 +23,6 @@ Most of the API endpoints require you to be authenticated. You can do that in on
 API Endpoints
 -------------
 
-*This API is still under development and is subject to changes.*
-
 To use the APIs, you will need to form the full URL by combining the base URL with the targeted API's route.
 The current base URL is `http://52.33.35.165:8080/api`.
 

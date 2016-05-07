@@ -1,5 +1,5 @@
 name := "MARS-back-end"
-version := "0.7.2"
+version := "1.0.0"
 scalaVersion := "2.11.8"
 scalacOptions ++= Seq("-Xexperimental", "-Ybackend:GenBCode", "-Ydelambdafy:method", "-target:jvm-1.8", "-Yopt:l:classpath")
 
@@ -16,8 +16,8 @@ libraryDependencies ++= Seq(
 
 // functional programming libs
 libraryDependencies ++= Seq(
-  "org.spire-math"       %% "cats"          % "0.3.0",
-  "com.github.mpilquist" %% "simulacrum"    % "0.5.0"
+  "org.typelevel"        %% "cats"          % "0.5.0",
+  "com.github.mpilquist" %% "simulacrum"    % "0.7.0"
 )
 
 // database
